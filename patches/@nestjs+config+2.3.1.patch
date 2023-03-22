@@ -1,0 +1,13 @@
+diff --git a/node_modules/@nestjs/config/dist/config.service.d.ts b/node_modules/@nestjs/config/dist/config.service.d.ts
+index d18695c..49ae199 100644
+--- a/node_modules/@nestjs/config/dist/config.service.d.ts
++++ b/node_modules/@nestjs/config/dist/config.service.d.ts
+@@ -27,7 +27,7 @@ export declare class ConfigService<K = Record<string, unknown>, WasValidated ext
+      * based on property path (you can use dot notation to traverse nested object, e.g. "database.host").
+      * @param propertyPath
+      */
+-    get<T = any>(propertyPath: KeyOf<K>): ExcludeUndefinedIf<WasValidated, T>;
++    get<S extends KeyOf<K>>(propertyPath: S): K[S];
+     /**
+      * Get a configuration value (either custom configuration or process environment variable)
+      * based on property path (you can use dot notation to traverse nested object, e.g. "database.host").

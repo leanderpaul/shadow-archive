@@ -1,0 +1,21 @@
+# compiled and generated outputs
+dist
+generated
+
+# dependencies
+node_modules
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+
+# Tests
+coverage
+.nyc_output
+
+# IDE - VSCode
+.vscode
