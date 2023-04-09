@@ -1,12 +1,12 @@
 /**
  * Importing npm packages
  */
-import { ObjectType, Field, Float, ID, Int, registerEnumType, createUnionType } from '@nestjs/graphql';
+import { ObjectType, Field, Float, ID, Int, registerEnumType } from '@nestjs/graphql';
 
 /**
  * Importing user defined packages
  */
-import { Error, Paginated } from '@app/graphql/common';
+import { Paginated } from '@app/graphql/common';
 
 /**
  * Importing and defining types
@@ -76,9 +76,3 @@ export class Expense {
 
 @ObjectType()
 export class ExpenseConnection extends Paginated(Expense) {}
-
-export const ExpenseOpResult = createUnionType({
-  name: 'ExpenseOperationResult',
-  types: () => [Expense, Error],
-  resolveType: (value: Expense | Error) => ('code' in value ? Error : Expense),
-});

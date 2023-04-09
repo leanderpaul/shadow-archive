@@ -78,10 +78,13 @@ const configs = {
   /** Handling Logger Environment Variables */
   LOG_LEVEL: setEnvConfig('LOG_LEVEL', 'http', false, value => ['silly', 'debug', 'http', 'info', 'warn', 'error'].includes(value)) as LogLevel,
   LOG_DIR: setEnvConfig('LOG_DIR', 'logs'),
-  LOGTAIL_SOURCE_TOKEN: setEnvConfig('LOGTAIL_SOURCE_TOKEN', null, true),
 
   /** Handling Database Environment Variables */
   DB_URI: setEnvConfig('DB_URI', 'mongodb://localhost/shadow', true),
+
+  /** Third party service API Keys */
+  LOGTAIL_SOURCE_TOKEN: setEnvConfig('LOGTAIL_SOURCE_TOKEN', null, true),
+  SENDGRID_API_KEY: setEnvConfig('SENDGRID_API_KEY', null, true),
 
   /** Handling Server Environment Variables */
   HOST_NAME: setEnvConfig('HOST_NAME', '0.0.0.0'),

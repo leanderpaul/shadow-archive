@@ -11,7 +11,9 @@ import { transformId, defaultOptionsPlugin } from '../database.utils';
 /**
  * Importing and defining types
  */
-import type { ObjectId } from 'mongoose';
+import type { ObjectId, Model } from 'mongoose';
+
+export interface ExpenseModel extends Model<Expense> {}
 
 /**
  * Declaring the constants

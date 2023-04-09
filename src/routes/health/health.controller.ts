@@ -1,0 +1,39 @@
+/**
+ * Importing npm packages
+ */
+import { Controller, Get } from '@nestjs/common';
+import { HealthCheckService, HttpHealthIndicator, HealthCheck, DiskHealthIndicator, MemoryHealthIndicator, MongooseHealthIndicator } from '@nestjs/terminus';
+
+/**
+ * Importing user defined packages
+ */
+
+/**
+ * Importing and defining types
+ */
+
+/**
+ * Declaring the constants
+ */
+
+@Controller('health')
+export class HealthController {
+  constructor(
+    private readonly health: HealthCheckService,
+    private readonly http: HttpHealthIndicator,
+    private readonly disk: DiskHealthIndicator,
+    private readonly memory: MemoryHealthIndicator,
+    private readonly mongoose: MongooseHealthIndicator,
+  ) {}
+
+  @Get()
+  @HealthCheck()
+  check() {
+    return this.health.check([
+      () => this.memory.checkRSS('memory_rss', 150 * 1024 * 1024),
+      () => this.memory.checkHeap('memory_heap', 150 * 1024 * 1024),
+      () => this.disk.checkStorage('storage', { path: '/', thresholdPercent: 0.75 }),
+      () => this.mongoose.pingCheck('database'),
+    ]);
+  }
+}

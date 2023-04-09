@@ -1,11 +1,12 @@
 /**
  * Importing npm packages
  */
-import { Injectable } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 
 /**
  * Importing user defined packages
  */
+import { MailService } from './mail.service';
 
 /**
  * Importing and defining types
@@ -15,9 +16,5 @@ import { Injectable } from '@nestjs/common';
  * Declaring the constants
  */
 
-@Injectable()
-export class StatusService {
-  getServerStatus() {
-    return 'Server Working';
-  }
-}
+@Module({})
+export class MailModule {}

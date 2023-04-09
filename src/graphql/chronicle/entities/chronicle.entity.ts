@@ -7,6 +7,7 @@ import { ObjectType, Field } from '@nestjs/graphql';
  * Importing user defined packages
  */
 import { Expense, ExpenseConnection } from './expense.entity';
+import { Memoir } from './memoir.entity';
 import { Metadata } from './metadata.entity';
 
 /**
@@ -24,6 +25,9 @@ export class Chronicle {
 
   @Field(() => Expense, { description: 'Particular expense' })
   expense?: Expense;
+
+  @Field(() => Memoir, { description: 'Memoir of a parituclar day' })
+  memoir: Memoir;
 
   @Field(() => Metadata)
   metadata: Metadata;

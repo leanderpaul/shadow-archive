@@ -1,6 +1,8 @@
 /**
  * Importing npm packages
  */
+import sagus from 'sagus';
+
 import { Schema, Prop, SchemaFactory, MongooseModule } from '@nestjs/mongoose';
 
 /**
@@ -11,7 +13,18 @@ import { transformId, defaultOptionsPlugin } from '../database.utils';
 /**
  * Importing and defining types
  */
-import type { ObjectId } from 'mongoose';
+import type { ObjectId, Model, Document, Query } from 'mongoose';
+
+interface UserStaticMethods {
+  isNativeUser(user: User): user is NativeUser;
+  isOAuthUser(user: User): user is OAuthUser;
+}
+
+export interface UserModel extends Model<User>, UserStaticMethods {}
+
+export interface NativeUserModel extends Model<NativeUser>, UserStaticMethods {}
+
+export interface OAuthUserModel extends Model<OAuthUser>, UserStaticMethods {}
 
 /**
  * Declaring the constants
@@ -19,6 +32,7 @@ import type { ObjectId } from 'mongoose';
 
 const nameRegex = /^[a-zA-Z\ ]{3,32}$/;
 const uriRegex = /^(?:[a-z][a-z0-9+\-.]*:)(?:\/?\/)?[^\s]*$/i;
+const passwordRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/;
 const emailRegex = /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/i;
 
 /**
@@ -61,7 +75,7 @@ export class User {
     type: 'string',
     lowercase: true,
     required: [true, 'Email is required'],
-    validate: [emailRegex, "Email '{VALUE}' is invalid"],
+    validate: [emailRegex, 'should be an email'],
   })
   email: string;
 
@@ -69,7 +83,7 @@ export class User {
   @Prop({
     trim: true,
     type: 'string',
-    required: [true, 'Name is required'],
+    required: [true, 'should have 3 - 32 characters and only contain alphabets and space'],
     validate: [nameRegex, "Name '{VALUE}' is invalid"],
   })
   name: string;
@@ -77,7 +91,7 @@ export class User {
   /** URL containing the user's profile pic */
   @Prop({
     type: 'string',
-    validate: [uriRegex, "Image URI '{VALUE}' is invalid"],
+    validate: [uriRegex, 'should be a uri'],
   })
   imageUrl?: string;
 
@@ -95,6 +109,14 @@ export class User {
     required: true,
   })
   sessions: UserSession[];
+
+  /** Email verification code sent to the user to verify the email address. It is a base64 string */
+  @Prop({ type: 'string' })
+  emailVerificationCode?: string;
+
+  /** Password reset code sent to the user to verify the password reset link. It is of the format '<expiry date in unix timestamp>|<base64 code>' */
+  @Prop({ type: 'string' })
+  passwordResetCode?: string;
 }
 
 @Schema()
@@ -103,6 +125,14 @@ export class NativeUser extends User {
   @Prop({
     type: 'string',
     required: [true, 'Password is requried'],
+    validate: {
+      msg: 'should have a minimum of 8 characters and have atleast one uppercase, lowercase, digit and, special character (#?!@$%^&*-)',
+      validator: async function (this: Document<NativeUser> | Query<unknown, NativeUser>, password: string) {
+        const isValid = passwordRegex.test(password);
+        if (isValid) this.set('password', await sagus.hash(password));
+        return isValid;
+      },
+    },
   })
   password: string;
 }
@@ -130,6 +160,9 @@ export class OAuthUser extends User {
 export const UserSchema = SchemaFactory.createForClass(User);
 export const NativeUserSchema = SchemaFactory.createForClass(NativeUser);
 export const OAuthUserSchema = SchemaFactory.createForClass(OAuthUser);
+
+UserSchema.static('isNativeUser', (user: User) => 'password' in user);
+UserSchema.static('isOAuthUser', (user: User) => 'refreshToken' in user);
 
 /**
  * Setting up middlewares

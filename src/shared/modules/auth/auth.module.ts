@@ -7,7 +7,7 @@ import { Module } from '@nestjs/common';
 /**
  * Importing user defined packages
  */
-import { ContextService, UserMongooseModule } from '@app/providers';
+import { ContextService, UserMongooseModule, MailService } from '@app/providers';
 
 import { AuthService } from './auth.service';
 
@@ -21,7 +21,7 @@ import { AuthService } from './auth.service';
 
 @Module({
   imports: [UserMongooseModule],
-  providers: [AuthService, ContextService],
+  providers: [AuthService, ContextService, MailService],
   exports: [AuthService],
 })
 export class AuthModule {}

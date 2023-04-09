@@ -12,7 +12,8 @@ import { InjectModel } from '@nestjs/mongoose';
 /**
  * Importing user defined packages
  */
-import { User, DBUtils, NativeUser, ContextService } from '@app/providers';
+import { User, DBUtils, NativeUser, ContextService, MailService, MailType } from '@app/providers';
+import { ValidationError } from '@app/shared/errors';
 
 /**
  * Importing and defining types
@@ -36,23 +37,24 @@ export interface ICreateUser {
 @Injectable()
 export class AuthService {
   constructor(
-    private configService: ConfigService<ConfigRecord>,
-    private contextService: ContextService,
-    @InjectModel(User.name) private userModel: UserModel,
-    @InjectModel(NativeUser.name) private nativeUserModel: NativeUserModel,
+    private readonly configService: ConfigService<ConfigRecord>,
+    private readonly contextService: ContextService,
+    private readonly mailService: MailService,
+    @InjectModel(User.name) private readonly userModel: UserModel,
+    @InjectModel(NativeUser.name) private readonly nativeUserModel: NativeUserModel,
   ) {}
 
-  private encrypt(iv: string | Buffer, secretKey: Buffer, input: string) {
+  private encrypt(iv: string | Buffer, secretKey: Buffer, input: string, encoding: BufferEncoding = 'base64') {
     const biv = typeof iv === 'string' ? Buffer.from(iv, 'base64') : iv;
     const cipher = crypto.createCipheriv('aes-256-ctr', secretKey, biv);
     const result = Buffer.concat([cipher.update(input), cipher.final()]);
-    return result.toString('base64');
+    return result.toString(encoding);
   }
 
-  private decrypt(iv: string | Buffer, secretKey: Buffer, encryptedinput: string) {
+  private decrypt(iv: string | Buffer, secretKey: Buffer, encryptedinput: string, encoding: BufferEncoding = 'base64') {
     const biv = typeof iv === 'string' ? Buffer.from(iv, 'base64') : iv;
     const decipher = crypto.createDecipheriv('aes-256-ctr', secretKey, biv);
-    const result = Buffer.concat([decipher.update(Buffer.from(encryptedinput, 'base64')), decipher.final()]);
+    const result = Buffer.concat([decipher.update(Buffer.from(encryptedinput, encoding)), decipher.final()]);
     return result.toString();
   }
 
@@ -84,18 +86,27 @@ export class AuthService {
   generateCSRFToken(sessionID: string) {
     const iv = crypto.randomBytes(16);
     const secretKey = this.configService.get('CSRF_SECRET_KEY');
-    const encryptedSession = this.encrypt(iv, secretKey, sessionID);
-    return iv.toString('base64') + '|' + encryptedSession;
+    const encryptedSession = this.encrypt(iv, secretKey, sessionID, 'base64url');
+    return iv.toString('base64url') + '|' + encryptedSession;
   }
 
-  async verifyCSRFToken(token: string, sessionID: string) {
+  async verifyCSRFToken() {
+    const req = this.contextService.getCurrentRequest();
+    const res = this.contextService.getCurrentResponse();
+
+    const token = req.headers['x-csrf-token'] as string | undefined;
+    if (!token) return false;
+    const auth = await this.getUserFromCookie(req, res);
+    if (!auth?.session) return false;
+
     const [iv, encryptedSessionId] = token.split('|');
     if (!iv || !encryptedSessionId) return false;
-    const biv = Buffer.from(iv, 'base64');
+    const biv = Buffer.from(iv, 'base64url');
     if (biv.length != 16) return false;
     const secretKey = this.configService.get('CSRF_SECRET_KEY');
-    const result = this.decrypt(biv, secretKey, encryptedSessionId);
-    return result === sessionID;
+    const result = this.decrypt(biv, secretKey, encryptedSessionId, 'base64url');
+
+    return result === auth.session.id;
   }
 
   private generateUserSession() {
@@ -105,6 +116,13 @@ export class AuthService {
   }
 
   async getUserFromCookie(req: FastifyRequest, res: FastifyReply) {
+    /** Return current user if session and user are already set */
+    const currentUser = this.contextService.getCurrentUser();
+    const currentSession = this.contextService.getCurrentSession();
+    if (currentUser && currentSession) {
+      return { user: currentUser, session: currentSession };
+    }
+
     /** Parsing the cookie */
     const cookieName = this.configService.get('COOKIE_NAME');
     const cookie = req.cookies[cookieName] as string | undefined;
@@ -140,7 +158,8 @@ export class AuthService {
 
   async initUserSession(user: User) {
     const session = this.generateUserSession();
-    await this.userModel.updateOne({ _id: user._id }, { $push: { sessions: session } });
+    const validSessions = user.sessions.filter(s => s.expireAt > new Date());
+    await this.userModel.updateOne({ _id: user._id }, { $set: { sessions: [...validSessions, session] } });
     this.setCookies(user.uid, session.id);
     this.contextService.setCurrentSession(session);
     return session;
@@ -149,13 +168,19 @@ export class AuthService {
   async createUser(newUser: ICreateUser) {
     const { createSession = false, ...userObj } = newUser;
     const sessions = createSession ? [this.generateUserSession()] : [];
-    const user = await this.nativeUserModel.create({ ...userObj, sessions });
+    const emailVerificationCode = sagus.genRandom(16);
+    const user = await this.nativeUserModel.create({ ...userObj, sessions, emailVerificationCode });
+
     if (createSession && user.sessions[0]) {
       const session = user.sessions[0];
       this.setCookies(user.uid, session.id);
       this.contextService.setCurrentUser(user);
       this.contextService.setCurrentSession(session);
     }
+
+    const code = Buffer.from(user.email).toString('base64') + '|' + emailVerificationCode;
+    this.mailService.sendMail(MailType.EMAIL_VERIFICATION, user.email, { code, name: user.name });
+
     return user;
   }
 

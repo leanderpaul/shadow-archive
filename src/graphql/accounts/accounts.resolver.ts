@@ -11,7 +11,7 @@ import { EAuthType, AuthType } from '@app/shared/decorators';
 import { AuthGuard } from '@app/shared/guards';
 
 import { AccountsService } from './accounts.service';
-import { LoginArgs, RegisterArgs } from './dto';
+import { LoginArgs, RegisterArgs, ResetPasswordArgs, UpdatePasswordArgs } from './dto';
 import { Viewer } from './entities';
 
 /**
@@ -34,13 +34,42 @@ export class AccountsResolver {
   }
 
   @Mutation(() => Viewer)
-  login(@Args() args: LoginArgs) {
-    return this.accountsService.loginUser(args.email, args.password);
+  async login(@Args() args: LoginArgs) {
+    return await this.accountsService.loginUser(args.email, args.password);
   }
 
   @Mutation(() => Viewer)
-  register(@Args() args: RegisterArgs) {
-    return this.accountsService.registerUser(args.email, args.password, args.name);
+  async register(@Args() args: RegisterArgs) {
+    return await this.accountsService.registerUser(args.email, args.password, args.name);
+  }
+
+  @Mutation(() => Boolean)
+  async verifyEmailAddress(@Args({ name: 'code' }) code: string) {
+    await this.accountsService.verifyEmailAddress(code);
+  }
+
+  @Mutation(() => Boolean)
+  forgotPassword(@Args({ name: 'email' }) email: string) {
+    this.accountsService.forgotPassword(email);
+    return true;
+  }
+
+  @Mutation(() => Boolean)
+  async resetPassword(@Args() args: ResetPasswordArgs) {
+    return await this.accountsService.resetPassword(args.code, args.newPassword);
+  }
+
+  @Mutation(() => Boolean)
+  async updatePassword(@Args() args: UpdatePasswordArgs) {
+    return await this.accountsService.updatePassword(args.oldPassword, args.newPassword);
+  }
+
+  @AuthType(EAuthType.AUTHENTICATED)
+  @UseGuards(AuthGuard)
+  @Mutation(() => Boolean)
+  resendEmailVerificationMail() {
+    this.accountsService.resendEmailVerificationMail();
+    return true;
   }
 
   @Mutation(() => Boolean, { name: 'logout' })

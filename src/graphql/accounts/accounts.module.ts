@@ -6,7 +6,7 @@ import { Module } from '@nestjs/common';
 /**
  * Importing user defined packages
  */
-import { UserMongooseModule, ContextService } from '@app/providers';
+import { UserMongooseModule, ContextService, MailService } from '@app/providers';
 import { AuthService, AuthModule } from '@app/shared/modules';
 
 import { AccountsService } from './accounts.service';
@@ -22,6 +22,6 @@ import { AccountsResolver } from './accounts.resolver';
 
 @Module({
   imports: [AuthModule, UserMongooseModule],
-  providers: [AccountsResolver, AccountsService, AuthService, ContextService],
+  providers: [AccountsResolver, AccountsService, AuthService, ContextService, MailService],
 })
 export class AccountsModule {}

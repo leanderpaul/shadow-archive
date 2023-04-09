@@ -7,7 +7,7 @@ import { mongooseLeanVirtuals } from 'mongoose-lean-virtuals';
 /**
  * Importing user defined packages
  */
-import { AppError } from '@app/shared/errors';
+import { AppError, ErrorCode } from '@app/shared/errors';
 
 /**
  * Importing and defining types
@@ -30,6 +30,12 @@ function defaultLean(this: Query<unknown, unknown>) {
   if (this._mongooseOptions.lean === true) this.lean({ virtuals: true });
 }
 
+function runUpdateValidations(this: Query<unknown, unknown>) {
+  console.log('Validators set');
+  const opts = this.getOptions();
+  if (opts.runValidators === undefined) opts.runValidators = true;
+}
+
 export function transformId(this: Document<unknown>) {
   return this._id!.toString();
 }
@@ -41,6 +47,11 @@ export function defaultOptionsPlugin(schema: Schema) {
   schema.pre('findOne', defaultLean);
   schema.pre('findOneAndUpdate', defaultLean);
   schema.pre('findOneAndDelete', defaultLean);
+
+  schema.pre('update', runUpdateValidations);
+  schema.pre('updateOne', runUpdateValidations);
+  schema.pre('updateMany', runUpdateValidations);
+  schema.pre('findOneAndUpdate', runUpdateValidations);
 }
 
 export class DBUtils {
@@ -50,7 +61,7 @@ export class DBUtils {
     try {
       return new Types.ObjectId(id);
     } catch (err) {
-      if (throwError) throw AppError.NotFound();
+      if (throwError) throw new AppError(ErrorCode.R001);
       return null;
     }
   }

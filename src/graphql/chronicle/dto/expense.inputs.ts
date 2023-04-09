@@ -2,7 +2,6 @@
  * Importing npm packages
  */
 import { InputType, Field, registerEnumType, Float, Int, PartialType } from '@nestjs/graphql';
-import { IsDefined } from 'class-validator';
 
 /**
  * Importing user defined packages
@@ -46,11 +45,9 @@ export class ExpenseQuery {
 
 @InputType()
 export class ExpenseSort {
-  @IsDefined()
   @Field(() => ExpenseSortField)
   field: ExpenseSortField;
 
-  @IsDefined()
   @Field(() => SortOrder, { defaultValue: SortOrder.ASC, nullable: true })
   order: SortOrder;
 }
@@ -68,7 +65,7 @@ export class ExpenseItemInput {
 }
 
 @InputType()
-export class ExpenseInput {
+export class AddExpenseInput {
   @Field({ description: 'Bill ID', nullable: true })
   bid?: string;
 
@@ -98,4 +95,4 @@ export class ExpenseInput {
 }
 
 @InputType()
-export class UpdateExpenseInput extends PartialType(ExpenseInput) {}
+export class UpdateExpenseInput extends PartialType(AddExpenseInput) {}

@@ -9,7 +9,7 @@ import { GqlExecutionContext } from '@nestjs/graphql';
  * Importing user defined packages
  */
 import { EAuthType } from '@app/shared/decorators';
-import { AppError } from '@app/shared/errors';
+import { AppError, ErrorCode } from '@app/shared/errors';
 import { AuthService } from '@app/shared/modules';
 
 /**
@@ -31,7 +31,7 @@ export interface GraphQLContext {
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private reflector: Reflector, private authService: AuthService) {}
+  constructor(private readonly reflector: Reflector, private readonly authService: AuthService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const ctx = GqlExecutionContext.create(context).getContext<GraphQLContext>();
@@ -45,11 +45,11 @@ export class AuthGuard implements CanActivate {
       } else ctx.user = null;
     }
 
-    if (!ctx.user) throw new AppError('UNAUTHORIZED', 'User not authenticated');
+    if (!ctx.user) throw new AppError(ErrorCode.IAM002);
     if (ctx.user && userType === EAuthType.AUTHENTICATED) return true;
 
     if (userType === EAuthType.VERIFIED) {
-      if (!ctx.user.verified) throw new AppError('UNAUTHORIZED', 'User not verified');
+      if (!ctx.user.verified) throw new AppError(ErrorCode.IAM003);
       return true;
     }
 

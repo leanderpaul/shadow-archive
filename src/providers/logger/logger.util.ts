@@ -7,7 +7,7 @@ import winston from 'winston';
 import { cyan, gray, yellow } from '@colors/colors/safe';
 import { Logtail } from '@logtail/node';
 import { LogtailTransport } from '@logtail/winston';
-import { LEVEL } from 'triple-beam';
+import { LEVEL, MESSAGE } from 'triple-beam';
 
 /**
  * Importing user defined packages.
@@ -82,9 +82,9 @@ function printConsoleMessage(info: Logform.TransformableInfo) {
   const prevTime = timestamp;
   timestamp = Date.now();
   const timeTaken = prevTime ? gray(` +${timestamp - prevTime}ms`) : '';
+  const stack = info.stack ? '\n' + (Array.isArray(info.stack) ? info.stack.join('\n') : info.stack) : '';
 
-  if (level === 'error') console.error(info.stack); // eslint-disable-line no-console
-  if (level != 'http') return `${info.level} ${yellow(`[${info.label || '-'}]`)} ${info.message} ${timeTaken}`;
+  if (level != 'http') return `${info.level} ${yellow(`[${info.label || '-'}]`)} ${info.message} ${timeTaken} ${stack}`;
   if (info.url != '/graphql' || info.method != 'POST') return cyan(`HTTP [REST] ${info.method} ${info.url} - ${info.timeTaken}ms`);
 
   /** Parsing GraphQL Request */

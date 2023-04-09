@@ -19,7 +19,7 @@ import { LoggerService } from '@nestjs/common';
 
 @Injectable()
 export class NestLogger implements LoggerService {
-  private static logger = Logger.getLogger('Nest');
+  private static readonly logger = Logger.getLogger('nest');
 
   constructor(@Optional() protected context?: string) {}
 
@@ -33,6 +33,12 @@ export class NestLogger implements LoggerService {
   }
 
   public error(message: any, trace?: string, context?: string): any {
+    /**
+     * This is to prevent nestjs from printing the error messages from the graphql module since it is already handled by
+     * the apollo graphql format error function.
+     */
+    if (trace && trace.includes('/src/graphql/')) return;
+
     const label = context || this.context;
     if (message instanceof Error) {
       const { message: msg, name, stack, ...meta } = message;

@@ -2,11 +2,11 @@
  * Importing npm packages
  */
 import { InputType, Int, Field } from '@nestjs/graphql';
-import { Min } from 'class-validator';
 
 /**
  * Importing user defined packages
  */
+import { ValidationError } from '@app/shared/errors';
 
 /**
  * Importing and defining types
@@ -18,11 +18,17 @@ import { Min } from 'class-validator';
 
 @InputType()
 export class PageInput {
-  @Min(1, { message: 'should be a greater than 0' })
   @Field(() => Int, { defaultValue: 20, nullable: true })
   limit: number;
 
-  @Min(0, { message: 'should be greater than or equal to 0' })
   @Field(() => Int, { defaultValue: 0, nullable: true })
   offset: number;
+
+  static isValid(input: PageInput) {
+    const error = new ValidationError();
+    if (input.limit < 1) error.addFieldError('limit', 'should be greater than 0');
+    if (input.offset < 0) error.addFieldError('offset', 'should be greater than or equal to 0');
+    if (error.getErrorCount() > 0) throw error;
+    return true;
+  }
 }

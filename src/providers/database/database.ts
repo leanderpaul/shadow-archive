@@ -13,21 +13,7 @@ import { Logger } from '@app/providers';
 /**
  * Importing and defining types
  */
-import type { Model, Connection } from 'mongoose';
-
-import type { User, NativeUser, OAuthUser, Expense, Metadata, ChronicleMetadata } from './schemas';
-
-export type UserModel = Model<User>;
-
-export type NativeUserModel = Model<NativeUser>;
-
-export type OAuthUserModel = Model<OAuthUser>;
-
-export type ExpenseModel = Model<Expense>;
-
-export type MetadataModel = Model<Metadata>;
-
-export type ChronicleMetadataModel = Model<ChronicleMetadata>;
+import type { Connection } from 'mongoose';
 
 /**
  * Declaring the constants

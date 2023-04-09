@@ -6,8 +6,7 @@ import { Module } from '@nestjs/common';
 /**
  * Importing user defined packages
  */
-import { StatusResolver } from './status.resolver';
-import { StatusService } from './status.service';
+import { HealthModule } from './health';
 
 /**
  * Importing and defining types
@@ -18,6 +17,6 @@ import { StatusService } from './status.service';
  */
 
 @Module({
-  providers: [StatusResolver, StatusService],
+  imports: [HealthModule],
 })
-export class StatusModule {}
+export class RoutesModule {}

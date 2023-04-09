@@ -6,7 +6,7 @@ import { Injectable } from '@nestjs/common';
 /**
  * Importing user defined packages
  */
-import { AppError } from '@app/shared/errors';
+import { AppError, ErrorCode } from '@app/shared/errors';
 
 import { Context } from './context.utils';
 
@@ -37,7 +37,7 @@ export class ContextService {
   getCurrentUser(required: true): User;
   getCurrentUser(required?: boolean) {
     const user = Context.getCurrentUser();
-    if (!user && required) throw new AppError('UNAUTHORIZED', 'You are not authorized to access this resource');
+    if (!user && required) throw new AppError(ErrorCode.IAM009);
     return user;
   }
 
@@ -50,7 +50,7 @@ export class ContextService {
   getCurrentSession(required: true): UserSession;
   getCurrentSession(requried?: boolean) {
     const session = Context.getCurrentSession();
-    if (!session && requried) throw new AppError('UNAUTHORIZED', 'You are not authorized to access this resource');
+    if (!session && requried) throw new AppError(ErrorCode.IAM009);
     return session;
   }
 
