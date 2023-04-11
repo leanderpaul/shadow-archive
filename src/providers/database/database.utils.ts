@@ -31,7 +31,6 @@ function defaultLean(this: Query<unknown, unknown>) {
 }
 
 function runUpdateValidations(this: Query<unknown, unknown>) {
-  console.log('Validators set');
   const opts = this.getOptions();
   if (opts.runValidators === undefined) opts.runValidators = true;
 }

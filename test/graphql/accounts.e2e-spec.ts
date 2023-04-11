@@ -14,6 +14,8 @@ import { ShadowArchive } from '@test/common';
 /**
  * Declaring the constants
  */
+const USER = { email: 'test-user@mail.com', name: 'Test User', password: 'Password@123' } as const;
+
 const archive = new ShadowArchive();
 
 beforeAll(() => archive.setup());
@@ -34,38 +36,34 @@ describe('[GraphQL][accounts:mutation] Register', () => {
 
   it('errors with invalid password', async () => {
     const variables = { email: 'test-user@mail.com', name: 'Test User', password: 'invalid-password' };
-    const { errors } = await archive.graphql(query, variables);
-    const error = errors[0]!;
+    const response = await archive.graphql(query, variables);
 
-    expect(error.extensions.type).toBe('CLIENT_ERROR');
-    expect(error.extensions.fields).toHaveLength(1);
-    expect(error.extensions?.fields?.[0]?.field).toBe('password');
+    response.expectGraphQLError('R002');
+    response.expectGraphQLErrorFields(['password']);
   });
 
   it('errors with multiple invalid input', async () => {
     const variables = { email: 'email-address', name: 'A', password: 'invalid-password' };
-    const { errors } = await archive.graphql(query, variables);
-    const error = errors[0]!;
+    const response = await archive.graphql(query, variables);
 
-    expect(error.extensions.type).toBe('CLIENT_ERROR');
-    expect(error.extensions.fields).toHaveLength(3);
-    const fields = error.extensions.fields?.map((obj: any) => obj.field);
-    expect(fields).toEqual(expect.arrayContaining(['password', 'email', 'name']));
+    response.expectGraphQLError('R002');
+    response.expectGraphQLErrorFields(['password', 'email', 'name']);
   });
 
   it('creates user with valid input', async () => {
-    const variables = { email: 'test-user@mail.com', name: 'Test User', password: 'Password@123' };
-    const response = await archive.rawGraphql(query, variables);
+    const variables = { ...USER };
+    const response = await archive.graphql(query, variables);
 
-    expect(response.get('Set-Cookie')).toEqual(expect.arrayContaining([expect.stringMatching(/^sasid=[a-zA-Z0-9%= \-;]{30,}$/)]));
-    expect(response.body.errors).toBeUndefined();
-    expect(response.body.data.register).toMatchObject({
-      uid: expect.stringMatching(/^[a-f0-9]{24}$/),
-      email: variables.email,
-      name: variables.name,
-      csrfToken: expect.stringMatching(/^[a-zA-Z0-9|\-_]{82}$/),
-      imageUrl: null,
-      verified: false,
+    response.expectCookies();
+    response.expectGraphQLData({
+      register: {
+        uid: expect.stringMatching(/^[a-f0-9]{24}$/),
+        email: variables.email,
+        name: variables.name,
+        csrfToken: expect.stringMatching(/^[a-zA-Z0-9|\-_]{82}$/),
+        imageUrl: null,
+        verified: false,
+      },
     });
   });
 });
@@ -84,11 +82,34 @@ describe('[GraphQL][accounts:mutation] Login', () => {
     }
   `;
 
-  it.todo('errors with invalid email address');
+  it('errors with invalid email address', async () => {
+    const variables = { email: 'invalid-email', password: USER.password };
+    const response = await archive.graphql(query, variables);
+    response.expectGraphQLError('IAM001');
+  });
 
-  it.todo('errors with invalid password');
+  it('errors with invalid password', async () => {
+    const variables = { email: USER.email, password: 'invalid-password' };
+    const response = await archive.graphql(query, variables);
+    response.expectGraphQLError('IAM006');
+  });
 
-  it.todo('returns cookie and data with valid credentials');
+  it('returns cookie and data with valid credentials', async () => {
+    const variables = { email: USER.email, password: USER.password };
+    const response = await archive.graphql(query, variables);
+
+    response.expectCookies();
+    response.expectGraphQLData({
+      login: {
+        uid: expect.stringMatching(/^[a-f0-9]{24}$/),
+        email: USER.email,
+        name: USER.name,
+        csrfToken: expect.stringMatching(/^[a-zA-Z0-9|\-_]{82}$/),
+        imageUrl: null,
+        verified: false,
+      },
+    });
+  });
 });
 
 afterAll(() => archive.teardown());

@@ -18,23 +18,22 @@ const archive = new ShadowArchive();
 
 beforeAll(() => archive.setup());
 
-describe('App Status', () => {
+describe('[REST][status] Page not found and Health', () => {
   it('Returns resource not found error', async () => {
     const response = await archive.rest('GET', '/');
-    expect(response.status).toBe(404);
-    expect(response.body).toMatchObject({
-      code: 'NOT_FOUND',
-      message: 'Resource not found',
-      rid: expect.stringMatching(/^[0-9A-F]{8}-[0-9A-F]{4}-[1][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i),
-    });
+
+    response.expectStatusCode(404);
+    response.expectRESTError('R001');
   });
 
   it('returns health response', async () => {
     const response = await archive.rest('GET', '/health');
-    expect(response.body).toHaveProperty('status');
-    expect(response.body).toHaveProperty('info');
-    expect(response.body).toHaveProperty('error');
-    expect(response.body).toHaveProperty('details');
+    const modules = Object.keys(response.getBody().details);
+    const expectModule = expect.objectContaining({ status: expect.stringMatching(/^(up|down)$/) });
+    response.expectRESTData({
+      status: expect.stringMatching(/^(error|ok|shutting_down)$/),
+      details: modules.reduce((acc, mod) => ({ ...acc, [mod]: expectModule }), {}),
+    });
   });
 });
 
