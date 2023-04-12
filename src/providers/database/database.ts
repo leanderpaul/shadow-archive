@@ -37,6 +37,3 @@ export const DatabaseModule = MongooseModule.forRoot(Config.get('DB_URI'), {
     return connection;
   },
 });
-
-@Injectable()
-export class Database {}

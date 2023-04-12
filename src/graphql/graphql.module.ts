@@ -12,6 +12,7 @@ import { rule, shield, allow } from 'graphql-shield';
 /**
  * Importing user defined packages
  */
+import { ConfigModule } from '@app/config';
 import { Logger } from '@app/providers';
 import { AppError, ErrorCode, ErrorUtils } from '@app/shared/errors';
 import { AuthService, AuthModule } from '@app/shared/modules';
@@ -22,7 +23,7 @@ import { ChronicleModule } from './chronicle';
 /**
  * Importing and defining types
  */
-import { ConfigModule, ConfigRecord } from '@app/config';
+import type { ConfigRecord } from '@app/config';
 import type { User, UserSession } from '@app/providers';
 import type { ApolloDriverConfig } from '@nestjs/apollo';
 import type { FastifyRequest, FastifyReply } from 'fastify';

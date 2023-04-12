@@ -6,6 +6,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 /**
  * Importing user defined packages
  */
+import { ConfigModule } from '@app/config';
+import { DatabaseModule, MetadataMongooseModule, ExpenseMongooseModule, MemoirMongooseModule, ContextService } from '@app/providers';
+
 import { ChronicleService } from './chronicle.service';
 
 /**
@@ -18,9 +21,13 @@ import { ChronicleService } from './chronicle.service';
 
 describe('ChronicleService', () => {
   let service: ChronicleService;
+  let module: TestingModule;
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({ providers: [ChronicleService] }).compile();
+  beforeAll(async () => {
+    module = await Test.createTestingModule({
+      imports: [ConfigModule, DatabaseModule, MetadataMongooseModule, ExpenseMongooseModule, MemoirMongooseModule],
+      providers: [ChronicleService, ContextService],
+    }).compile();
 
     service = module.get<ChronicleService>(ChronicleService);
   });
@@ -28,4 +35,6 @@ describe('ChronicleService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
+
+  afterAll(() => module.close());
 });

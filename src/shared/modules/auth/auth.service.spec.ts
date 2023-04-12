@@ -1,11 +1,14 @@
 /**
  * Importing npm packages
  */
+import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 
 /**
  * Importing user defined packages
  */
+import { UserMongooseModule, MailService, ContextService, DatabaseModule } from '@app/providers';
+
 import { AuthService } from './auth.service';
 
 /**
@@ -18,10 +21,12 @@ import { AuthService } from './auth.service';
 
 describe('AuthService', () => {
   let service: AuthService;
+  let module: TestingModule;
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [AuthService],
+  beforeAll(async () => {
+    module = await Test.createTestingModule({
+      imports: [DatabaseModule, UserMongooseModule],
+      providers: [AuthService, MailService, ContextService, ConfigService],
     }).compile();
 
     service = module.get<AuthService>(AuthService);
@@ -30,4 +35,6 @@ describe('AuthService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
+
+  afterAll(() => module.close());
 });

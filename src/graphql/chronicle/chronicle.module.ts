@@ -6,8 +6,8 @@ import { Module } from '@nestjs/common';
 /**
  * Importing user defined packages
  */
-import { ExpenseMongooseModule, UserMongooseModule, ContextService, MetadataMongooseModule, MemoirMongooseModule, MailService } from '@app/providers';
-import { AuthModule, AuthService } from '@app/shared/modules';
+import { ExpenseMongooseModule, UserMongooseModule, ContextService, MetadataMongooseModule, MemoirMongooseModule } from '@app/providers';
+import { AuthModule } from '@app/shared/modules';
 
 import { ChronicleService } from './chronicle.service';
 import { ChronicleResolver } from './chronicle.resolver';
@@ -22,6 +22,6 @@ import { ChronicleResolver } from './chronicle.resolver';
 
 @Module({
   imports: [ExpenseMongooseModule, AuthModule, UserMongooseModule, MetadataMongooseModule, MemoirMongooseModule],
-  providers: [ChronicleResolver, ChronicleService, ContextService, AuthService, MailService],
+  providers: [ChronicleResolver, ChronicleService, ContextService],
 })
 export class ChronicleModule {}

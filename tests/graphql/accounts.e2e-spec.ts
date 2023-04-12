@@ -5,7 +5,7 @@
 /**
  * Importing user defined packages
  */
-import { ShadowArchive } from '@test/common';
+import { ShadowArchive } from '@tests/common';
 
 /**
  * Importing and defining types

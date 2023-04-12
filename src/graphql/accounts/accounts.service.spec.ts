@@ -6,6 +6,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 /**
  * Importing user defined packages
  */
+import { ConfigModule } from '@app/config';
+import { ContextService, MailService, DatabaseModule, UserMongooseModule } from '@app/providers';
+import { AuthModule } from '@app/shared/modules';
+
 import { AccountsService } from './accounts.service';
 
 /**
@@ -18,10 +22,12 @@ import { AccountsService } from './accounts.service';
 
 describe('AccountsService', () => {
   let service: AccountsService;
+  let module: TestingModule;
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [AccountsService],
+  beforeAll(async () => {
+    module = await Test.createTestingModule({
+      imports: [ConfigModule, DatabaseModule, UserMongooseModule, AuthModule],
+      providers: [AccountsService, ContextService, MailService],
     }).compile();
 
     service = module.get<AccountsService>(AccountsService);
@@ -30,4 +36,6 @@ describe('AccountsService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
+
+  afterAll(() => module.close());
 });
