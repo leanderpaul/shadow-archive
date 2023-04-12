@@ -13,7 +13,7 @@ import { transformId, defaultOptionsPlugin } from '../database.utils';
  */
 import type { ObjectId, Model } from 'mongoose';
 
-export interface ExpenseModel extends Model<Expense> {}
+export type ExpenseModel = Model<Expense>;
 
 /**
  * Declaring the constants

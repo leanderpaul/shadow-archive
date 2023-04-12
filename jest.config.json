@@ -1,0 +1,16 @@
+{
+  "collectCoverageFrom": ["**/*.(t|j)s"],
+  "coverageDirectory": "./coverage",
+  "displayName": "Shadow Archive Unit Test",
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "moduleNameMapper": {
+    "@app/(.*)": "<rootDir>/$1"
+  },
+  "rootDir": "src",
+  "testEnvironment": "node",
+  "testRegex": ".*\\.spec\\.ts$",
+  "transform": {
+    "^.+\\.(t|j)s$": "ts-jest"
+  },
+  "verbose": true
+}

@@ -13,9 +13,9 @@ import { defaultOptionsPlugin } from '../database.utils';
  */
 import type { ObjectId, Model } from 'mongoose';
 
-export interface MetadataModel extends Model<Metadata> {}
+export type MetadataModel = Model<Metadata>;
 
-export interface ChronicleMetadataModel extends Model<ChronicleMetadata> {}
+export type ChronicleMetadataModel = Model<ChronicleMetadata>;
 
 /**
  * Declaring the constants

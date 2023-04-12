@@ -13,7 +13,7 @@ import { defaultOptionsPlugin } from '../database.utils';
  */
 import type { ObjectId, Model } from 'mongoose';
 
-export interface MemoirModel extends Model<Memoir> {}
+export type MemoirModel = Model<Memoir>;
 
 export enum ActivityType {
   ANIME = 'ANIME',
