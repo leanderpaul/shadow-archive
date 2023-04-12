@@ -13,7 +13,7 @@ import { ErrorCode } from '@app/shared/errors';
  */
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import type { GraphQLFormattedErrorExtensions } from '@app/shared/errors';
-import type { Response as SupertestResponse } from 'supertest';
+import type { Response, Request } from 'supertest';
 
 export type RestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
@@ -29,18 +29,14 @@ export interface GraphQLFormattedError {
   extensions: GraphQLFormattedErrorExtensions;
 }
 
-export interface Response<T = any> extends SupertestResponse {
-  body: T;
-}
-
-export interface GraphQLErrorResponse extends SupertestResponse {
+export interface GraphQLErrorResponse extends Response {
   body: {
     data: null;
     errors: GraphQLFormattedError[];
   };
 }
 
-export interface GraphQLDataResponse<T = any> extends SupertestResponse {
+export interface GraphQLDataResponse<T = any> extends Response {
   body: {
     data: T;
   };
@@ -71,22 +67,14 @@ export class ShadowArchive {
     await instance.ready();
   }
 
-  async rest(method: RestMethod, url: string, cookieName?: string | null, data?: object) {
+  rest(method: RestMethod, url: string) {
     const mtd = method.toLowerCase() as Lowercase<RestMethod>;
-    const responsePromise = request(this.app.getHttpServer())[mtd](url);
-    if (cookieName) {
-      const cookie = cookies.get(cookieName);
-      if (!cookie) throw new Error(`Cookie '${cookieName}' not present`);
-      responsePromise.set('Cookie', cookie);
-    }
-    const response = await responsePromise.send(data);
-    expect(response.type).toEqual(expect.stringContaining('application/json'));
-    return new ShadowArchiveResponse(response);
+    const apiRequest = request(this.app.getHttpServer())[mtd](url);
+    return new ShadowArchiveRequest(apiRequest);
   }
 
-  async graphql(query: string, variables: object = {}, cookieName?: string) {
-    const response = await this.rest('POST', '/graphql', cookieName, { query, variables });
-    response.expectStatusCode(200);
+  graphql(query: string, variables: object = {}) {
+    const response = this.rest('POST', '/graphql').send({ query, variables });
     return response;
   }
 
@@ -95,8 +83,44 @@ export class ShadowArchive {
   }
 }
 
+export class ShadowArchiveRequest {
+  constructor(private readonly request: Request) {}
+
+  private async execute() {
+    const response = await this.request;
+    return new ShadowArchiveResponse(response, this.request.url === '/graphql');
+  }
+
+  send(data: object) {
+    this.request.send(data);
+    return this;
+  }
+
+  cookie(cookie: string) {
+    this.request.set('Cookie', cookie);
+    return this;
+  }
+
+  session(email: string) {}
+
+  then(resolve: (value: ShadowArchiveResponse) => ShadowArchiveResponse, reject: (reason: any) => void) {
+    return this.execute().then(resolve, reject);
+  }
+
+  catch(reject: (reason: any) => void) {
+    return this.execute().then(null, reject);
+  }
+
+  finally(callback: () => void) {
+    return this.execute().finally(callback);
+  }
+}
+
 export class ShadowArchiveResponse {
-  constructor(private readonly response: SupertestResponse) {}
+  constructor(private readonly response: Response, isGraphQLRequest: boolean) {
+    expect(response.type).toEqual(expect.stringContaining('application/json'));
+    if (isGraphQLRequest) expect(response.status).toBe(200);
+  }
 
   getBody() {
     return this.response.body;

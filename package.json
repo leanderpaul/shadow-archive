@@ -15,9 +15,10 @@
     "postinstall": "patch-package",
     "prepare": "husky install",
     "start": "node dist/main",
-    "test": "jest",
+    "test": "npm run test:unit && npm run test:e2e",
     "test:cov": "jest --coverage",
-    "test:e2e": "jest --config ./tests/jest-e2e.json"
+    "test:e2e": "jest --config ./tests/jest-e2e.json",
+    "test:unit": "jest"
   },
   "dependencies": {
     "@apollo/server": "^4.5.0",
