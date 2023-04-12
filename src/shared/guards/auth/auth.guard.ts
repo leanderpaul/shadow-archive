@@ -1,7 +1,7 @@
 /**
  * Importing npm packages
  */
-import { ExecutionContext, mixin } from '@nestjs/common';
+import { ExecutionContext, mixin, Injectable } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
 
 /**
@@ -37,6 +37,7 @@ export enum AuthType {
 export const AuthGuard = Utils.memorize(createAuthGuard);
 
 function createAuthGuard(requiredAuth: AuthType = AuthType.VERIFIED): Type<CanActivate> {
+  @Injectable()
   class MixinAuthGuard implements CanActivate {
     constructor(private readonly authService: AuthService) {}
 

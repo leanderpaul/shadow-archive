@@ -6,6 +6,7 @@
  * Importing user defined packages
  */
 import { ShadowArchive } from '@tests/common';
+import { sampleUsers } from '@tests/testdata';
 
 /**
  * Importing and defining types
@@ -108,6 +109,42 @@ describe('[GraphQL][accounts:mutation] Login', () => {
         imageUrl: null,
         verified: false,
       },
+    });
+  });
+
+  describe('[GraphQL][accounts:query] VerifySession', function () {
+    const query = /* GraphQL */ `
+      query verifySession {
+        viewer {
+          uid
+          email
+          name
+          verified
+          imageUrl
+          csrfToken
+        }
+      }
+    `;
+
+    it('errors for invalid session', async () => {
+      const response = await archive.graphql(query).cookie('sasid=invalid-cookie-value');
+      response.expectGraphQLError('IAM002');
+    });
+
+    it('return user for valid session', async () => {
+      const response = await archive.graphql(query).session('sample-user-1@mail.com');
+      const user = sampleUsers['sample-user-1@mail.com'];
+
+      response.expectGraphQLData({
+        viewer: {
+          uid: user.uid,
+          email: user.email,
+          name: user.name,
+          verified: user.verified,
+          imageUrl: null,
+          csrfToken: expect.stringMatching(`^[a-zA-Z0-9\-|_]{${60 + user.email.length}}$`),
+        },
+      });
     });
   });
 });

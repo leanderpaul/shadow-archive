@@ -13,7 +13,8 @@ import { transformId, defaultOptionsPlugin } from '../database.utils';
 /**
  * Importing and defining types
  */
-import type { ObjectId, Model, Document, Query } from 'mongoose';
+import type { ObjectId } from 'mongodb';
+import type { Model, Document, Query } from 'mongoose';
 
 interface UserStaticMethods {
   isNativeUser(user: User): user is NativeUser;

@@ -9,11 +9,18 @@ import { Test } from '@nestjs/testing';
 import { ErrorCode } from '@app/shared/errors';
 
 /**
+ * Importing user defined packages
+ */
+import { sampleUsers } from './testdata';
+
+/**
  * Importing and defining types
  */
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import type { GraphQLFormattedErrorExtensions } from '@app/shared/errors';
 import type { Response, Request } from 'supertest';
+
+import type { SampleUserEmail } from './testdata';
 
 export type RestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
@@ -47,7 +54,7 @@ export type GraphQLResponse<T = any> = GraphQLErrorResponse | GraphQLDataRespons
 /**
  * Declaring the constants
  */
-const cookies = new Map<string, string>();
+const cookieName = 'test-session';
 const expectRID = expect.stringMatching(/^[0-9A-F]{8}-[0-9A-F]{4}-[1][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i);
 
 export class ShadowArchive {
@@ -57,11 +64,23 @@ export class ShadowArchive {
     const { AppModule } = await import('@app/app.module');
     const { Context } = await import('@app/providers');
 
-    const moduleFixture = await Test.createTestingModule({ imports: [AppModule] }).compile();
-    this.app = moduleFixture.createNestApplication<NestFastifyApplication>(new FastifyAdapter(), { logger: false });
-    const instance = this.app.getHttpAdapter().getInstance();
+    const adapter = new FastifyAdapter();
+    const instance = adapter.getInstance();
     await instance.register(fastifyCookie);
     instance.addHook('preHandler', Context.init());
+    instance.addHook('preHandler', async (req, _res) => {
+      const cookie = req.cookies[cookieName];
+      if (cookie) {
+        const user = Object.values(sampleUsers).find(user => user.uid === cookie);
+        if (user) {
+          Context.setCurrentUser({ ...user } as any);
+          Context.setCurrentSession(user.sessions[0]!);
+        }
+      }
+    });
+
+    const moduleFixture = await Test.createTestingModule({ imports: [AppModule] }).compile();
+    this.app = moduleFixture.createNestApplication<NestFastifyApplication>(adapter, { logger: false });
 
     await this.app.init();
     await instance.ready();
@@ -101,7 +120,11 @@ export class ShadowArchiveRequest {
     return this;
   }
 
-  session(email: string) {}
+  session(email: SampleUserEmail) {
+    const user = sampleUsers[email];
+    this.request.set('Cookie', `${cookieName}=${user.uid}`);
+    return this;
+  }
 
   then(resolve: (value: ShadowArchiveResponse) => ShadowArchiveResponse, reject: (reason: any) => void) {
     return this.execute().then(resolve, reject);
