@@ -10,18 +10,14 @@
  * Importing and defining types
  */
 
-type ExpandRecursively<T> = T extends object ? (T extends infer O ? { [K in keyof O]: ExpandRecursively<O[K]> } : never) : T;
-
-type ExcludeNull<T> = ExpandRecursively<{ [K in keyof T]: Exclude<ExcludeNull<T[K]>, null> }>;
-
 /**
  * Declaring the constants
  */
 
 export class Utils {
-  static excludeNull<T>(obj: T[]): ExcludeNull<T>[];
-  static excludeNull<T extends object>(obj: T): ExcludeNull<T>;
-  static excludeNull<T>(obj: T | T[]): ExcludeNull<T> | ExcludeNull<T>[] {
+  static excludeNull<T>(obj: T[]): T[];
+  static excludeNull<T>(obj: T): T;
+  static excludeNull<T>(obj: T | T[]): T | T[] {
     if (Array.isArray(obj)) {
       const trimmedArr = [] as any[];
       for (const value of obj) {
@@ -38,5 +34,18 @@ export class Utils {
       trimmedObj[key] = typeof value != 'object' ? value : Array.isArray(value) ? Utils.excludeNull(value) : Utils.excludeNull(value);
     }
     return trimmedObj;
+  }
+
+  static memorize<T extends (value?: any) => any>(fn: T): T {
+    const defaultKey = 'default';
+    const cache: Record<string, T> = {};
+
+    return function (input?: any) {
+      const name = input ?? defaultKey;
+      if (name in cache) return cache[name]!;
+      const result = fn(input);
+      cache[name] = result;
+      return result;
+    } as any;
   }
 }

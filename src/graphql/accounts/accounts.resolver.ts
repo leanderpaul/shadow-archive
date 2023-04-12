@@ -7,8 +7,7 @@ import { Resolver, Query, Mutation, Args, ResolveField } from '@nestjs/graphql';
 /**
  * Importing user defined packages
  */
-import { EAuthType, AuthType } from '@app/shared/decorators';
-import { AuthGuard } from '@app/shared/guards';
+import { UseAuth, AuthType } from '@app/shared/decorators';
 
 import { AccountsService } from './accounts.service';
 import { LoginArgs, RegisterArgs, ResetPasswordArgs, UpdatePasswordArgs } from './dto';
@@ -26,8 +25,7 @@ import { Viewer } from './entities';
 export class AccountsResolver {
   constructor(private readonly accountsService: AccountsService) {}
 
-  @AuthType(EAuthType.AUTHENTICATED)
-  @UseGuards(AuthGuard)
+  @UseAuth(AuthType.AUTHENTICATED)
   @Query(() => Viewer, { name: 'viewer' })
   getCurrentUser() {
     return this.accountsService.getUser();
@@ -64,8 +62,7 @@ export class AccountsResolver {
     return await this.accountsService.updatePassword(args.oldPassword, args.newPassword);
   }
 
-  @AuthType(EAuthType.AUTHENTICATED)
-  @UseGuards(AuthGuard)
+  @UseAuth(AuthType.AUTHENTICATED)
   @Mutation(() => Boolean)
   resendEmailVerificationMail() {
     this.accountsService.resendEmailVerificationMail();
@@ -77,8 +74,7 @@ export class AccountsResolver {
     return this.accountsService.logoutUser(sessionId === '*');
   }
 
-  @AuthType(EAuthType.AUTHENTICATED)
-  @UseGuards(AuthGuard)
+  @UseAuth(AuthType.AUTHENTICATED)
   @ResolveField(() => String, { name: 'csrfToken' })
   getCSRFToken() {
     return this.accountsService.getCSRFToken();

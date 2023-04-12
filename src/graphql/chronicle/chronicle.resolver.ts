@@ -1,14 +1,13 @@
 /**
  * Importing npm packages
  */
-import { UseGuards } from '@nestjs/common';
 import { Resolver, Query, Args, ResolveField, Info, Mutation } from '@nestjs/graphql';
 
 /**
  * Importing user defined packages
  */
 import { PageInput } from '@app/graphql/common';
-import { AuthGuard } from '@app/shared/guards';
+import { AuthType, UseAuth } from '@app/shared/decorators';
 import { GraphQLUtils } from '@app/shared/utils';
 
 import { ChronicleService } from './chronicle.service';
@@ -25,7 +24,7 @@ import type { GraphQLResolveInfo } from 'graphql';
  * Declaring the constants
  */
 
-@UseGuards(AuthGuard)
+@UseAuth(AuthType.VERIFIED)
 @Resolver(() => Chronicle)
 export class ChronicleResolver {
   constructor(private readonly chronicleService: ChronicleService) {}
