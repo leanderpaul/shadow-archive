@@ -1,0 +1,16 @@
+diff --git a/node_modules/mongoose/types/query.d.ts b/node_modules/mongoose/types/query.d.ts
+index 15b973b..daaf9cc 100644
+--- a/node_modules/mongoose/types/query.d.ts
++++ b/node_modules/mongoose/types/query.d.ts
+@@ -557,6 +557,11 @@ declare module 'mongoose' {
+      */
+     set(path: string | Record<string, unknown>, value?: any): this;
+ 
++    /**
++     * Adds a `$unset` to this query's update withou changing the operation.
++     */
++    unset(path: string | string[]): this;
++
+     /** Sets query options. Some options only make sense for certain operations. */
+     setOptions(options: QueryOptions<DocType>, overwrite?: boolean): this;
+ 

@@ -45,7 +45,7 @@
     "graphql-middleware": "^6.1.33",
     "graphql-shield": "^7.6.5",
     "moment": "^2.29.4",
-    "mongoose": "^7.0.2",
+    "mongoose": "^7.0.3",
     "mongoose-lean-virtuals": "^0.9.1",
     "mustache": "^4.2.0",
     "patch-package": "^6.5.1",
