@@ -11,9 +11,9 @@ import { Types } from 'mongoose';
  */
 
 /**
- * Importing and defining types
+ * Defining types
  */
-import type { NativeUser, OAuthUser, UserSession } from '@app/providers';
+import type { NativeUser, OAuthUser, UserSession } from '@app/providers/database';
 
 export type SampleUserEmail = keyof typeof sampleUsers;
 

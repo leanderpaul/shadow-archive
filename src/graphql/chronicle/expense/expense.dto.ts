@@ -1,17 +1,17 @@
 /**
  * Importing npm packages
  */
-import { InputType, Field, registerEnumType, Float, Int, PartialType } from '@nestjs/graphql';
+import { ArgsType, InputType, Field, registerEnumType, Float, Int, PartialType } from '@nestjs/graphql';
 
 /**
  * Importing user defined packages
  */
-import { IntQuery, SortOrder } from '@app/graphql/common';
+import { IntQuery, SortOrder, PageInput } from '@app/graphql/common';
 
-import { Currency } from '../entities';
+import { Currency } from './expense.entity';
 
 /**
- * Importing and defining types
+ * Defining types
  */
 
 export enum ExpenseSortField {
@@ -96,3 +96,15 @@ export class AddExpenseInput {
 
 @InputType()
 export class UpdateExpenseInput extends PartialType(AddExpenseInput) {}
+
+@ArgsType()
+export class GetExpensesArgs {
+  @Field(() => ExpenseQuery, { nullable: true })
+  query?: ExpenseQuery;
+
+  @Field(() => PageInput, { nullable: true })
+  page: PageInput = { offset: 0, limit: 20 };
+
+  @Field(() => ExpenseSort, { nullable: true })
+  sort: ExpenseSort = { field: ExpenseSortField.DATE, order: SortOrder.DESC };
+}

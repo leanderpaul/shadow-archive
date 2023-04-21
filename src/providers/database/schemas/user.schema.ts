@@ -4,6 +4,8 @@
 import sagus from 'sagus';
 
 import { Schema, Prop, SchemaFactory, MongooseModule } from '@nestjs/mongoose';
+import { ObjectId } from 'mongodb';
+import { Model, Document, Query } from 'mongoose';
 
 /**
  * Importing user defined packages
@@ -11,10 +13,8 @@ import { Schema, Prop, SchemaFactory, MongooseModule } from '@nestjs/mongoose';
 import { transformId, defaultOptionsPlugin } from '../database.utils';
 
 /**
- * Importing and defining types
+ * Defining types
  */
-import type { ObjectId } from 'mongodb';
-import type { Model, Document, Query } from 'mongoose';
 
 interface UserStaticMethods {
   isNativeUser(user: User): user is NativeUser;
@@ -95,6 +95,10 @@ export class User {
     validate: [uriRegex, 'should be a uri'],
   })
   imageUrl?: string;
+
+  /** Determines whether the user is an admin or not */
+  @Prop({ type: 'boolean' })
+  admin?: boolean;
 
   /** Denotes whether a user email address is verified or not */
   @Prop({

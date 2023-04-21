@@ -7,7 +7,7 @@
  */
 
 /**
- * Importing and defining types
+ * Defining types
  */
 
 /**

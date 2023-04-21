@@ -1,27 +1,23 @@
 /**
  * Importing npm packages
  */
-import { GraphQLError } from 'graphql';
+import { GraphQLError, GraphQLFormattedError } from 'graphql';
 import { Error as MongooseError } from 'mongoose';
+import { Logger } from 'winston';
 
 /**
  * Importing user defined packages
  */
-import { Context } from '@app/providers';
-
 import { AppError } from './app.error';
 import { ErrorCode, ErrorType } from './error-code.error';
-import { ValidationError } from './validation.error';
+import { ValidationError, FieldError } from './validation.error';
 
 /**
- * Importing and defining types
+ * Defining types
  */
-import type { GraphQLFormattedError } from 'graphql';
-import type { Logger } from 'winston';
-
-import type { FieldError } from './validation.error';
 
 export interface FormattedError {
+  rid: string;
   code: string;
   type: string;
   message: string;
@@ -42,7 +38,7 @@ export class ErrorUtils {
     if (error instanceof GraphQLError) error = error.originalError;
     if (formattedError.extensions?.code) delete formattedError.extensions.code;
     const { message, ...extensions } = ErrorUtils.formatError(error);
-    const obj = { ...formattedError, message, extensions: { rid: Context.getRID(), ...extensions, ...formattedError.extensions } };
+    const obj = { ...formattedError, message, extensions: { ...extensions, ...formattedError.extensions } };
 
     if (extensions.code === ErrorType.SERVER_ERROR) logger.error(error);
     else logger.warn(error);

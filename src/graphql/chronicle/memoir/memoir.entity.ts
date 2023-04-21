@@ -1,15 +1,15 @@
 /**
  * Importing npm packages
  */
-import { ObjectType, Field, Int, registerEnumType, createUnionType } from '@nestjs/graphql';
+import { ObjectType, Field, Int, registerEnumType } from '@nestjs/graphql';
 
 /**
  * Importing user defined packages
  */
-import { ActivityType } from '@app/providers';
+import { ActivityType } from '@app/providers/database';
 
 /**
- * Importing and defining types
+ * Defining types
  */
 
 /**

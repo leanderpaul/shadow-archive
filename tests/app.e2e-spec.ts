@@ -8,7 +8,7 @@
 import { ShadowArchive } from '@tests/common';
 
 /**
- * Importing and defining types
+ * Defining types
  */
 
 /**

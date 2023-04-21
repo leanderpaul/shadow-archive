@@ -7,19 +7,18 @@ import winston from 'winston';
 import { cyan, gray, yellow } from '@colors/colors/safe';
 import { Logtail } from '@logtail/node';
 import { LogtailTransport } from '@logtail/winston';
-import { LEVEL, MESSAGE } from 'triple-beam';
+import { FastifyRequest, FastifyReply } from 'fastify';
+import { LEVEL } from 'triple-beam';
 
 /**
  * Importing user defined packages.
  */
 import { Config } from '@app/config';
-import { Context } from '@app/providers';
+import { Context } from '@app/providers/context';
 
 /**
- * Importing and defining types.
+ * Defining types
  */
-import type { FastifyRequest, FastifyReply } from 'fastify';
-import type { Logger as WinstonLogger, Logform } from 'winston';
 
 export interface LogMetadata {
   service?: string;
@@ -56,7 +55,7 @@ const { combine, printf, errors, colorize, json } = winston.format;
 const logColorFormat = { info: 'green', error: 'bold red', warn: 'yellow', debug: 'magenta', http: 'cyan' };
 const sensitiveFields = ['password'];
 
-let logger: WinstonLogger;
+let logger: winston.Logger;
 let logtail: Logtail;
 let timestamp: number;
 
@@ -65,7 +64,7 @@ let timestamp: number;
  * @param info
  * @returns
  */
-function appendLogMetadata(info: Logform.TransformableInfo) {
+function appendLogMetadata(info: winston.Logform.TransformableInfo) {
   const rid = Context.getRID();
   if (rid) info.rid = rid;
   info.dt = new Date();
@@ -77,7 +76,7 @@ function appendLogMetadata(info: Logform.TransformableInfo) {
  * @param info
  * @returns
  */
-function printConsoleMessage(info: Logform.TransformableInfo) {
+function printConsoleMessage(info: winston.Logform.TransformableInfo) {
   const level = info[LEVEL];
   const prevTime = timestamp;
   timestamp = Date.now();
@@ -186,6 +185,9 @@ export const Logger = {
     return typeof input === 'string' ? logger.child({ label: input }) : logger.child({ ...input });
   },
 
+  /**
+   * Sets the request start time in request object
+   */
   getRequestStartHandler() {
     return (req: FastifyRequest, _res: FastifyReply, next: () => void) => {
       req.startTime = process.hrtime();
@@ -193,6 +195,9 @@ export const Logger = {
     };
   },
 
+  /**
+   * Logs the request data and time taken to complete the request
+   */
   getRequestEndHandler() {
     return (req: FastifyRequest, res: FastifyReply, next: () => void) => {
       const metadata: RequestMetadata = {};
@@ -212,6 +217,9 @@ export const Logger = {
     };
   },
 
+  /**
+   * Closes the log stream
+   */
   close() {
     logtail?.flush();
     logger.close();

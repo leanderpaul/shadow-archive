@@ -8,7 +8,7 @@ import { ArgsType, Field } from '@nestjs/graphql';
  */
 
 /**
- * Importing and defining types
+ * Defining types
  */
 
 /**

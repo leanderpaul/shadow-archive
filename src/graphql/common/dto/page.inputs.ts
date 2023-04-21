@@ -9,7 +9,7 @@ import { InputType, Int, Field } from '@nestjs/graphql';
 import { ValidationError } from '@app/shared/errors';
 
 /**
- * Importing and defining types
+ * Defining types
  */
 
 /**

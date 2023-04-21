@@ -8,7 +8,7 @@ import { InputType, Field, Int } from '@nestjs/graphql';
  */
 
 /**
- * Importing and defining types
+ * Defining types
  */
 
 /**

@@ -1,16 +1,15 @@
 /**
  * Importing npm packages
  */
+import { GraphQLResolveInfo, SelectionSetNode, Kind } from 'graphql';
 
 /**
  * Importing user defined packages
  */
-import { Kind } from 'graphql';
 
 /**
- * Importing and defining types
+ * Defining types
  */
-import type { GraphQLResolveInfo, SelectionSetNode } from 'graphql';
 
 export type Projection<T extends object> = {
   [K in keyof T]?: T[K] extends object[] ? Projection<T[K][number]> : T[K] extends object ? Projection<T[K]> : 1;

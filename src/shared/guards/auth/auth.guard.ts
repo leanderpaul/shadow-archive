@@ -1,22 +1,21 @@
 /**
  * Importing npm packages
  */
-import { ExecutionContext, mixin, Injectable } from '@nestjs/common';
+import { ExecutionContext, mixin, Injectable, Type, CanActivate } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
+import { FastifyRequest, FastifyReply } from 'fastify';
 
 /**
  * Importing user defined packages
  */
+import { UserSession, User } from '@app/providers/database';
 import { AppError, ErrorCode } from '@app/shared/errors';
 import { AuthService } from '@app/shared/modules';
 import { Utils } from '@app/shared/utils';
 
 /**
- * Importing and defining types
+ * Defining types
  */
-import type { UserSession, User } from '@app/providers';
-import type { Type, CanActivate } from '@nestjs/common';
-import type { FastifyRequest, FastifyReply } from 'fastify';
 
 export interface GraphQLContext {
   req: FastifyRequest;
@@ -28,6 +27,7 @@ export interface GraphQLContext {
 export enum AuthType {
   VERIFIED,
   AUTHENTICATED,
+  ADMIN,
 }
 
 /**

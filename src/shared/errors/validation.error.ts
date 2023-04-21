@@ -1,18 +1,17 @@
 /**
  * Importing npm packages
  */
+import { Error as MongooseError } from 'mongoose';
 
 /**
  * Importing user defined packages
  */
 import { ErrorCode } from './error-code.error';
+import { FormattedError } from './util.error';
 
 /**
- * Importing and defining types
+ * Defining types
  */
-import type { Error as MongooseError } from 'mongoose';
-
-import type { FormattedError } from './util.error';
 
 export interface FieldError {
   field: string;

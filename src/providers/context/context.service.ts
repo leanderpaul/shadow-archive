@@ -6,14 +6,14 @@ import { Injectable } from '@nestjs/common';
 /**
  * Importing user defined packages
  */
+import { User, UserSession } from '@app/providers/database';
 import { AppError, ErrorCode } from '@app/shared/errors';
 
 import { Context } from './context.utils';
 
 /**
- * Importing and defining types
+ * Defining types
  */
-import type { User, UserSession } from '@app/providers/database';
 
 /**
  * Declaring the constants

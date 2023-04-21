@@ -5,19 +5,19 @@ import sagus from 'sagus';
 import moment from 'moment';
 
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
 
 /**
  * Importing user defined packages
  */
-import { NativeUser, ContextService, MailService, MailType } from '@app/providers';
+import { ContextService } from '@app/providers/context';
+import { DatabaseService, UserVariant } from '@app/providers/database';
+import { MailService, MailType } from '@app/providers/mail';
 import { AppError, ErrorCode } from '@app/shared/errors';
 import { AuthService } from '@app/shared/modules';
 
 /**
- * Importing and defining types
+ * Defining types
  */
-import type { NativeUserModel } from '@app/providers';
 
 /**
  * Declaring the constants
@@ -25,12 +25,16 @@ import type { NativeUserModel } from '@app/providers';
 
 @Injectable()
 export class AccountsService {
+  private readonly nativeUserModel;
+
   constructor(
     private readonly authService: AuthService,
     private readonly contextService: ContextService,
     private readonly mailService: MailService,
-    @InjectModel(NativeUser.name) private readonly nativeUserModel: NativeUserModel,
-  ) {}
+    databaseService: DatabaseService,
+  ) {
+    this.nativeUserModel = databaseService.getUserModel(UserVariant.NATIVE);
+  }
 
   getUser() {
     return this.contextService.getCurrentUser(true);
@@ -109,10 +113,5 @@ export class AccountsService {
     const user = this.getUser();
     const session = this.contextService.getCurrentSession(true);
     return this.authService.removeSession(user, clearAllSessions ? '*' : session.id);
-  }
-
-  getCSRFToken() {
-    const session = this.contextService.getCurrentSession(true);
-    return this.authService.generateCSRFToken(session.id);
   }
 }

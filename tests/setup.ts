@@ -9,13 +9,13 @@ import mongoose from 'mongoose';
 import { sampleUsers } from './testdata';
 
 /**
- * Importing and defining types
+ * Defining types
  */
 
 /**
  * Declaring the constants
  */
-process.env.DB_URI = 'mongodb://localhost/shadow-testing';
+process.env.DB_URI = 'mongodb://localhost/shadow-test';
 
 module.exports = async function () {
   /** Deleting old test data */

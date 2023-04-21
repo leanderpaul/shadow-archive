@@ -7,20 +7,20 @@ import sagus from 'sagus';
 
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { InjectModel } from '@nestjs/mongoose';
+import { FastifyRequest, FastifyReply } from 'fastify';
 
 /**
  * Importing user defined packages
  */
-import { User, DBUtils, NativeUser, ContextService, MailService, MailType } from '@app/providers';
-import { ValidationError } from '@app/shared/errors';
+import { ConfigRecord } from '@app/config';
+import { ContextService } from '@app/providers/context';
+import { DBUtils, DatabaseService, UserVariant, User } from '@app/providers/database';
+import { MailService, MailType } from '@app/providers/mail';
+import { AppError, ErrorCode } from '@app/shared/errors';
 
 /**
- * Importing and defining types
+ * Defining types
  */
-import type { ConfigRecord } from '@app/config';
-import type { UserModel, NativeUserModel } from '@app/providers';
-import type { FastifyRequest, FastifyReply } from 'fastify';
 
 export interface ICreateUser {
   name: string;
@@ -33,16 +33,22 @@ export interface ICreateUser {
 /**
  * Declaring the constants
  */
+const DEFAULT_SESSION_ID = 'unauthenticated';
 
 @Injectable()
 export class AuthService {
+  private readonly userModel;
+  private readonly nativeUserModel;
+
   constructor(
     private readonly configService: ConfigService<ConfigRecord>,
     private readonly contextService: ContextService,
     private readonly mailService: MailService,
-    @InjectModel(User.name) private readonly userModel: UserModel,
-    @InjectModel(NativeUser.name) private readonly nativeUserModel: NativeUserModel,
-  ) {}
+    databaseService: DatabaseService,
+  ) {
+    this.userModel = databaseService.getUserModel();
+    this.nativeUserModel = databaseService.getUserModel(UserVariant.NATIVE);
+  }
 
   private encrypt(iv: string | Buffer, secretKey: Buffer, input: string, encoding: BufferEncoding = 'base64') {
     const biv = typeof iv === 'string' ? Buffer.from(iv, 'base64') : iv;
@@ -83,11 +89,16 @@ export class AuthService {
     res.setCookie(name, value, { maxAge, secure });
   }
 
-  generateCSRFToken(sessionID: string) {
+  initCSRFToken(res: FastifyReply, sessionID = DEFAULT_SESSION_ID) {
     const iv = crypto.randomBytes(16);
     const secretKey = this.configService.get('CSRF_SECRET_KEY');
     const encryptedSession = this.encrypt(iv, secretKey, sessionID, 'base64url');
-    return iv.toString('base64url') + '|' + encryptedSession;
+    const token = iv.toString('base64url') + '|' + encryptedSession;
+
+    const name = this.configService.get('CSRF_TOKEN_NAME');
+    const maxAge = this.configService.get('CSRF_TOKEN_MAX_AGE') * 1000;
+    const secure = this.configService.get('IS_PROD_SERVER');
+    res.setCookie(name, token, { maxAge, secure });
   }
 
   async verifyCSRFToken() {
@@ -95,9 +106,9 @@ export class AuthService {
     const res = this.contextService.getCurrentResponse();
 
     const token = req.headers['x-csrf-token'] as string | undefined;
-    if (!token) return false;
+    if (!token) throw new AppError(ErrorCode.IAM005);
     const auth = await this.getUserFromCookie(req, res);
-    if (!auth?.session) return false;
+    const sessionID = auth?.session.id ?? DEFAULT_SESSION_ID;
 
     const [iv, encryptedSessionId] = token.split('|');
     if (!iv || !encryptedSessionId) return false;
@@ -106,7 +117,9 @@ export class AuthService {
     const secretKey = this.configService.get('CSRF_SECRET_KEY');
     const result = this.decrypt(biv, secretKey, encryptedSessionId, 'base64url');
 
-    return result === auth.session.id;
+    if (result != sessionID) throw new AppError(ErrorCode.IAM005);
+    this.initCSRFToken(res, sessionID);
+    return true;
   }
 
   private generateUserSession() {

@@ -1,7 +1,7 @@
 /**
  * Importing npm packages
  */
-import { Injectable, Optional } from '@nestjs/common';
+import { Injectable, Optional, LoggerService } from '@nestjs/common';
 
 /**
  * Importing user defined packages
@@ -9,9 +9,8 @@ import { Injectable, Optional } from '@nestjs/common';
 import { Logger } from './logger.util';
 
 /**
- * Importing and defining types
+ * Defining types
  */
-import { LoggerService } from '@nestjs/common';
 
 /**
  * Declaring the constants

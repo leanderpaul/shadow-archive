@@ -5,12 +5,14 @@
 /**
  * Importing user defined packages
  */
+import { Context } from '@app/providers/context';
+
 import { ErrorType, ErrorCode } from './error-code.error';
+import { FormattedError } from './util.error';
 
 /**
- * Importing and defining types
+ * Defining types
  */
-import type { FormattedError } from './util.error';
 
 /**
  * Declaring the constants
@@ -20,6 +22,10 @@ export class AppError<T> extends Error {
   private code: string;
   private type: ErrorType;
   private details: T;
+
+  static throw(code: ErrorCode) {
+    throw new AppError(code);
+  }
 
   constructor(code: ErrorCode, details?: T);
   constructor(type: ErrorType, msg: string, details?: T);
@@ -53,6 +59,6 @@ export class AppError<T> extends Error {
   }
 
   getFormattedError(): FormattedError {
-    return { code: this.getCode(), type: this.getType(), message: this.getMessage() };
+    return { rid: Context.getRID(), code: this.getCode(), type: this.getType(), message: this.getMessage() };
   }
 }

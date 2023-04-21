@@ -5,11 +5,12 @@
 /**
  * Importing user defined packages
  */
+import { Context } from '@app/providers/context';
+import { FormattedError } from './util.error';
 
 /**
- * Importing and defining types
+ * Defining types
  */
-import type { FormattedError } from './util.error';
 
 export enum ErrorType {
   CLIENT_ERROR = 'CLIENT_ERROR',
@@ -41,7 +42,7 @@ export class ErrorCode {
   }
 
   getFormattedError(): FormattedError {
-    return { code: this.getCode(), type: this.getType(), message: this.getMessage() };
+    return { rid: Context.getRID(), code: this.getCode(), type: this.getType(), message: this.getMessage() };
   }
 
   /*!
@@ -57,7 +58,7 @@ export class ErrorCode {
   /** user not authorized to access this resource */
   static readonly IAM004 = new ErrorCode('IAM004', ErrorType.UNAUTHORIZED, 'user not authorized to access this resource');
   /** CSRF Token required */
-  static readonly IAM005 = new ErrorCode('IAM005', ErrorType.UNAUTHORIZED, 'CSRF Token required');
+  static readonly IAM005 = new ErrorCode('IAM005', ErrorType.UNAUTHORIZED, 'CSRF Token invalid');
   /** User email address or password is incorrect */
   static readonly IAM006 = new ErrorCode('IAM006', ErrorType.CLIENT_ERROR, 'User email address or password is incorrect');
   /** only native user's can change the password */

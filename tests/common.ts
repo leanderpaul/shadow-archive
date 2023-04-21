@@ -2,25 +2,28 @@
  * Importing npm packages
  */
 import fastifyCookie from '@fastify/cookie';
-import request from 'supertest';
+import request, { Response, Request } from 'supertest';
 
-import { FastifyAdapter } from '@nestjs/platform-fastify';
+import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 import { Test } from '@nestjs/testing';
-import { ErrorCode } from '@app/shared/errors';
 
 /**
  * Importing user defined packages
  */
-import { sampleUsers } from './testdata';
+import { ErrorCode, GraphQLFormattedErrorExtensions } from '@app/shared/errors';
+import { AppModule } from '@app/app.module';
+import { Context } from '@app/providers/context';
+
+import { sampleUsers, SampleUserEmail } from './testdata';
 
 /**
- * Importing and defining types
+ * Defining types
  */
-import type { NestFastifyApplication } from '@nestjs/platform-fastify';
-import type { GraphQLFormattedErrorExtensions } from '@app/shared/errors';
-import type { Response, Request } from 'supertest';
 
-import type { SampleUserEmail } from './testdata';
+export enum GraphQLModule {
+  ACCOUNTS = 'accounts',
+  CHRONICLE = 'chronicle',
+}
 
 export type RestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
@@ -60,9 +63,11 @@ const expectRID = expect.stringMatching(/^[0-9A-F]{8}-[0-9A-F]{4}-[1][0-9A-F]{3}
 export class ShadowArchive {
   private app: NestFastifyApplication;
 
+  constructor(private graphqlModule: GraphQLModule = GraphQLModule.ACCOUNTS) {}
+
   async setup() {
-    const { AppModule } = await import('@app/app.module');
-    const { Context } = await import('@app/providers');
+    // const { AppModule } = await import('@app/app.module');
+    // const { Context } = await import('@app/providers/context');
 
     const adapter = new FastifyAdapter();
     const instance = adapter.getInstance();
@@ -86,14 +91,19 @@ export class ShadowArchive {
     await instance.ready();
   }
 
+  getGraphQLModule(module: GraphQLModule) {
+    this.graphqlModule = module;
+    return this;
+  }
+
   rest(method: RestMethod, url: string) {
     const mtd = method.toLowerCase() as Lowercase<RestMethod>;
     const apiRequest = request(this.app.getHttpServer())[mtd](url);
     return new ShadowArchiveRequest(apiRequest);
   }
 
-  graphql(query: string, variables: object = {}) {
-    const response = this.rest('POST', '/graphql').send({ query, variables });
+  graphql(query: string, variables: object = {}, module?: GraphQLModule) {
+    const response = this.rest('POST', `/graphql/${module || this.graphqlModule}`).send({ query, variables });
     return response;
   }
 

@@ -8,7 +8,7 @@ import { ObjectType, Field, Int } from '@nestjs/graphql';
  */
 
 /**
- * Importing and defining types
+ * Defining types
  */
 
 /**
@@ -36,5 +36,5 @@ export class Metadata {
   groups: ExpenseGroup[];
 
   @Field(() => [String], { description: 'Payment methods or modes used by the user', defaultValue: [] })
-  pms: string[];
+  paymentMethods: string[];
 }

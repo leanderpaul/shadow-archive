@@ -9,7 +9,7 @@ import { UseGuards } from '@nestjs/common';
 import { AuthGuard, AuthType } from '@app/shared/guards';
 
 /**
- * Importing and defining types
+ * Defining types
  */
 
 /**

@@ -3,6 +3,7 @@
  */
 import { Types, Query } from 'mongoose';
 import { mongooseLeanVirtuals } from 'mongoose-lean-virtuals';
+import { Document, Schema } from 'mongoose';
 
 /**
  * Importing user defined packages
@@ -10,9 +11,8 @@ import { mongooseLeanVirtuals } from 'mongoose-lean-virtuals';
 import { AppError, ErrorCode } from '@app/shared/errors';
 
 /**
- * Importing and defining types
+ * Defining types
  */
-import type { Document, Schema } from 'mongoose';
 
 /**
  * Declaring the constants

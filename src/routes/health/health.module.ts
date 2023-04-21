@@ -8,12 +8,12 @@ import { TerminusModule } from '@nestjs/terminus';
 /**
  * Importing user defined packages
  */
-import { NestLogger } from '@app/providers';
+import { NestLogger } from '@app/providers/logger';
 
 import { HealthController } from './health.controller';
 
 /**
- * Importing and defining types
+ * Defining types
  */
 
 /**

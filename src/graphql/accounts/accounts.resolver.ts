@@ -1,20 +1,19 @@
 /**
  * Importing npm packages
  */
-import { UseGuards } from '@nestjs/common';
-import { Resolver, Query, Mutation, Args, ResolveField } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 
 /**
  * Importing user defined packages
  */
 import { UseAuth, AuthType } from '@app/shared/decorators';
 
+import { LoginArgs, RegisterArgs, ResetPasswordArgs, UpdatePasswordArgs } from './accounts.dto';
+import { Viewer } from './accounts.entity';
 import { AccountsService } from './accounts.service';
-import { LoginArgs, RegisterArgs, ResetPasswordArgs, UpdatePasswordArgs } from './dto';
-import { Viewer } from './entities';
 
 /**
- * Importing and defining types
+ * Defining types
  */
 
 /**
@@ -72,11 +71,5 @@ export class AccountsResolver {
   @Mutation(() => Boolean, { name: 'logout' })
   logout(@Args({ name: 'sessionId', nullable: true }) sessionId: string) {
     return this.accountsService.logoutUser(sessionId === '*');
-  }
-
-  @UseAuth(AuthType.AUTHENTICATED)
-  @ResolveField(() => String, { name: 'csrfToken' })
-  getCSRFToken() {
-    return this.accountsService.getCSRFToken();
   }
 }

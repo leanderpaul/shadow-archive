@@ -4,17 +4,17 @@
 import sagus from 'sagus';
 
 import { AsyncLocalStorage } from 'async_hooks';
+import { FastifyRequest, FastifyReply } from 'fastify';
 
 /**
  * Importing user defined packages
  */
+import { User, UserSession } from '@app/providers/database';
 import { Utils } from '@app/shared/utils';
 
 /**
- * Importing and defining types
+ * Defining types
  */
-import type { User, UserSession } from '@app/providers/database';
-import type { FastifyRequest, FastifyReply } from 'fastify';
 
 /**
  * Declaring the constants

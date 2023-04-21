@@ -2,6 +2,8 @@
  * Importing npm packages
  */
 import { Schema, Prop, SchemaFactory, MongooseModule } from '@nestjs/mongoose';
+import { ObjectId } from 'mongodb';
+import { Model } from 'mongoose';
 
 /**
  * Importing user defined packages
@@ -9,9 +11,8 @@ import { Schema, Prop, SchemaFactory, MongooseModule } from '@nestjs/mongoose';
 import { transformId, defaultOptionsPlugin } from '../database.utils';
 
 /**
- * Importing and defining types
+ * Defining types
  */
-import type { ObjectId, Model } from 'mongoose';
 
 export type ExpenseModel = Model<Expense>;
 

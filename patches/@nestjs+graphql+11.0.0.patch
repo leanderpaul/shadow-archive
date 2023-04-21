@@ -1,0 +1,66 @@
+diff --git a/node_modules/@nestjs/graphql/dist/interfaces/build-schema-options.interface.d.ts b/node_modules/@nestjs/graphql/dist/interfaces/build-schema-options.interface.d.ts
+index 26527ee..167855e 100644
+--- a/node_modules/@nestjs/graphql/dist/interfaces/build-schema-options.interface.d.ts
++++ b/node_modules/@nestjs/graphql/dist/interfaces/build-schema-options.interface.d.ts
+@@ -41,5 +41,9 @@ export interface BuildSchemaOptions {
+      * Set to true if it should throw an error when the same Query / Mutation field is defined more than once
+      */
+     noDuplicatedFields?: boolean;
++    /**
++     * Set to true if it should not add ununsed types to the GrapQL schema
++     */
++    filterUnusedTypes?: boolean;
+ }
+ //# sourceMappingURL=build-schema-options.interface.d.ts.map
+\ No newline at end of file
+diff --git a/node_modules/@nestjs/graphql/dist/schema-builder/graphql-schema.factory.js b/node_modules/@nestjs/graphql/dist/schema-builder/graphql-schema.factory.js
+index e5d6aea..c7f5fb4 100644
+--- a/node_modules/@nestjs/graphql/dist/schema-builder/graphql-schema.factory.js
++++ b/node_modules/@nestjs/graphql/dist/schema-builder/graphql-schema.factory.js
+@@ -40,10 +40,13 @@ let GraphQLSchemaFactory = GraphQLSchemaFactory_1 = class GraphQLSchemaFactory {
+             mutation: this.mutationTypeFactory.create(resolvers, options),
+             query: this.queryTypeFactory.create(resolvers, options),
+             subscription: this.subscriptionTypeFactory.create(resolvers, options),
+-            types: [
+-                ...this.orphanedTypesFactory.create(options.orphanedTypes),
+-                ...((_a = options.scalarsMap) !== null && _a !== void 0 ? _a : []).map(({ scalar }) => scalar),
+-            ],
++            types:
++                options.filterUnusedTypes === true
++                    ? []
++                    : [
++                        ...this.orphanedTypesFactory.create(options.orphanedTypes),
++                        ...(options.scalarsMap ?? []).map(({ scalar }) => scalar),
++                    ],
+             directives: [...graphql_1.specifiedDirectives, ...((_b = options.directives) !== null && _b !== void 0 ? _b : [])],
+         });
+         if (!options.skipCheck) {
+diff --git a/node_modules/@nestjs/graphql/dist/schema-builder/storages/type-definitions.storage.js b/node_modules/@nestjs/graphql/dist/schema-builder/storages/type-definitions.storage.js
+index 81b8ba7..8b1c567 100644
+--- a/node_modules/@nestjs/graphql/dist/schema-builder/storages/type-definitions.storage.js
++++ b/node_modules/@nestjs/graphql/dist/schema-builder/storages/type-definitions.storage.js
+@@ -10,6 +10,12 @@ let TypeDefinitionsStorage = class TypeDefinitionsStorage {
+         this.unionTypeDefinitions = new Map();
+         this.objectTypeDefinitions = new Map();
+         this.inputTypeDefinitions = new Map();
++        this.inputTypeDefinitionsLinks = null;
++        this.outputTypeDefinitionsLinks = null;
++    }
++    clear() {
++        this.inputTypeDefinitionsLinks = null;
++        this.outputTypeDefinitionsLinks = null;
+     }
+     addEnums(enumDefs) {
+         enumDefs.forEach((item) => this.enumTypeDefinitions.set(item.enumRef, item));
+diff --git a/node_modules/@nestjs/graphql/dist/schema-builder/type-definitions.generator.js b/node_modules/@nestjs/graphql/dist/schema-builder/type-definitions.generator.js
+index 1bc1edd..2b4a1e5 100644
+--- a/node_modules/@nestjs/graphql/dist/schema-builder/type-definitions.generator.js
++++ b/node_modules/@nestjs/graphql/dist/schema-builder/type-definitions.generator.js
+@@ -20,6 +20,7 @@ let TypeDefinitionsGenerator = class TypeDefinitionsGenerator {
+         this.unionDefinitionFactory = unionDefinitionFactory;
+     }
+     generate(options) {
++        this.typeDefinitionsStorage.clear();
+         this.generateUnionDefs();
+         this.generateEnumDefs();
+         this.generateInterfaceDefs(options);

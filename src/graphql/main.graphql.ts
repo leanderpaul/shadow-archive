@@ -6,7 +6,8 @@ import { Module } from '@nestjs/common';
 /**
  * Importing user defined packages
  */
-import { HealthModule } from './health';
+import { AccountsGraphQLModule } from './accounts';
+import { ChronicleGraphQLModule } from './chronicle';
 
 /**
  * Defining types
@@ -17,6 +18,6 @@ import { HealthModule } from './health';
  */
 
 @Module({
-  imports: [HealthModule],
+  imports: [AccountsGraphQLModule, ChronicleGraphQLModule],
 })
-export class RoutesModule {}
+export class GraphQLModule {}

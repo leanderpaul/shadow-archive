@@ -9,7 +9,7 @@ import { ObjectType, Field, Float, ID, Int, registerEnumType } from '@nestjs/gra
 import { Paginated } from '@app/graphql/common';
 
 /**
- * Importing and defining types
+ * Defining types
  */
 
 /**

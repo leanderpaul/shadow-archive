@@ -8,7 +8,7 @@ import { ObjectType, Field, ID } from '@nestjs/graphql';
  */
 
 /**
- * Importing and defining types
+ * Defining types
  */
 
 /**
@@ -31,7 +31,4 @@ export class Viewer {
 
   @Field({ description: 'User avatar image uri', nullable: true })
   imageUrl?: string;
-
-  @Field({ description: 'CSRF token' })
-  csrfToken: string;
 }

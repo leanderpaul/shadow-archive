@@ -1,17 +1,16 @@
 /**
  * Importing npm packages
  */
-
 import { Module } from '@nestjs/common';
 
 /**
  * Importing user defined packages
  */
-import { DatabaseModule } from '@app/providers/database';
 import { ContextService } from '@app/providers/context';
-import { MailService } from '@app/providers/mail';
+import { DatabaseModule } from '@app/providers/database';
 
-import { AuthService } from './auth.service';
+import { MemoirService } from './memoir.service';
+import { MemoirResolver } from './memoir.resolver';
 
 /**
  * Defining types
@@ -23,7 +22,6 @@ import { AuthService } from './auth.service';
 
 @Module({
   imports: [DatabaseModule],
-  providers: [AuthService, ContextService, MailService],
-  exports: [AuthService],
+  providers: [MemoirResolver, MemoirService, ContextService],
 })
-export class AuthModule {}
+export class MemoirModule {}

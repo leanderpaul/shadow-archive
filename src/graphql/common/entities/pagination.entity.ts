@@ -1,6 +1,7 @@
 /**
  * Importing npm packages
  */
+import { Type } from '@nestjs/common';
 import { ObjectType, registerEnumType, Field, Int } from '@nestjs/graphql';
 
 /**
@@ -8,9 +9,8 @@ import { ObjectType, registerEnumType, Field, Int } from '@nestjs/graphql';
  */
 
 /**
- * Importing and defining types
+ * Defining types
  */
-import type { Type } from '@nestjs/common';
 
 export interface IPaginatedType<T> {
   page: PageInfo;

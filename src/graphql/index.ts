@@ -1,1 +1,1 @@
-export * from './graphql.module';
+export * from './main.graphql';

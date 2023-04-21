@@ -12,11 +12,10 @@ import { NotFoundFilter } from '@app/shared/errors';
 
 import { ConfigModule } from './config';
 import { GraphQLModule } from './graphql';
-import { DatabaseModule } from './providers';
 import { RoutesModule } from './routes';
 
 /**
- * Importing and defining types
+ * Defining types
  */
 
 /**
@@ -24,10 +23,9 @@ import { RoutesModule } from './routes';
  */
 const NotFoundProvider = { provide: APP_FILTER, useClass: NotFoundFilter };
 const RateLimiterModule = ThrottlerModule.forRoot({ limit: 10, ttl: 30 });
-DatabaseModule.global = true;
 
 @Module({
-  imports: [ConfigModule, DatabaseModule, RateLimiterModule, RoutesModule, GraphQLModule],
+  imports: [ConfigModule, RateLimiterModule, RoutesModule, GraphQLModule],
   providers: [NotFoundProvider],
 })
 export class AppModule {}

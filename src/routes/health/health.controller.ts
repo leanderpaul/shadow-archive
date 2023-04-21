@@ -9,7 +9,7 @@ import { HealthCheckService, HttpHealthIndicator, HealthCheck, DiskHealthIndicat
  */
 
 /**
- * Importing and defining types
+ * Defining types
  */
 
 /**

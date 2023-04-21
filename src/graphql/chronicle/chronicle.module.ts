@@ -6,22 +6,28 @@ import { Module } from '@nestjs/common';
 /**
  * Importing user defined packages
  */
-import { ExpenseMongooseModule, UserMongooseModule, ContextService, MetadataMongooseModule, MemoirMongooseModule } from '@app/providers';
-import { AuthModule } from '@app/shared/modules';
+import { GraphQLModule } from '@app/graphql/common';
 
-import { ChronicleService } from './chronicle.service';
-import { ChronicleResolver } from './chronicle.resolver';
+import { ChronicleMetadataModule, ChronicleMetadataResolver } from './chronicle-metadata';
+import { ExpenseModule, ExpenseResolver } from './expense';
+import { MemoirModule, MemoirResolver } from './memoir';
 
 /**
- * Importing and defining types
+ * Defining types
  */
 
 /**
  * Declaring the constants
  */
 
+export const chronicleResolvers = [ChronicleMetadataResolver, ExpenseResolver, MemoirResolver];
+
 @Module({
-  imports: [ExpenseMongooseModule, AuthModule, UserMongooseModule, MetadataMongooseModule, MemoirMongooseModule],
-  providers: [ChronicleResolver, ChronicleService, ContextService],
+  imports: [ChronicleMetadataModule, ExpenseModule, MemoirModule],
 })
-export class ChronicleModule {}
+class ChronicleModule {}
+
+@Module({
+  imports: [GraphQLModule.forRoot({ name: 'chronicle', include: [ChronicleModule], disableCSRFProtection: true }), ChronicleModule],
+})
+export class ChronicleGraphQLModule {}

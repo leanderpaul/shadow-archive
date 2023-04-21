@@ -5,11 +5,11 @@
 /**
  * Importing user defined packages
  */
-import { ShadowArchive } from '@tests/common';
+import { ShadowArchive, GraphQLModule } from '@tests/common';
 import { sampleUsers } from '@tests/testdata';
 
 /**
- * Importing and defining types
+ * Defining types
  */
 
 /**
@@ -17,7 +17,7 @@ import { sampleUsers } from '@tests/testdata';
  */
 const USER = { email: 'test-user@mail.com', name: 'Test User', password: 'Password@123' } as const;
 
-const archive = new ShadowArchive();
+const archive = new ShadowArchive(GraphQLModule.ACCOUNTS);
 
 beforeAll(() => archive.setup());
 
@@ -28,7 +28,6 @@ describe('[GraphQL][accounts:mutation] Register', () => {
         uid
         email
         name
-        csrfToken
         imageUrl
         verified
       }
@@ -61,7 +60,6 @@ describe('[GraphQL][accounts:mutation] Register', () => {
         uid: expect.stringMatching(/^[a-f0-9]{24}$/),
         email: variables.email,
         name: variables.name,
-        csrfToken: expect.stringMatching(/^[a-zA-Z0-9|\-_]{82}$/),
         imageUrl: null,
         verified: false,
       },
@@ -76,7 +74,6 @@ describe('[GraphQL][accounts:mutation] Login', () => {
         uid
         email
         name
-        csrfToken
         imageUrl
         verified
       }
@@ -105,46 +102,43 @@ describe('[GraphQL][accounts:mutation] Login', () => {
         uid: expect.stringMatching(/^[a-f0-9]{24}$/),
         email: USER.email,
         name: USER.name,
-        csrfToken: expect.stringMatching(/^[a-zA-Z0-9|\-_]{82}$/),
         imageUrl: null,
         verified: false,
       },
     });
   });
+});
 
-  describe('[GraphQL][accounts:query] VerifySession', function () {
-    const query = /* GraphQL */ `
-      query verifySession {
-        viewer {
-          uid
-          email
-          name
-          verified
-          imageUrl
-          csrfToken
-        }
+describe('[GraphQL][accounts:query] VerifySession', function () {
+  const query = /* GraphQL */ `
+    query verifySession {
+      viewer {
+        uid
+        email
+        name
+        verified
+        imageUrl
       }
-    `;
+    }
+  `;
 
-    it('errors for invalid session', async () => {
-      const response = await archive.graphql(query).cookie('sasid=invalid-cookie-value');
-      response.expectGraphQLError('IAM002');
-    });
+  it('errors for invalid session', async () => {
+    const response = await archive.graphql(query).cookie('sasid=invalid-cookie-value');
+    response.expectGraphQLError('IAM002');
+  });
 
-    it('return user for valid session', async () => {
-      const response = await archive.graphql(query).session('sample-user-1@mail.com');
-      const user = sampleUsers['sample-user-1@mail.com'];
+  it('return user for valid session', async () => {
+    const response = await archive.graphql(query).session('sample-user-1@mail.com');
+    const user = sampleUsers['sample-user-1@mail.com'];
 
-      response.expectGraphQLData({
-        viewer: {
-          uid: user.uid,
-          email: user.email,
-          name: user.name,
-          verified: user.verified,
-          imageUrl: null,
-          csrfToken: expect.stringMatching(`^[a-zA-Z0-9\-|_]{${60 + user.email.length}}$`),
-        },
-      });
+    response.expectGraphQLData({
+      viewer: {
+        uid: user.uid,
+        email: user.email,
+        name: user.name,
+        verified: user.verified,
+        imageUrl: null,
+      },
     });
   });
 });

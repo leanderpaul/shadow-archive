@@ -7,18 +7,17 @@ import sagus from 'sagus';
 
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { MailService as SendGridMail } from '@sendgrid/mail';
+import { MailService as SendGridMail, MailDataRequired } from '@sendgrid/mail';
 
 /**
  * Importing user defined packages
  */
+import { ConfigRecord } from '@app/config';
 import { Logger } from '@app/providers/logger';
 
 /**
- * Importing and defining types
+ * Defining types
  */
-import type { ConfigRecord } from '@app/config';
-import type { MailDataRequired } from '@sendgrid/mail';
 
 export enum MailType {
   EMAIL_VERIFICATION = 'EMAIL_VERIFICATION',
@@ -57,10 +56,10 @@ export class MailService {
   private readonly templates = new Map<string, ITemplate>();
   private isEnabled = false;
 
-  constructor(private readonly configService: ConfigService<ConfigRecord>) {
+  constructor(configService: ConfigService<ConfigRecord>) {
     this.mail = new SendGridMail();
     const apiKey = configService.get('SENDGRID_API_KEY');
-    if (apiKey) {
+    if (apiKey && !configService.get('IS_TEST_SERVER')) {
       this.mail.setApiKey(apiKey);
       this.isEnabled = true;
     }
