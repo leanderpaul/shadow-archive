@@ -86,7 +86,7 @@ export class AuthService {
     const value = this.encodeCookie(uid, sid);
     const secure = this.configService.get('IS_PROD_SERVER');
     if (!res?.setCookie) res = this.contextService.getCurrentResponse();
-    res.setCookie(name, value, { maxAge, secure });
+    res.setCookie(name, value, { maxAge, secure, domain: secure ? this.configService.get('DOMAIN') : undefined });
   }
 
   initCSRFToken(res: FastifyReply, sessionID = DEFAULT_SESSION_ID) {

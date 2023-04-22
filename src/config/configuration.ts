@@ -89,6 +89,7 @@ const configs = {
   /** Handling Server Environment Variables */
   HOST_NAME: setEnvConfig('HOST_NAME', '0.0.0.0'),
   PORT: setTypedEnvConfig('PORT', 'number', 8080),
+  DOMAIN: setEnvConfig('DOMAIN', 'shadow-apps.com'),
 
   /** Handling Auth Environment Variables */
   COOKIE_NAME: setEnvConfig('COOKIE_NAME', 'sasid'),
