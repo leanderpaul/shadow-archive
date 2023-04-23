@@ -58,4 +58,13 @@ export class ContextService {
     Context.setCurrentSession(session);
     return this;
   }
+
+  get<T>(key: string) {
+    return Context.get<T>(key) ?? null;
+  }
+
+  set<T>(key: string, value: T) {
+    Context.set(key, value);
+    return this;
+  }
 }

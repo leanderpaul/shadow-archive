@@ -9,8 +9,8 @@ import { FastifyRequest, FastifyReply } from 'fastify';
 /**
  * Importing user defined packages
  */
-import { User, UserSession } from '@app/providers/database';
-import { Utils } from '@app/shared/utils';
+import type { User, UserSession } from '@app/providers/database';
+import { Utils } from '@app/shared/utils/common.utils';
 
 /**
  * Defining types

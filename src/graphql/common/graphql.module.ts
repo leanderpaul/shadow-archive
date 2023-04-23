@@ -24,8 +24,6 @@ import { AuthService, AuthModule } from '@app/shared/modules';
 export interface GraphQLContext {
   req: FastifyRequest;
   res: FastifyReply;
-  user?: User | null;
-  session?: UserSession;
 }
 
 export interface GraphQLModuleOptions {
@@ -63,16 +61,13 @@ export class GraphQLModule {
           if (req.method === 'GET') return res.send(ErrorCode.R001.getFormattedError());
 
           const result = await authService.getUserFromCookie(req, res);
-          if (options.requiredAuth === undefined) {
-            authService.initCSRFToken(res);
-            return { req, res, ...result };
-          }
+          if (options.requiredAuth === undefined) return { req, res };
 
           /** Throwing resource not found error when required auth is admin */
           if (options.requiredAuth === AuthType.ADMIN && !result?.user.admin) return res.send(ErrorCode.R001.getFormattedError());
           if (!result) throw new AppError(ErrorCode.IAM002);
           if (options.requiredAuth === AuthType.VERIFIED && !result.user.verified) throw new AppError(ErrorCode.IAM003);
-          return { req, res, ...result };
+          return { req, res };
         };
 
         return {

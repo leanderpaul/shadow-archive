@@ -7,6 +7,7 @@ import { Module } from '@nestjs/common';
  * Importing user defined packages
  */
 import { AccountsGraphQLModule } from './accounts';
+import { AdminGraphQLModule } from './admin';
 import { ChronicleGraphQLModule } from './chronicle';
 
 /**
@@ -18,6 +19,6 @@ import { ChronicleGraphQLModule } from './chronicle';
  */
 
 @Module({
-  imports: [AccountsGraphQLModule, ChronicleGraphQLModule],
+  imports: [AccountsGraphQLModule, ChronicleGraphQLModule, AdminGraphQLModule],
 })
 export class GraphQLModule {}

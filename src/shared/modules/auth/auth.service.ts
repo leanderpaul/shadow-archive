@@ -34,6 +34,7 @@ export interface ICreateUser {
  * Declaring the constants
  */
 const DEFAULT_SESSION_ID = 'unauthenticated';
+const COOKIE_SESSION_INITED = 'COOKIE_SESSION_INITED';
 
 @Injectable()
 export class AuthService {
@@ -84,21 +85,22 @@ export class AuthService {
     const name = this.configService.get('COOKIE_NAME');
     const maxAge = this.configService.get('COOKIE_MAX_AGE') * 1000;
     const value = this.encodeCookie(uid, sid);
-    const secure = this.configService.get('IS_PROD_SERVER');
+    const domain = this.configService.get('IS_PROD_SERVER') ? this.configService.get('DOMAIN') : undefined;
     if (!res?.setCookie) res = this.contextService.getCurrentResponse();
-    res.setCookie(name, value, { maxAge, secure, domain: secure ? this.configService.get('DOMAIN') : undefined });
+    res.setCookie(name, value, { maxAge, secure: 'auto', httpOnly: true });
   }
 
-  initCSRFToken(res: FastifyReply, sessionID = DEFAULT_SESSION_ID) {
-    const iv = crypto.randomBytes(16);
-    const secretKey = this.configService.get('CSRF_SECRET_KEY');
-    const encryptedSession = this.encrypt(iv, secretKey, sessionID, 'base64url');
-    const token = iv.toString('base64url') + '|' + encryptedSession;
-
+  initCSRFToken(res: FastifyReply, sessionID: string) {
     const name = this.configService.get('CSRF_TOKEN_NAME');
     const maxAge = this.configService.get('CSRF_TOKEN_MAX_AGE') * 1000;
-    const secure = this.configService.get('IS_PROD_SERVER');
-    res.setCookie(name, token, { maxAge, secure });
+
+    const iv = crypto.randomBytes(16);
+    const secretKey = this.configService.get('CSRF_SECRET_KEY');
+    const payload = Date.now() + maxAge + '-' + sessionID;
+    const encryptedSession = this.encrypt(iv, secretKey, payload, 'base64url');
+    const token = iv.toString('base64url') + '|' + encryptedSession;
+
+    res.setCookie(name, token, { maxAge, secure: 'auto', httpOnly: true });
   }
 
   async verifyCSRFToken() {
@@ -129,12 +131,14 @@ export class AuthService {
   }
 
   async getUserFromCookie(req: FastifyRequest, res: FastifyReply) {
+    const inited = this.contextService.get<true>(COOKIE_SESSION_INITED);
+
     /** Return current user if session and user are already set */
-    const currentUser = this.contextService.getCurrentUser();
-    const currentSession = this.contextService.getCurrentSession();
-    if (currentUser && currentSession) {
-      return { user: currentUser, session: currentSession };
-    }
+    if (inited) {
+      const currentUser = this.contextService.getCurrentUser();
+      const currentSession = this.contextService.getCurrentSession();
+      return currentUser && currentSession ? { user: currentUser, session: currentSession } : null;
+    } else this.contextService.set(COOKIE_SESSION_INITED, true);
 
     /** Parsing the cookie */
     const cookieName = this.configService.get('COOKIE_NAME');

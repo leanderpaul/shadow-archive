@@ -57,7 +57,7 @@ export class ErrorCode {
   static readonly IAM003 = new ErrorCode('IAM003', ErrorType.UNAUTHORIZED, 'user not verified');
   /** user not authorized to access this resource */
   static readonly IAM004 = new ErrorCode('IAM004', ErrorType.UNAUTHORIZED, 'user not authorized to access this resource');
-  /** CSRF Token required */
+  /** CSRF Token invalid */
   static readonly IAM005 = new ErrorCode('IAM005', ErrorType.UNAUTHORIZED, 'CSRF Token invalid');
   /** User email address or password is incorrect */
   static readonly IAM006 = new ErrorCode('IAM006', ErrorType.CLIENT_ERROR, 'User email address or password is incorrect');

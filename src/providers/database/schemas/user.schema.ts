@@ -122,6 +122,10 @@ export class User {
   /** Password reset code sent to the user to verify the password reset link. It is of the format '<expiry date in unix timestamp>|<base64 code>' */
   @Prop({ type: 'string' })
   passwordResetCode?: string;
+
+  createdAt: Date;
+
+  updatedAt: Date;
 }
 
 @Schema()

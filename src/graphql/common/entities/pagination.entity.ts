@@ -12,7 +12,7 @@ import { ObjectType, registerEnumType, Field, Int } from '@nestjs/graphql';
  * Defining types
  */
 
-export interface IPaginatedType<T> {
+export interface PaginatedType<T> {
   page: PageInfo;
   items: T[];
   totalCount: number;
@@ -40,7 +40,7 @@ export class PageInfo {
 
 export function Paginated<T>(classRef: Type<T>) {
   @ObjectType({ isAbstract: true })
-  abstract class Connection implements IPaginatedType<T> {
+  abstract class Connection implements PaginatedType<T> {
     @Field(() => PageInfo, { description: 'Connection page details' })
     page: PageInfo;
 
@@ -51,5 +51,5 @@ export function Paginated<T>(classRef: Type<T>) {
     totalCount: number;
   }
 
-  return Connection as Type<IPaginatedType<T>>;
+  return Connection as Type<PaginatedType<T>>;
 }

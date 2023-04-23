@@ -7,8 +7,8 @@ import { Module } from '@nestjs/common';
 /**
  * Importing user defined packages
  */
-import { DatabaseModule } from '@app/providers/database';
 import { ContextService } from '@app/providers/context';
+import { DatabaseModule } from '@app/providers/database';
 import { MailService } from '@app/providers/mail';
 
 import { AuthService } from './auth.service';
@@ -24,6 +24,6 @@ import { AuthService } from './auth.service';
 @Module({
   imports: [DatabaseModule],
   providers: [AuthService, ContextService, MailService],
-  exports: [AuthService],
+  exports: [AuthService, ContextService],
 })
 export class AuthModule {}

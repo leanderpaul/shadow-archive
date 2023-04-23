@@ -1,13 +1,15 @@
 /**
  * Importing npm packages
  */
+
 import { Module } from '@nestjs/common';
 
 /**
  * Importing user defined packages
  */
-import { AdminModule } from './admin';
-import { HealthModule } from './health';
+import { AuthModule } from '@app/shared/modules';
+
+import { AdminController } from './admin.controller';
 
 /**
  * Defining types
@@ -18,6 +20,7 @@ import { HealthModule } from './health';
  */
 
 @Module({
-  imports: [HealthModule, AdminModule],
+  imports: [AuthModule],
+  controllers: [AdminController],
 })
-export class RoutesModule {}
+export class AdminModule {}
