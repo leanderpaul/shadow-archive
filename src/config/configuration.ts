@@ -94,8 +94,6 @@ const configs = {
   /** Handling Auth Environment Variables */
   COOKIE_NAME: setEnvConfig('COOKIE_NAME', 'sasid'),
   COOKIE_MAX_AGE: setTypedEnvConfig('COOKIE_MAX_AGE', 'number', 10 * 24 * 60 * 60),
-  CSRF_TOKEN_NAME: setEnvConfig('CSRF_TOKEN_NAME', 'csrf'),
-  CSRF_TOKEN_MAX_AGE: setTypedEnvConfig('CSRF_TOKEN_MAX_AGE', 'number', 10 * 60),
 
   /** Handling Secret Key Environment Variables */
   CSRF_SECRET_KEY: setComplexEnvConfig('CSRF_SECRET_KEY', secretKeyValidator, 'wiJVTyl+XrTOm5SBbZxs0o8QdSLljAFRV7F01D9bFKA=', true),
@@ -121,10 +119,6 @@ export const Config = {
 
   getSecretKey(name: 'CSRF' | 'REFRESH_TOKEN') {
     return name === 'CSRF' ? configs.CSRF_SECRET_KEY : configs.REFRESH_TOKEN_SECRET_KEY;
-  },
-
-  getMaxAge(name: 'COOKIE' | 'CSRF_TOKEN') {
-    return name === 'COOKIE' ? configs.COOKIE_MAX_AGE : configs.CSRF_TOKEN_MAX_AGE;
   },
 
   getLog(name: 'LEVEL' | 'DIR') {

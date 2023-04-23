@@ -31,4 +31,7 @@ export class Viewer {
 
   @Field({ description: 'User avatar image uri', nullable: true })
   imageUrl?: string;
+
+  @Field()
+  csrfToken: string;
 }

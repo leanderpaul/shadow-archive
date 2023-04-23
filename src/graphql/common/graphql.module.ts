@@ -11,7 +11,6 @@ import { rule, shield, allow } from 'graphql-shield';
 /**
  * Importing user defined packages
  */
-import { User, UserSession } from '@app/providers/database';
 import { Logger } from '@app/providers/logger';
 import { AppError, ErrorCode, ErrorUtils } from '@app/shared/errors';
 import { AuthType } from '@app/shared/guards';

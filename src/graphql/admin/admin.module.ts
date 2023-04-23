@@ -1,12 +1,13 @@
 /**
  * Importing npm packages
  */
-import { Module, OnModuleInit } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 
 /**
  * Importing user defined packages
  */
 import { DatabaseModule } from '@app/providers/database';
+import { AuthType } from '@app/shared/guards';
 
 import { GraphQLModule } from '../common';
 import { AdminResolver } from './admin.resolver';
@@ -29,6 +30,6 @@ export const adminResolvers = [AdminResolver];
 export class AdminModule {}
 
 @Module({
-  imports: [GraphQLModule.forRoot({ name: 'admin', include: [AdminModule] }), AdminModule],
+  imports: [GraphQLModule.forRoot({ name: 'admin', include: [AdminModule], requiredAuth: AuthType.ADMIN }), AdminModule],
 })
 export class AdminGraphQLModule {}

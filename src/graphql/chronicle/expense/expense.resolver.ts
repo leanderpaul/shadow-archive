@@ -54,9 +54,9 @@ export class ExpenseResolver {
     }
 
     await Promise.all(promises);
-    if (projection.page) {
+    if (projection.page && result.totalCount) {
       const hasPrev = args.page.offset > 0;
-      const hasNext = result.totalCount! > args.page.offset + args.page.limit;
+      const hasNext = result.totalCount > args.page.offset + args.page.limit;
       result.page = { hasPrev, hasNext };
     }
 

@@ -1,7 +1,7 @@
 /**
  * Importing npm packages
  */
-import { Field, ObjectType, GraphQLISODateTime } from '@nestjs/graphql';
+import { Field, ObjectType, GraphQLISODateTime, OmitType } from '@nestjs/graphql';
 
 /**
  * Importing user defined packages
@@ -18,7 +18,7 @@ import { Paginated } from '@app/graphql/common';
  */
 
 @ObjectType()
-export class User extends Viewer {
+export class User extends OmitType(Viewer, ['csrfToken'] as const) {
   @Field()
   type: string;
 

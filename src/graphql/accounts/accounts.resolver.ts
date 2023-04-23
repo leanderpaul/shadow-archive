@@ -1,7 +1,7 @@
 /**
  * Importing npm packages
  */
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, ResolveField } from '@nestjs/graphql';
 
 /**
  * Importing user defined packages
@@ -28,6 +28,11 @@ export class AccountsResolver {
   @Query(() => Viewer, { name: 'viewer' })
   getCurrentUser() {
     return this.accountsService.getUser();
+  }
+
+  @ResolveField(() => String, { name: 'csrfToken' })
+  getCSRFToken() {
+    return this.accountsService.getCSRFToken();
   }
 
   @Mutation(() => Viewer)

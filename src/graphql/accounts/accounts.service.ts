@@ -55,6 +55,11 @@ export class AccountsService {
     return this.authService.createUser({ email, password, name, createSession: true });
   }
 
+  getCSRFToken() {
+    const expireAt = moment().add(1, 'hour');
+    return this.authService.generateCSRFToken(expireAt);
+  }
+
   async verifyEmailAddress(code: string) {
     const [encodedEmail, emailVerificationCode] = code.split('|');
     if (!encodedEmail || !emailVerificationCode) throw new AppError(ErrorCode.IAM011);
@@ -89,9 +94,9 @@ export class AccountsService {
 
     const email = Buffer.from(encodedEmail, 'base64url').toString();
     const user = await this.nativeUserModel.findOneAndUpdate({ email, passwordResetCode }).lean();
-    if (!user) throw new AppError(ErrorCode.IAM010);
+    if (!user || !user.passwordResetCode) throw new AppError(ErrorCode.IAM010);
 
-    const [expiry] = user.passwordResetCode!.split('.') as [string, string];
+    const [expiry] = user.passwordResetCode.split('.') as [string, string];
     if (moment().isAfter(expiry)) {
       await this.nativeUserModel.updateOne({ email }, { $unset: { passwordResetCode: '' } });
       return 'Password reset code is expired';

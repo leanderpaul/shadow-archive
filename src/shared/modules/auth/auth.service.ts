@@ -33,7 +33,6 @@ export interface ICreateUser {
 /**
  * Declaring the constants
  */
-const DEFAULT_SESSION_ID = 'unauthenticated';
 const COOKIE_SESSION_INITED = 'COOKIE_SESSION_INITED';
 
 @Injectable()
@@ -87,20 +86,14 @@ export class AuthService {
     const value = this.encodeCookie(uid, sid);
     const domain = this.configService.get('IS_PROD_SERVER') ? this.configService.get('DOMAIN') : undefined;
     if (!res?.setCookie) res = this.contextService.getCurrentResponse();
-    res.setCookie(name, value, { maxAge, secure: 'auto', httpOnly: true });
+    res.setCookie(name, value, { maxAge, secure: 'auto', httpOnly: true, domain });
   }
 
-  initCSRFToken(res: FastifyReply, sessionID: string) {
-    const name = this.configService.get('CSRF_TOKEN_NAME');
-    const maxAge = this.configService.get('CSRF_TOKEN_MAX_AGE') * 1000;
-
-    const iv = crypto.randomBytes(16);
-    const secretKey = this.configService.get('CSRF_SECRET_KEY');
-    const payload = Date.now() + maxAge + '-' + sessionID;
-    const encryptedSession = this.encrypt(iv, secretKey, payload, 'base64url');
-    const token = iv.toString('base64url') + '|' + encryptedSession;
-
-    res.setCookie(name, token, { maxAge, secure: 'auto', httpOnly: true });
+  generateCSRFToken(expireAt: moment.Moment) {
+    const session = this.contextService.getCurrentSession(true);
+    const md5 = crypto.createHash('md5');
+    const payload = expireAt.unix() + '|' + session.id;
+    return expireAt.unix() + '|' + md5.update(payload).digest('base64url');
   }
 
   async verifyCSRFToken() {
@@ -110,17 +103,14 @@ export class AuthService {
     const token = req.headers['x-csrf-token'] as string | undefined;
     if (!token) throw new AppError(ErrorCode.IAM005);
     const auth = await this.getUserFromCookie(req, res);
-    const sessionID = auth?.session.id ?? DEFAULT_SESSION_ID;
+    if (!auth) throw new AppError(ErrorCode.IAM004);
 
-    const [iv, encryptedSessionId] = token.split('|');
-    if (!iv || !encryptedSessionId) return false;
-    const biv = Buffer.from(iv, 'base64url');
-    if (biv.length != 16) return false;
-    const secretKey = this.configService.get('CSRF_SECRET_KEY');
-    const result = this.decrypt(biv, secretKey, encryptedSessionId, 'base64url');
+    const [expireAt] = token.split('|');
+    const expiryDate = moment(expireAt, 'X');
+    if (expiryDate.isBefore()) throw new AppError(ErrorCode.IAM005);
+    const csrfToken = this.generateCSRFToken(expiryDate);
+    if (token != csrfToken) throw new AppError(ErrorCode.IAM005);
 
-    if (result != sessionID) throw new AppError(ErrorCode.IAM005);
-    this.initCSRFToken(res, sessionID);
     return true;
   }
 
