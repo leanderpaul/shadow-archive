@@ -54,15 +54,18 @@ const mailTemplates: TMailTemplates = {
 export class MailService {
   private readonly mail: SendGridMail;
   private readonly templates = new Map<string, ITemplate>();
+  private readonly defaultData: Record<string, string>;
   private isEnabled = false;
 
   constructor(configService: ConfigService<ConfigRecord>) {
     this.mail = new SendGridMail();
     const apiKey = configService.get('SENDGRID_API_KEY');
+    const domain = configService.get('DOMAIN');
     if (apiKey && !configService.get('IS_TEST_SERVER')) {
       this.mail.setApiKey(apiKey);
       this.isEnabled = true;
     }
+    this.defaultData = { domain };
   }
 
   private getTemplate(mailType: MailType) {
@@ -97,6 +100,6 @@ export class MailService {
   sendMail(mailType: MailType, to: string, data: object) {
     const template = this.getTemplate(mailType);
     const html = mustache.render(template.html, data);
-    this._sendMail({ ...template, html, to });
+    this._sendMail({ ...this.defaultData, ...template, html, to });
   }
 }
