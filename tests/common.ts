@@ -175,7 +175,7 @@ export class ShadowArchiveResponse {
   }
 
   expectCookies() {
-    expect(this.response.get('Set-Cookie')).toEqual(expect.arrayContaining([expect.stringMatching(/^sasid=[a-zA-Z0-9%= \-;]{30,}$/)]));
+    expect(this.response.get('Set-Cookie')).toEqual(expect.arrayContaining([expect.stringMatching(/^sasid=[a-zA-Z0-9%= \-\/\\;]{30,}$/)]));
   }
 
   expectGraphQLError(code: string, type?: string, index = 0) {

@@ -9,7 +9,6 @@ import { FastifyRequest, FastifyReply } from 'fastify';
  */
 import { AppError, ErrorCode } from '@app/shared/errors';
 import { AuthService } from '@app/shared/modules';
-import { Utils } from '@app/shared/utils';
 
 /**
  * Defining types
@@ -24,10 +23,9 @@ export enum AuthType {
 /**
  * Declaring the constants
  */
+const cache: Partial<Record<AuthType, Type<CanActivate>>> = {};
 
-export const AuthGuard = Utils.memorize(createAuthGuard);
-
-function createAuthGuard(requiredAuth: AuthType = AuthType.VERIFIED): Type<CanActivate> {
+function createAuthGuard(requiredAuth: AuthType): Type<CanActivate> {
   @Injectable()
   class MixinAuthGuard implements CanActivate {
     constructor(private readonly authService: AuthService) {}
@@ -42,16 +40,19 @@ function createAuthGuard(requiredAuth: AuthType = AuthType.VERIFIED): Type<CanAc
         return false;
       }
       if (!result) throw new AppError(ErrorCode.IAM002);
-      if (result.user && requiredAuth === AuthType.AUTHENTICATED) return true;
+      if (requiredAuth === AuthType.VERIFIED && !result.user.verified) throw new AppError(ErrorCode.IAM003);
 
-      if (requiredAuth === AuthType.VERIFIED) {
-        if (!result.user.verified) throw new AppError(ErrorCode.IAM003);
-        return true;
-      }
-
-      return false;
+      return true;
     }
   }
 
   return mixin(MixinAuthGuard);
+}
+
+export function AuthGuard(requiredAuth: AuthType = AuthType.VERIFIED) {
+  const cachedResult = cache[requiredAuth];
+  if (cachedResult) return cachedResult;
+  const result = createAuthGuard(requiredAuth);
+  cache[requiredAuth] = result;
+  return result;
 }

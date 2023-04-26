@@ -21,7 +21,7 @@ export type SampleUserEmail = keyof typeof sampleUsers;
  * Declaring the constants
  */
 
-type IUser = (Omit<NativeUser, 'sessions'> | Omit<OAuthUser, 'sessions'>) & { sessions: readonly UserSession[] };
+type IUser = (Omit<NativeUser, 'sessions' | 'createdAt' | 'updatedAt'> | Omit<OAuthUser, 'sessions' | 'createdAt' | 'updatedAt'>) & { sessions: readonly UserSession[] };
 
 const password = bcrypt.hashSync('Password@123', 10);
 

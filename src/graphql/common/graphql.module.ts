@@ -15,6 +15,7 @@ import { Logger } from '@app/providers/logger';
 import { AppError, ErrorCode, ErrorUtils } from '@app/shared/errors';
 import { AuthType } from '@app/shared/guards';
 import { AuthService, AuthModule } from '@app/shared/modules';
+import { Utils } from '@app/shared/utils';
 
 /**
  * Defining types
@@ -69,6 +70,9 @@ export class GraphQLModule {
           return { req, res };
         };
 
+        const registeredApps = Utils.getCache<string[]>('graphql') || [];
+        Utils.setCache('graphql', [...registeredApps, options.name]);
+
         return {
           autoSchemaFile: true,
           autoTransformHttpErrors: false,
@@ -78,6 +82,7 @@ export class GraphQLModule {
           formatError: (formattedError, actualError) => ErrorUtils.formatGraphQLError(formattedError, actualError, logger),
           include: options.include,
           path: `/graphql/${options.name}`,
+          playground: false,
           transformSchema: schema => applyMiddleware(schema, permissions),
         };
       },

@@ -22,6 +22,7 @@ import { AppModule } from './app.module';
  * Declaring the constants
  */
 const logger = new NestLogger();
+const templates = `${__dirname}/routes/views`;
 
 async function bootstrap() {
   const adapter = new FastifyAdapter();
@@ -38,8 +39,12 @@ async function bootstrap() {
   instance.addHook('onResponse', Logger.getRequestEndHandler());
 
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, adapter, { logger });
+
+  /** Configuring the nestjs application */
   Middleware.setNestApplication(app);
+  app.setViewEngine({ engine: { handlebars: require('handlebars') }, templates });
   app.enableShutdownHooks([ShutdownSignal.SIGINT, ShutdownSignal.SIGUSR2, ShutdownSignal.SIGTERM]);
+
   await app.listen(Config.get('PORT'), Config.get('HOST_NAME'));
 }
 

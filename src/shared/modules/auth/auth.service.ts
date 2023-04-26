@@ -82,11 +82,12 @@ export class AuthService {
 
   private setCookies(uid: string, sid: string, res?: FastifyReply) {
     const name = this.configService.get('COOKIE_NAME');
-    const maxAge = this.configService.get('COOKIE_MAX_AGE') * 1000;
+    const maxAge = this.configService.get('COOKIE_MAX_AGE');
     const value = this.encodeCookie(uid, sid);
-    const domain = this.configService.get('IS_PROD_SERVER') ? this.configService.get('DOMAIN') : undefined;
+    const secure = this.configService.get('IS_PROD_SERVER');
+    const domain = secure ? this.configService.get('DOMAIN') : undefined;
     if (!res?.setCookie) res = this.contextService.getCurrentResponse();
-    res.setCookie(name, value, { maxAge, secure: 'auto', httpOnly: true, domain });
+    res.setCookie(name, value, { maxAge, secure, domain, httpOnly: true, path: '/' });
   }
 
   generateCSRFToken(expireAt: moment.Moment) {

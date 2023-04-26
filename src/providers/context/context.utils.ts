@@ -24,7 +24,7 @@ const asyncLocalStorage = new AsyncLocalStorage<Map<string, any>>();
 export const Context = {
   init() {
     return (req: FastifyRequest, res: FastifyReply, next: () => void) => {
-      req.body = typeof req.body === 'object' ? Utils.excludeNull(req.body as object) : req.body;
+      req.body = typeof req.body === 'object' ? Utils.sanitize(req.body as object) : req.body;
       asyncLocalStorage.run(new Map(), () => {
         const store = asyncLocalStorage.getStore()!;
         store.set('RID', sagus.genUUID());
