@@ -1,18 +1,20 @@
 /**
  * Importing npm packages
  */
-import { Module } from '@nestjs/common';
+import { Module, OnModuleInit } from '@nestjs/common';
 import { APP_FILTER } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
 
 /**
  * Importing user defined packages
  */
-import { NotFoundFilter } from '@app/shared/errors';
 
 import { ConfigModule } from './config';
 import { GraphQLModule } from './graphql';
 import { RoutesModule } from './routes';
+import { NotFoundFilter } from './shared/errors';
+import { AuthService } from './shared/modules';
+import { Method, Middleware } from './shared/utils';
 
 /**
  * Defining types
@@ -28,4 +30,12 @@ const RateLimiterModule = ThrottlerModule.forRoot({ limit: 10, ttl: 30 });
   imports: [ConfigModule, RateLimiterModule, RoutesModule, GraphQLModule],
   providers: [NotFoundProvider],
 })
-export class AppModule {}
+export class AppModule implements OnModuleInit {
+  onModuleInit() {
+    Middleware.addMiddleware({
+      path: '*',
+      method: Method.ALL,
+      handler: (req, res, app) => app.get(AuthService).getCurrentUserContext(req, res),
+    });
+  }
+}

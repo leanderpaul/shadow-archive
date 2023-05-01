@@ -34,7 +34,7 @@ function createAuthGuard(requiredAuth: AuthType): Type<CanActivate> {
       const request = context.switchToHttp().getRequest<FastifyRequest>();
       const response = context.switchToHttp().getResponse<FastifyReply>();
 
-      const result = await this.authService.getUserFromCookie(request, response);
+      const result = await this.authService.getCurrentUserContext(request, response);
       if (requiredAuth === AuthType.ADMIN && (!result || !result.user.admin)) {
         response.send(ErrorCode.R001.getFormattedError());
         return false;

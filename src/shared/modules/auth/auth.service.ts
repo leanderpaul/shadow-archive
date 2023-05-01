@@ -103,7 +103,7 @@ export class AuthService {
 
     const token = req.headers['x-csrf-token'] as string | undefined;
     if (!token) throw new AppError(ErrorCode.IAM005);
-    const auth = await this.getUserFromCookie(req, res);
+    const auth = await this.getCurrentUserContext(req, res);
     if (!auth) throw new AppError(ErrorCode.IAM004);
 
     const [expireAt] = token.split('|');
@@ -121,7 +121,7 @@ export class AuthService {
     return { id: sagus.genRandom(32, 'base64'), expireAt };
   }
 
-  async getUserFromCookie(req: FastifyRequest, res: FastifyReply) {
+  async getCurrentUserContext(req: FastifyRequest, res: FastifyReply) {
     const inited = this.contextService.get<true>(COOKIE_SESSION_INITED);
 
     /** Return current user if session and user are already set */

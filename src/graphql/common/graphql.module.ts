@@ -5,12 +5,15 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { Type } from '@nestjs/common';
 import { GraphQLModule as NestGraphQLModule } from '@nestjs/graphql';
 import { FastifyRequest, FastifyReply } from 'fastify';
+import { GraphQLError, ValidationContext, ValidationRule } from 'graphql';
 import { applyMiddleware } from 'graphql-middleware';
 import { rule, shield, allow } from 'graphql-shield';
 
 /**
  * Importing user defined packages
  */
+import { Config } from '@app/config';
+import { Context } from '@app/providers/context';
 import { Logger } from '@app/providers/logger';
 import { AppError, ErrorCode, ErrorUtils } from '@app/shared/errors';
 import { AuthType } from '@app/shared/guards';
@@ -44,6 +47,21 @@ export interface GraphQLModuleOptions {
  * Declaring the constants
  */
 
+const IntrospectionRule: ValidationRule = (context: ValidationContext) => ({
+  Field(node) {
+    const isIntrospectionQuery = node.name.value === '__schema' || node.name.value === '__type';
+    if (!isIntrospectionQuery) return;
+
+    const isProd = Config.get('IS_PROD_SERVER');
+    const user = Context.getCurrentUser();
+    if (isProd && !user?.admin) {
+      const appError = new AppError(ErrorCode.S003);
+      const graphqlError = new GraphQLError(appError.getMessage(), { originalError: appError });
+      context.reportError(graphqlError);
+    }
+  },
+});
+
 export class GraphQLModule {
   static forRoot(options: GraphQLModuleOptions) {
     return NestGraphQLModule.forRootAsync<ApolloDriverConfig>({
@@ -60,7 +78,7 @@ export class GraphQLModule {
         const context = async (req: FastifyRequest, res: FastifyReply) => {
           if (req.method === 'GET') return res.send(ErrorCode.R001.getFormattedError());
 
-          const result = await authService.getUserFromCookie(req, res);
+          const result = await authService.getCurrentUserContext(req, res);
           if (options.requiredAuth === undefined) return { req, res };
 
           /** Throwing resource not found error when required auth is admin */
@@ -81,9 +99,10 @@ export class GraphQLModule {
           csrfPrevention: false,
           formatError: (formattedError, actualError) => ErrorUtils.formatGraphQLError(formattedError, actualError, logger),
           include: options.include,
+          introspection: true,
           path: `/graphql/${options.name}`,
-          playground: false,
           transformSchema: schema => applyMiddleware(schema, permissions),
+          validationRules: [IntrospectionRule],
         };
       },
     });

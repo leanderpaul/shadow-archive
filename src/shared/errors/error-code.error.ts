@@ -91,4 +91,6 @@ export class ErrorCode {
   static readonly S001 = new ErrorCode('S001', ErrorType.SERVER_ERROR, 'Unexpected server error');
   /** only to be used when setting custom error type and message in `AppError` */
   static readonly S002 = new ErrorCode('S002', ErrorType.CUSTOM_ERROR, 'Custom error');
+  /** Introspection queries are not allowed */
+  static readonly S003 = new ErrorCode('S003', ErrorType.UNAUTHORIZED, 'Introspection queries are not allowed');
 }
