@@ -6,8 +6,8 @@ import { Module } from '@nestjs/common';
 /**
  * Importing user defined packages
  */
-import { AdminModule } from './admin';
 import { HealthModule } from './health';
+import { DevToolsModule } from './dev-tools';
 
 /**
  * Defining types
@@ -18,6 +18,6 @@ import { HealthModule } from './health';
  */
 
 @Module({
-  imports: [HealthModule, AdminModule],
+  imports: [HealthModule, DevToolsModule],
 })
 export class RoutesModule {}

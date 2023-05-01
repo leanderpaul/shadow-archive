@@ -9,7 +9,7 @@ import { Module } from '@nestjs/common';
  */
 import { AuthModule } from '@app/shared/modules';
 
-import { AdminController } from './admin.controller';
+import { DevToolsController } from './dev-tools.controller';
 
 /**
  * Defining types
@@ -21,6 +21,6 @@ import { AdminController } from './admin.controller';
 
 @Module({
   imports: [AuthModule],
-  controllers: [AdminController],
+  controllers: [DevToolsController],
 })
-export class AdminModule {}
+export class DevToolsModule {}

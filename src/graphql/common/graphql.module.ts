@@ -101,6 +101,7 @@ export class GraphQLModule {
           include: options.include,
           introspection: true,
           path: `/graphql/${options.name}`,
+          playground: false,
           transformSchema: schema => applyMiddleware(schema, permissions),
           validationRules: [IntrospectionRule],
         };

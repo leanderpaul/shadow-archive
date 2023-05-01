@@ -2,13 +2,13 @@
  * Importing npm packages
  */
 import { ExecutionContext, mixin, Injectable, Type, CanActivate } from '@nestjs/common';
-import { FastifyRequest, FastifyReply } from 'fastify';
+import { FastifyReply } from 'fastify';
 
 /**
  * Importing user defined packages
  */
+import { ContextService } from '@app/providers/context';
 import { AppError, ErrorCode } from '@app/shared/errors';
-import { AuthService } from '@app/shared/modules';
 
 /**
  * Defining types
@@ -28,19 +28,18 @@ const cache: Partial<Record<AuthType, Type<CanActivate>>> = {};
 function createAuthGuard(requiredAuth: AuthType): Type<CanActivate> {
   @Injectable()
   class MixinAuthGuard implements CanActivate {
-    constructor(private readonly authService: AuthService) {}
+    constructor(private readonly contextService: ContextService) {}
 
-    async canActivate(context: ExecutionContext): Promise<boolean> {
-      const request = context.switchToHttp().getRequest<FastifyRequest>();
+    canActivate(context: ExecutionContext): boolean {
       const response = context.switchToHttp().getResponse<FastifyReply>();
 
-      const result = await this.authService.getCurrentUserContext(request, response);
-      if (requiredAuth === AuthType.ADMIN && (!result || !result.user.admin)) {
+      const user = this.contextService.getCurrentUser();
+      if (requiredAuth === AuthType.ADMIN && (!user || !user.admin)) {
         response.send(ErrorCode.R001.getFormattedError());
         return false;
       }
-      if (!result) throw new AppError(ErrorCode.IAM002);
-      if (requiredAuth === AuthType.VERIFIED && !result.user.verified) throw new AppError(ErrorCode.IAM003);
+      if (!user) throw new AppError(ErrorCode.IAM002);
+      if (requiredAuth === AuthType.VERIFIED && !user.verified) throw new AppError(ErrorCode.IAM003);
 
       return true;
     }

@@ -20,8 +20,13 @@
     <div id='graphiql'>Loading...</div>
     <script src='https://unpkg.com/graphiql/graphiql.min.js' type='application/javascript'></script>
     <script>
-      const fetcher = GraphiQL.createFetcher({ url: "{{url}}", headers: { "x-csrf-token": "{{csrfToken}}" } }); const element = React.createElement(GraphiQL, { fetcher,
-      defaultEditorToolsVisibility: true, }); ReactDOM.render(element, document.getElementById("graphiql"));
+      {{#if csrfToken}}
+        const headers = { 'x-csrf-token': '{{csrfToken}}' };
+      {{else}}
+        const headers = {};
+      {{/if}}
+      const fetcher = GraphiQL.createFetcher({ url: "{{url}}", headers }); const element = React.createElement(GraphiQL, { fetcher, defaultEditorToolsVisibility: true, });
+      ReactDOM.render(element, document.getElementById("graphiql"));
     </script>
   </body>
 </html>
