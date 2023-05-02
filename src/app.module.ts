@@ -12,7 +12,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { ConfigModule } from './config';
 import { GraphQLModule } from './graphql';
 import { RoutesModule } from './routes';
-import { NotFoundFilter } from './shared/errors';
+import { ErrorFilter } from './shared/errors';
 import { AuthService } from './shared/modules';
 import { Method, Middleware } from './shared/utils';
 
@@ -23,12 +23,12 @@ import { Method, Middleware } from './shared/utils';
 /**
  * Declaring the constants
  */
-const NotFoundProvider = { provide: APP_FILTER, useClass: NotFoundFilter };
+const GlobalErrorFilter = { provide: APP_FILTER, useClass: ErrorFilter };
 const RateLimiterModule = ThrottlerModule.forRoot({ limit: 10, ttl: 30 });
 
 @Module({
   imports: [ConfigModule, RateLimiterModule, RoutesModule, GraphQLModule],
-  providers: [NotFoundProvider],
+  providers: [GlobalErrorFilter],
 })
 export class AppModule implements OnModuleInit {
   onModuleInit() {

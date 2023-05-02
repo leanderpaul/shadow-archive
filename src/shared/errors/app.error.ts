@@ -17,8 +17,18 @@ import { FormattedError } from './util.error';
 /**
  * Declaring the constants
  */
+const ERROR_STATUS_CODES: Record<ErrorType, number> = {
+  [ErrorType.CLIENT_ERROR]: 400,
+  [ErrorType.CUSTOM_ERROR]: 500,
+  [ErrorType.HTTP_ERROR]: 400,
+  [ErrorType.NOT_FOUND]: 404,
+  [ErrorType.SERVER_ERROR]: 500,
+  [ErrorType.UNAUTHORIZED]: 403,
+  [ErrorType.VALIDATION_ERROR]: 400,
+};
 
 export class AppError<T> extends Error {
+  private statusCode = 500;
   private code: string;
   private type: ErrorType;
   private details: T;
@@ -36,6 +46,7 @@ export class AppError<T> extends Error {
       this.type = codeOrType.getType();
       this.code = codeOrType.getCode();
       this.message = codeOrType.getMessage();
+      this.statusCode = codeOrType.getType() === ErrorType.UNAUTHORIZED ? (!Context.getCurrentUser() ? 401 : 403) : ERROR_STATUS_CODES[this.getType()];
       if (msgOrDetails) this.details = msgOrDetails as T;
       return;
     }
@@ -58,7 +69,20 @@ export class AppError<T> extends Error {
     return this.message;
   }
 
+  getDetails() {
+    return this.details;
+  }
+
   getFormattedError(): FormattedError {
     return { rid: Context.getRID(), code: this.getCode(), type: this.getType(), message: this.getMessage() };
+  }
+
+  getStatusCode() {
+    return this.statusCode;
+  }
+
+  setStatusCode(statusCode: number) {
+    this.statusCode = statusCode;
+    return this;
   }
 }

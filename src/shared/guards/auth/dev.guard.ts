@@ -9,6 +9,7 @@ import { CanActivate, Injectable, Type, mixin } from '@nestjs/common';
  */
 import { ContextService } from '@app/providers/context';
 import { ConfigRecord } from '@app/config';
+import { AppError, ErrorCode } from '@app/shared/errors';
 
 /**
  * Defining types
@@ -29,9 +30,9 @@ function createDevGuard(allowAdmin: boolean): Type<CanActivate> {
       if (isDev) return true;
 
       const user = this.contextService.getCurrentUser();
-      if (allowAdmin && user?.admin === true) return true;
+      if (!allowAdmin || !user?.admin) throw new AppError(ErrorCode.R001);
 
-      return false;
+      return true;
     }
   }
 
