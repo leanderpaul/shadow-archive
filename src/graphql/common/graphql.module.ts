@@ -76,13 +76,13 @@ export class GraphQLModule {
         const permissions = shield(ruleTree, { allowExternalErrors: true, fallbackRule: allow });
 
         const context = async (req: FastifyRequest, res: FastifyReply) => {
-          if (req.method === 'GET') return res.send(ErrorCode.R001.getFormattedError());
+          if (req.method === 'GET') return res.status(404).send(ErrorCode.R001.getFormattedError());
 
           const result = await authService.getCurrentUserContext(req, res);
           if (options.requiredAuth === undefined) return { req, res };
 
           /** Throwing resource not found error when required auth is admin */
-          if (options.requiredAuth === AuthType.ADMIN && !result?.user.admin) return res.send(ErrorCode.R001.getFormattedError());
+          if (options.requiredAuth === AuthType.ADMIN && !result?.user.admin) return res.status(404).send(ErrorCode.R001.getFormattedError());
           if (!result) throw new AppError(ErrorCode.IAM002);
           if (options.requiredAuth === AuthType.VERIFIED && !result.user.verified) throw new AppError(ErrorCode.IAM003);
           return { req, res };

@@ -35,7 +35,7 @@ function createAuthGuard(requiredAuth: AuthType): Type<CanActivate> {
 
       const user = this.contextService.getCurrentUser();
       if (requiredAuth === AuthType.ADMIN && (!user || !user.admin)) {
-        response.send(ErrorCode.R001.getFormattedError());
+        response.status(404).send(ErrorCode.R001.getFormattedError());
         return false;
       }
       if (!user) throw new AppError(ErrorCode.IAM002);

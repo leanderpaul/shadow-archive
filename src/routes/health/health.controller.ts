@@ -31,7 +31,7 @@ export class HealthController {
         () => this.mongoose.pingCheck('database'),
       ]);
     } catch (err: unknown) {
-      if (err instanceof ServiceUnavailableException) return await res.status(503).send(err.getResponse());
+      if (err instanceof ServiceUnavailableException) return res.status(err.getStatus()).send(err.getResponse());
       throw err;
     }
   }

@@ -25,7 +25,7 @@ import { ContextService } from '@app/providers/context';
 export class DevToolsController {
   constructor(private readonly authService: AuthService, private readonly contextService: ContextService) {}
 
-  @Get()
+  @Get('graphiql')
   @UseGuards(DevGuard(true))
   @Render('admin.hbs')
   getGraphiQL(@Query('app') app: string) {

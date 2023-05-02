@@ -55,7 +55,7 @@ export class ErrorUtils {
     let formattedError = ErrorCode.S001.getFormattedError();
     if (error instanceof AppError || error instanceof ValidationError) formattedError = error.getFormattedError();
     else if (error instanceof MongooseError) formattedError = this.formatMongooseError(error);
-    if (throwUnexpectedError && formattedError.code === ErrorType.SERVER_ERROR) throw new AppError(ErrorCode.S001);
+    if (throwUnexpectedError && formattedError.code === ErrorType.SERVER_ERROR) throw new AppError(ErrorCode.S001, error);
     return formattedError;
   }
 }
