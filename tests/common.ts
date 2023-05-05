@@ -66,9 +66,6 @@ export class ShadowArchive {
   constructor(private graphqlModule: GraphQLModule = GraphQLModule.ACCOUNTS) {}
 
   async setup() {
-    // const { AppModule } = await import('@app/app.module');
-    // const { Context } = await import('@app/providers/context');
-
     const adapter = new FastifyAdapter();
     const instance = adapter.getInstance();
     await instance.register(fastifyCookie);

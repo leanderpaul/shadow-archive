@@ -15,7 +15,8 @@ import { sampleUsers } from './testdata';
 /**
  * Declaring the constants
  */
-process.env.DB_URI = 'mongodb://localhost/shadow-test';
+process.env.NODE_ENV = 'test';
+process.env.DB_URI = process.env.DB_URI || 'mongodb://localhost/shadow-test';
 
 module.exports = async function () {
   /** Deleting old test data */

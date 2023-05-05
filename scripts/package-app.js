@@ -21,7 +21,7 @@ function copyTask() {
 }
 
 function packageApp() {
-  execSync('npm run build', { cwd: rootDir });
+  execSync('nest build', { cwd: rootDir });
   copyTask();
   execSync(`zip -r ${rootDir}/shadow-archive.zip .`, { cwd: distDir });
 }
