@@ -1,7 +1,7 @@
 /**
  * Importing npm packages
  */
-import { Injectable, Optional, LoggerService } from '@nestjs/common';
+import { Injectable, Optional, LoggerService, OnApplicationShutdown } from '@nestjs/common';
 
 /**
  * Importing user defined packages
@@ -17,10 +17,15 @@ import { Logger } from './logger.util';
  */
 
 @Injectable()
-export class NestLogger implements LoggerService {
+export class NestLogger implements LoggerService, OnApplicationShutdown {
   private static readonly logger = Logger.getLogger('nest');
 
   constructor(@Optional() protected context?: string) {}
+
+  onApplicationShutdown() {
+    this.log(`Application shutting down`);
+    return Logger.close();
+  }
 
   public log(message: any, context?: string): any {
     const label = context || this.context;

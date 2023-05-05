@@ -1,8 +1,9 @@
 /**
  * Importing npm packages
  */
-import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
+import { Injectable, OnApplicationShutdown } from '@nestjs/common';
+import { InjectModel, InjectConnection } from '@nestjs/mongoose';
+import { Connection } from 'mongoose';
 
 /**
  * Importing user defined packages
@@ -28,8 +29,9 @@ export enum MetadataVariant {
  */
 
 @Injectable()
-export class DatabaseService {
+export class DatabaseService implements OnApplicationShutdown {
   constructor(
+    @InjectConnection() private readonly connection: Connection,
     @InjectModel(User.name) private readonly userModel: UserModel,
     @InjectModel(NativeUser.name) private readonly nativeUserModel: NativeUserModel,
     @InjectModel(OAuthUser.name) private readonly oauthUserModel: OAuthUserModel,
@@ -38,6 +40,10 @@ export class DatabaseService {
     @InjectModel(ChronicleMetadata.name) private readonly chronicleMetadataModel: ChronicleMetadataModel,
     @InjectModel(Memoir.name) private readonly memoirModel: MemoirModel,
   ) {}
+
+  onApplicationShutdown() {
+    return this.connection.close();
+  }
 
   getUserModel(): UserModel;
   getUserModel(variant: UserVariant.NATIVE): NativeUserModel;
