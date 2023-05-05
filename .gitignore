@@ -1,6 +1,7 @@
 # compiled and generated outputs
 dist
 generated
+*.zip
 
 # dependencies
 node_modules
