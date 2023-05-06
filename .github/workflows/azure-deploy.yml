@@ -2,10 +2,14 @@ name: Deploy code to azure app service
 
 on:
   workflow_dispatch:
+    branches:
+      - master
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    env:
+      DB_URI: ${{ secrets.DATABASE_CONNECTION_STRING }}
 
     steps:
       - uses: actions/checkout@v3
@@ -24,7 +28,7 @@ jobs:
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
         with:
-          name: shadow-archive
+          name: release
           path: shadow-archive.zip
           retention-days: 1
 
@@ -39,7 +43,7 @@ jobs:
       - name: Download artifact from build job
         uses: actions/download-artifact@v3
         with:
-          name: shadow-archive
+          name: release
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
