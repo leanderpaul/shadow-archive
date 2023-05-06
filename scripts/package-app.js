@@ -23,7 +23,6 @@ function copyTask() {
 function packageApp() {
   execSync('nest build', { cwd: rootDir });
   copyTask();
-  execSync(`npm ci`, { cwd: distDir });
   execSync(`zip -q -r ${rootDir}/shadow-archive.zip .`, { cwd: distDir });
 }
 
