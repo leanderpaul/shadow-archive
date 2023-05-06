@@ -13,7 +13,14 @@ const distDir = `${rootDir}/dist`;
 function copyTask() {
   /** Removing unneccessary scripts from package.json and copying */
   const packageJson = require('../package.json');
-  const distPackageJson = { ...packageJson, scripts: { start: 'pm2 start main.js --no-daemon', postinstall: 'patch-package' } };
+  const distPackageJson = {
+    ...packageJson,
+    scripts: {
+      prestart: 'npm ci',
+      start: 'pm2 start main.js --no-daemon',
+      postinstall: 'patch-package',
+    },
+  };
   fs.writeFileSync(`${distDir}/package.json`, JSON.stringify(distPackageJson, null, 2));
 
   execSync(`cp ${rootDir}/package-lock.json ${distDir}/package-lock.json`);
