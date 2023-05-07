@@ -20,6 +20,11 @@ import { Context } from '@app/providers/context';
  * Defining types
  */
 
+interface Route {
+  path: string;
+  method: 'GET' | 'PUT' | 'POST' | 'DELETE' | 'OPTIONS' | 'HEAD';
+}
+
 export interface LogMetadata {
   service?: string;
   filename?: string;
@@ -54,6 +59,7 @@ const { combine, printf, errors, colorize, json } = winston.format;
 
 const logColorFormat = { info: 'green', error: 'bold red', warn: 'yellow', debug: 'magenta', http: 'cyan' };
 const sensitiveFields = ['password'];
+const logDisabledRoutes: Route[] = [{ method: 'GET', path: '/health' }];
 
 let logger: winston.Logger;
 let logtail: Logtail;
@@ -200,6 +206,9 @@ export const Logger = {
    */
   getRequestEndHandler() {
     return (req: FastifyRequest, res: FastifyReply, next: () => void) => {
+      const isLoggingDisabled = logDisabledRoutes.some(route => route.method === req.method && route.path === req.url);
+      if (isLoggingDisabled && Config.getNodeEnv() === 'production') return next();
+
       const metadata: RequestMetadata = {};
       metadata.rid = Context.getRID();
       metadata.url = req.url;

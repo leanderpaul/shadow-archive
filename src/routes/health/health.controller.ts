@@ -25,11 +25,12 @@ export class HealthController {
   @HealthCheck()
   async check(@Res() res: FastifyReply) {
     try {
-      return await this.health.check([
+      const result = await this.health.check([
         () => this.memory.checkRSS('memory_rss', 150 * 1024 * 1024),
         () => this.memory.checkHeap('memory_heap', 150 * 1024 * 1024),
         () => this.mongoose.pingCheck('database'),
       ]);
+      return res.send(result);
     } catch (err: unknown) {
       if (err instanceof ServiceUnavailableException) return res.status(err.getStatus()).send(err.getResponse());
       throw err;
