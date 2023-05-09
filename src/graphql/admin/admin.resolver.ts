@@ -28,8 +28,7 @@ export class AdminResolver {
 
   @Query(() => User, { name: 'user', nullable: true })
   async getUser(@Args('identifier', { description: 'Email address or UID' }) identifier: string): Promise<User | null> {
-    const user = await this.adminService.getUser(identifier);
-    return user ? { ...user, hasPasswordResetCode: !!user.passwordResetCode } : null;
+    return await this.adminService.getUser(identifier);
   }
 
   @Query(() => UserConnection, { name: 'users' })

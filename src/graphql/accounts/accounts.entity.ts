@@ -1,7 +1,7 @@
 /**
  * Importing npm packages
  */
-import { ObjectType, Field, ID } from '@nestjs/graphql';
+import { ObjectType, Field, ID, GraphQLISODateTime } from '@nestjs/graphql';
 
 /**
  * Importing user defined packages
@@ -14,6 +14,24 @@ import { ObjectType, Field, ID } from '@nestjs/graphql';
 /**
  * Declaring the constants
  */
+
+@ObjectType()
+export class Session {
+  @Field({ nullable: true })
+  browser?: string;
+
+  @Field({ nullable: true })
+  os?: string;
+
+  @Field({ nullable: true })
+  device?: string;
+
+  @Field(() => GraphQLISODateTime)
+  accessedAt: Date;
+
+  @Field(() => Boolean, { nullable: true })
+  currentSession?: boolean;
+}
 
 @ObjectType()
 export class Viewer {
@@ -34,4 +52,7 @@ export class Viewer {
 
   @Field()
   csrfToken: string;
+
+  @Field(() => [Session])
+  sessions: Session[];
 }

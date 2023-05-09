@@ -4,6 +4,7 @@
 import crypto from 'crypto';
 import moment from 'moment';
 import sagus from 'sagus';
+import useragent from 'useragent';
 
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -14,7 +15,7 @@ import { FastifyRequest, FastifyReply } from 'fastify';
  */
 import { ConfigRecord } from '@app/config';
 import { ContextService } from '@app/providers/context';
-import { DBUtils, DatabaseService, UserVariant, User } from '@app/providers/database';
+import { DBUtils, DatabaseService, UserVariant, User, UserSession } from '@app/providers/database';
 import { MailService, MailType } from '@app/providers/mail';
 import { AppError, ErrorCode } from '@app/shared/errors';
 
@@ -116,9 +117,13 @@ export class AuthService {
   }
 
   private generateUserSession() {
-    const maxAge = this.configService.get('COOKIE_MAX_AGE');
-    const expireAt = moment().add(maxAge, 'seconds').toDate();
-    return { id: sagus.genRandom(32, 'base64'), expireAt };
+    const session: UserSession = { id: sagus.genRandom(32, 'base64'), accessedAt: new Date() };
+    const req = this.contextService.getCurrentRequest();
+    const agent = useragent.parse(req.headers['user-agent']);
+    if (agent.family != 'Other') session.browser = agent.toAgent();
+    if (agent.os.family != 'Other') session.os = agent.os.toString();
+    if (agent.device.family != 'Other') session.device = agent.device.toString();
+    return session;
   }
 
   async getCurrentUserContext(req: FastifyRequest, res: FastifyReply) {
@@ -144,29 +149,27 @@ export class AuthService {
     if (!user) return this.clearCookies(res);
     const session = user.sessions.find(s => s.id === sid);
     if (!session) return this.clearCookies(res);
-    const validSession = moment().isBefore(session.expireAt);
-    if (!validSession) this.clearCookies(res);
+    const maxAge = this.configService.get('COOKIE_MAX_AGE');
+    const expireAt = moment().subtract(maxAge, 'seconds');
+    const validSession = moment(session.accessedAt).isAfter(expireAt);
+    if (!validSession) {
+      this.clearCookies(res);
+      this.userModel.updateOne({ _id }, { $pullAll: { 'sessions.accessedAt': { $lt: expireAt } } });
+      throw new AppError(ErrorCode.IAM013);
+    }
 
     /** Setting up the request context values */
     this.contextService.setCurrentUser(user);
     this.contextService.setCurrentSession(session);
-
-    /** Updating the expiry date of the session if it is going to expire */
-    const willSessionExpire = moment().add(2, 'days').isAfter(session.expireAt);
-    if (willSessionExpire) {
-      const newSession = this.generateUserSession();
-      await this.userModel.updateOne({ _id }, { $pull: { sessions: { id: session.id } }, $push: { sessions: newSession } });
-      this.setCookies(user.uid, newSession.id, res);
-      this.contextService.setCurrentSession(newSession);
-      return { user, session: newSession };
-    }
 
     return { user, session };
   }
 
   async initUserSession(user: User) {
     const session = this.generateUserSession();
-    const validSessions = user.sessions.filter(s => s.expireAt > new Date());
+    const maxAge = this.configService.get('COOKIE_MAX_AGE');
+    const expireAt = moment().subtract(maxAge, 'seconds').toDate();
+    const validSessions = user.sessions.filter(s => s.accessedAt > expireAt);
     await this.userModel.updateOne({ _id: user._id }, { $set: { sessions: [...validSessions, session] } });
     this.setCookies(user.uid, session.id);
     this.contextService.setCurrentSession(session);

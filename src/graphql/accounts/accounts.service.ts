@@ -10,10 +10,12 @@ import { Injectable } from '@nestjs/common';
  * Importing user defined packages
  */
 import { ContextService } from '@app/providers/context';
-import { DatabaseService, UserVariant } from '@app/providers/database';
+import { DatabaseService, UserSession, UserVariant } from '@app/providers/database';
 import { MailService, MailType } from '@app/providers/mail';
 import { AppError, ErrorCode } from '@app/shared/errors';
 import { AuthService } from '@app/shared/modules';
+
+import { Session } from './accounts.entity';
 
 /**
  * Defining types
@@ -38,6 +40,13 @@ export class AccountsService {
 
   getUser() {
     return this.contextService.getCurrentUser(true);
+  }
+
+  convertSession(userSession: UserSession) {
+    const session: Session = { ...userSession };
+    const currentSession = this.contextService.getCurrentSession(true);
+    if (currentSession.id === userSession.id) session.currentSession = true;
+    return session;
   }
 
   async loginUser(email: string, password: string) {

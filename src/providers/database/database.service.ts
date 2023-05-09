@@ -1,7 +1,7 @@
 /**
  * Importing npm packages
  */
-import { Injectable, OnApplicationShutdown } from '@nestjs/common';
+import { Injectable, OnApplicationShutdown, OnModuleInit } from '@nestjs/common';
 import { InjectModel, InjectConnection } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
 
@@ -27,9 +27,18 @@ export enum MetadataVariant {
 /**
  * Declaring the constants
  */
+const users = [
+  {
+    email: 'admin@shadow-apps.com',
+    name: 'Shadow Apps Administrator',
+    password: 'Password@123',
+    verified: true,
+    admin: true,
+  },
+];
 
 @Injectable()
-export class DatabaseService implements OnApplicationShutdown {
+export class DatabaseService implements OnApplicationShutdown, OnModuleInit {
   constructor(
     @InjectConnection() private readonly connection: Connection,
     @InjectModel(User.name) private readonly userModel: UserModel,
@@ -40,6 +49,13 @@ export class DatabaseService implements OnApplicationShutdown {
     @InjectModel(ChronicleMetadata.name) private readonly chronicleMetadataModel: ChronicleMetadataModel,
     @InjectModel(Memoir.name) private readonly memoirModel: MemoirModel,
   ) {}
+
+  async onModuleInit() {
+    for (const user of users) {
+      const userDoc = await this.userModel.findOne({ email: user.email });
+      if (!userDoc) await this.userModel.create(user);
+    }
+  }
 
   onApplicationShutdown() {
     return this.connection.close();

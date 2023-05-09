@@ -6,11 +6,12 @@ import { Injectable } from '@nestjs/common';
 /**
  * Importing user defined packages
  */
-import { DatabaseService } from '@app/providers/database';
+import { DatabaseService, User } from '@app/providers/database';
 import { Projection } from '@app/shared/utils';
 
 import { PageInput } from '../common';
 import { UserSort } from './admin.dto';
+import { User as GUser } from './admin.entity';
 
 /**
  * Defining types
@@ -28,9 +29,14 @@ export class AdminService {
     this.userModel = databaseService.getUserModel();
   }
 
+  private convertUser(user: User): GUser {
+    return { ...user, hasPasswordResetCode: !!user.passwordResetCode };
+  }
+
   async getUser(emailOrUid: string) {
     const query = emailOrUid.includes('@') ? { email: emailOrUid } : { _id: emailOrUid };
-    return await this.userModel.findOne(query).lean();
+    const user = await this.userModel.findOne(query).lean();
+    return user ? this.convertUser(user) : null;
   }
 
   async searchUsers<T extends object>(projection: Projection<T>, sort: UserSort, page: PageInput, email?: string) {
@@ -40,7 +46,7 @@ export class AdminService {
       .skip(page.offset)
       .limit(page.limit)
       .lean();
-    return users.map(user => ({ ...user, hasPasswordResetCode: !!user.passwordResetCode }));
+    return users.map(user => this.convertUser(user));
   }
 
   async getTotalUsers(email?: string) {

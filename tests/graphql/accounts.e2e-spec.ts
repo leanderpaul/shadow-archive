@@ -6,7 +6,6 @@
  * Importing user defined packages
  */
 import { ShadowArchive, GraphQLModule } from '@tests/common';
-import { sampleUsers } from '@tests/testdata';
 
 /**
  * Defining types
@@ -96,7 +95,7 @@ describe('[GraphQL][accounts:mutation] Login', () => {
     const variables = { email: USER.email, password: USER.password };
     const response = await archive.graphql(query, variables);
 
-    response.expectCookies();
+    response.expectCookies(USER.email);
     response.expectGraphQLData({
       login: {
         uid: expect.stringMatching(/^[a-f0-9]{24}$/),
@@ -118,6 +117,13 @@ describe('[GraphQL][accounts:query] VerifySession', function () {
         name
         verified
         imageUrl
+        sessions {
+          browser
+          os
+          device
+          accessedAt
+          currentSession
+        }
       }
     }
   `;
@@ -128,16 +134,24 @@ describe('[GraphQL][accounts:query] VerifySession', function () {
   });
 
   it('return user for valid session', async () => {
-    const response = await archive.graphql(query).session('sample-user-1@mail.com');
-    const user = sampleUsers['sample-user-1@mail.com'];
+    const response = await archive.graphql(query).session(USER.email);
 
     response.expectGraphQLData({
       viewer: {
-        uid: user.uid,
-        email: user.email,
-        name: user.name,
-        verified: user.verified,
+        uid: expect.stringMatching(/^[0-9a-f]{24}$/),
+        email: USER.email,
+        name: USER.name,
+        verified: false,
         imageUrl: null,
+        sessions: expect.arrayContaining([
+          {
+            browser: null,
+            os: null,
+            device: null,
+            accessedAt: expect.stringMatching(/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}Z$/),
+            currentSession: expect.any(Boolean),
+          },
+        ]),
       },
     });
   });

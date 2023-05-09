@@ -10,11 +10,10 @@ import { Test } from '@nestjs/testing';
 /**
  * Importing user defined packages
  */
-import { ErrorCode, GraphQLFormattedErrorExtensions } from '@app/shared/errors';
 import { AppModule } from '@app/app.module';
+import { Config } from '@app/config';
 import { Context } from '@app/providers/context';
-
-import { sampleUsers, SampleUserEmail } from './testdata';
+import { ErrorCode, GraphQLFormattedErrorExtensions } from '@app/shared/errors';
 
 /**
  * Defining types
@@ -57,8 +56,11 @@ export type GraphQLResponse<T = any> = GraphQLErrorResponse | GraphQLDataRespons
 /**
  * Declaring the constants
  */
-const cookieName = 'test-session';
+const cookies = new Map<string, string>();
 const expectRID = expect.stringMatching(/^[0-9A-F]{8}-[0-9A-F]{4}-[1][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i);
+const OContext = { ...Context };
+Context.getCurrentRequest = () => OContext.getCurrentRequest() || { headers: {} };
+Context.getCurrentResponse = () => OContext.getCurrentResponse() || { setCookie: jest.fn(), clearCookie: jest.fn() };
 
 export class ShadowArchive {
   private app: NestFastifyApplication;
@@ -70,16 +72,6 @@ export class ShadowArchive {
     const instance = adapter.getInstance();
     await instance.register(fastifyCookie);
     instance.addHook('preHandler', Context.init());
-    instance.addHook('preHandler', async (req, _res) => {
-      const cookie = req.cookies[cookieName];
-      if (cookie) {
-        const user = Object.values(sampleUsers).find(user => user.uid === cookie);
-        if (user) {
-          Context.setCurrentUser({ ...user } as any);
-          Context.setCurrentSession(user.sessions[0]!);
-        }
-      }
-    });
 
     const moduleFixture = await Test.createTestingModule({ imports: [AppModule] }).compile();
     this.app = moduleFixture.createNestApplication<NestFastifyApplication>(adapter, { logger: false });
@@ -123,13 +115,15 @@ export class ShadowArchiveRequest {
   }
 
   cookie(cookie: string) {
-    this.request.set('Cookie', cookie);
+    const value = cookie.startsWith(Config.getCookieName()) ? cookie : Config.getCookieName() + '=' + cookie;
+    this.request.set('Cookie', value);
     return this;
   }
 
-  session(email: SampleUserEmail) {
-    const user = sampleUsers[email];
-    this.request.set('Cookie', `${cookieName}=${user.uid}`);
+  session(key: string) {
+    const cookie = cookies.get(key);
+    if (!cookie) throw new Error(`Cookie '${key}' not present in cookie store`);
+    this.cookie(cookie);
     return this;
   }
 
@@ -171,8 +165,18 @@ export class ShadowArchiveResponse {
     expect(this.response.statusCode).toBe(statusCode);
   }
 
-  expectCookies() {
-    expect(this.response.get('Set-Cookie')).toEqual(expect.arrayContaining([expect.stringMatching(/^sasid=[a-zA-Z0-9%= \-\/\\;]{30,}$/)]));
+  /**
+   * Expects token to be present and if key is provided, it store cookie for future use
+   * @param key
+   */
+  expectCookies(key?: string) {
+    const cookie = this.response.get('Set-Cookie');
+    expect(cookie).toEqual(expect.arrayContaining([expect.stringMatching(/^sasid=[a-zA-Z0-9%= \-\/\\;]{30,}$/)]));
+    if (key && cookie[0]) {
+      const values = cookie[0].split(';');
+      const cookieValue = values.find(v => v.startsWith(Config.get('COOKIE_NAME')));
+      if (cookieValue) cookies.set(key, decodeURIComponent(cookieValue));
+    }
   }
 
   expectGraphQLError(code: string, type?: string, index = 0) {

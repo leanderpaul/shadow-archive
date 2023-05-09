@@ -73,6 +73,8 @@ export class ErrorCode {
   static readonly IAM011 = new ErrorCode('IAM011', ErrorType.CLIENT_ERROR, 'Invalid email verification code');
   /** Email address already verified */
   static readonly IAM012 = new ErrorCode('IAM012', ErrorType.CLIENT_ERROR, 'Email address already verified');
+  /** User session expired */
+  static readonly IAM013 = new ErrorCode('IAM013', ErrorType.UNAUTHORIZED, 'User session expired');
 
   /**
    * List of resource related errors

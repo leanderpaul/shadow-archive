@@ -49,12 +49,24 @@ export class UserSession {
   })
   id: string;
 
-  /** The date the session was created on */
+  /** The browser from which the session was created */
+  @Prop({ type: 'string' })
+  browser?: string;
+
+  /** The device OS from which the session was created */
+  @Prop({ type: 'string' })
+  os?: string;
+
+  /** The device from which the session was created */
+  @Prop({ type: 'string' })
+  device?: string;
+
+  /** session last activity */
   @Prop({
     type: 'date',
     required: true,
   })
-  expireAt: Date;
+  accessedAt: Date;
 }
 
 @Schema({

@@ -1,15 +1,16 @@
 /**
  * Importing npm packages
  */
-import { Resolver, Query, Mutation, Args, ResolveField } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, ResolveField, Parent } from '@nestjs/graphql';
 
 /**
  * Importing user defined packages
  */
+import { User } from '@app/providers/database';
 import { UseAuth, AuthType } from '@app/shared/decorators';
 
 import { LoginArgs, RegisterArgs, ResetPasswordArgs, UpdatePasswordArgs } from './accounts.dto';
-import { Viewer } from './accounts.entity';
+import { Session, Viewer } from './accounts.entity';
 import { AccountsService } from './accounts.service';
 
 /**
@@ -33,6 +34,11 @@ export class AccountsResolver {
   @ResolveField(() => String, { name: 'csrfToken' })
   getCSRFToken() {
     return this.accountsService.getCSRFToken();
+  }
+
+  @ResolveField(() => [Session], { name: 'sessions' })
+  getSessions(@Parent() parent: User) {
+    return parent.sessions.map(session => this.accountsService.convertSession(session));
   }
 
   @Mutation(() => Viewer)

@@ -44,6 +44,7 @@
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.2.0",
     "sagus": "^1.0.3",
+    "useragent": "^2.3.0",
     "winston": "^3.8.2"
   },
   "devDependencies": {
@@ -59,6 +60,7 @@
     "@types/node": "18.11.18",
     "@types/on-finished": "^2.3.1",
     "@types/supertest": "^2.0.11",
+    "@types/useragent": "^2.3.1",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^8.0.1",
