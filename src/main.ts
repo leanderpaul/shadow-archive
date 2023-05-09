@@ -2,8 +2,7 @@
  * Importing npm packages
  */
 import compression from '@fastify/compress';
-import fastifyCookie from '@fastify/cookie';
-
+import { fastifyCookie } from '@fastify/cookie';
 import { ShutdownSignal } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';

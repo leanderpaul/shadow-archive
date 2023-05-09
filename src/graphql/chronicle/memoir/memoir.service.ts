@@ -1,9 +1,8 @@
 /**
  * Importing npm packages
  */
-import moment from 'moment';
-
 import { Injectable } from '@nestjs/common';
+import moment from 'moment';
 
 /**
  * Importing user defined packages

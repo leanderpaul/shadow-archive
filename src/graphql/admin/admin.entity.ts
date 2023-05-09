@@ -1,7 +1,7 @@
 /**
  * Importing npm packages
  */
-import { Field, ObjectType, GraphQLISODateTime, OmitType } from '@nestjs/graphql';
+import { Field, GraphQLISODateTime, ObjectType, OmitType } from '@nestjs/graphql';
 
 /**
  * Importing user defined packages

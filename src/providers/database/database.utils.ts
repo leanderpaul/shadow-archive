@@ -1,9 +1,8 @@
 /**
  * Importing npm packages
  */
-import { Types, Query } from 'mongoose';
+import { Document, Query, Schema, Types } from 'mongoose';
 import { mongooseLeanVirtuals } from 'mongoose-lean-virtuals';
-import { Document, Schema } from 'mongoose';
 
 /**
  * Importing user defined packages

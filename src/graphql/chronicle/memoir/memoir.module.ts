@@ -9,8 +9,8 @@ import { Module } from '@nestjs/common';
 import { ContextService } from '@app/providers/context';
 import { DatabaseModule } from '@app/providers/database';
 
-import { MemoirService } from './memoir.service';
 import { MemoirResolver } from './memoir.resolver';
+import { MemoirService } from './memoir.service';
 
 /**
  * Defining types

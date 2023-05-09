@@ -1,13 +1,13 @@
 /**
  * Importing npm packages
  */
-import { Resolver, Query, Mutation, Args, ResolveField, Parent } from '@nestjs/graphql';
+import { Args, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
 
 /**
  * Importing user defined packages
  */
 import { User } from '@app/providers/database';
-import { UseAuth, AuthType } from '@app/shared/decorators';
+import { AuthType, UseAuth } from '@app/shared/decorators';
 
 import { LoginArgs, RegisterArgs, ResetPasswordArgs, UpdatePasswordArgs } from './accounts.dto';
 import { Session, Viewer } from './accounts.entity';

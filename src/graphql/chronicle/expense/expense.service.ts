@@ -8,7 +8,7 @@ import { Injectable } from '@nestjs/common';
  */
 import { PageInput } from '@app/graphql/common';
 import { ContextService } from '@app/providers/context';
-import { DatabaseService, DBUtils, MetadataVariant } from '@app/providers/database';
+import { DBUtils, DatabaseService, MetadataVariant } from '@app/providers/database';
 import { Logger } from '@app/providers/logger';
 import { AppError, ErrorCode } from '@app/shared/errors';
 import { Projection } from '@app/shared/utils';

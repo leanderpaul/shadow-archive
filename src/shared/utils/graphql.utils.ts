@@ -1,7 +1,7 @@
 /**
  * Importing npm packages
  */
-import { GraphQLResolveInfo, SelectionSetNode, Kind } from 'graphql';
+import { GraphQLResolveInfo, Kind, SelectionSetNode } from 'graphql';
 
 /**
  * Importing user defined packages

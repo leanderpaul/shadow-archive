@@ -9,8 +9,8 @@ import { Module } from '@nestjs/common';
 import { ContextService } from '@app/providers/context';
 import { DatabaseModule } from '@app/providers/database';
 
-import { ExpenseService } from './expense.service';
 import { ExpenseResolver } from './expense.resolver';
+import { ExpenseService } from './expense.service';
 
 /**
  * Defining types

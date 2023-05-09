@@ -7,7 +7,7 @@
  */
 import { Context } from '@app/providers/context';
 
-import { ErrorType, ErrorCode } from './error-code.error';
+import { ErrorCode, ErrorType } from './error-code.error';
 import { FormattedError } from './util.error';
 
 /**

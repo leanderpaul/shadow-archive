@@ -12,8 +12,8 @@ import { DatabaseModule } from '@app/providers/database';
 import { MailService } from '@app/providers/mail';
 import { AuthModule } from '@app/shared/modules';
 
-import { AccountsService } from './accounts.service';
 import { AccountsResolver } from './accounts.resolver';
+import { AccountsService } from './accounts.service';
 
 /**
  * Defining types

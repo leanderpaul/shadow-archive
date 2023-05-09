@@ -1,14 +1,14 @@
 /**
  * Importing npm packages
  */
-import { Schema, Prop, SchemaFactory, MongooseModule } from '@nestjs/mongoose';
+import { MongooseModule, Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ObjectId } from 'mongodb';
 import { Model } from 'mongoose';
 
 /**
  * Importing user defined packages
  */
-import { transformId, defaultOptionsPlugin } from '../database.utils';
+import { defaultOptionsPlugin, transformId } from '../database.utils';
 
 /**
  * Defining types
@@ -19,7 +19,7 @@ export type ExpenseModel = Model<Expense>;
 /**
  * Declaring the constants
  */
-const nameRegex = /^[a-zA-Z0-9\-_\ ]{1,32}$/;
+const nameRegex = /^[a-zA-Z0-9\-_ ]{1,32}$/;
 const nameRegexMsg = 'should only contain alphanumberic, underscore and space characters';
 const greaterThanZero = (num: number) => num > 0;
 const greaterThanZeroMsg = 'should be greater than 0';

@@ -6,10 +6,10 @@ import { Module } from '@nestjs/common';
 /**
  * Importing user defined packages
  */
+import { GraphQLModule } from '@app/graphql/common';
 import { DatabaseModule } from '@app/providers/database';
 import { AuthType } from '@app/shared/guards';
 
-import { GraphQLModule } from '../common';
 import { AdminResolver } from './admin.resolver';
 import { AdminService } from './admin.service';
 

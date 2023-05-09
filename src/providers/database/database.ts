@@ -12,7 +12,7 @@ import { Config } from '@app/config';
 import { Logger } from '@app/providers/logger';
 
 import { DatabaseService } from './database.service';
-import { UserMongooseModule, ExpenseMongooseModule, MetadataMongooseModule, MemoirMongooseModule } from './schemas';
+import { ExpenseMongooseModule, MemoirMongooseModule, MetadataMongooseModule, UserMongooseModule } from './schemas';
 
 /**
  * Defining types

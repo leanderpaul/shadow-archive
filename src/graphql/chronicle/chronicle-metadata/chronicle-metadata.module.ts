@@ -9,8 +9,8 @@ import { Module } from '@nestjs/common';
 import { ContextService } from '@app/providers/context';
 import { DatabaseModule } from '@app/providers/database';
 
-import { ChronicleMetadataService } from './chronicle-metadata.service';
 import { ChronicleMetadataResolver } from './chronicle-metadata.resolver';
+import { ChronicleMetadataService } from './chronicle-metadata.service';
 
 /**
  * Defining types

@@ -2,7 +2,7 @@
  * Importing npm packages
  */
 import { Type } from '@nestjs/common';
-import { ObjectType, registerEnumType, Field, Int } from '@nestjs/graphql';
+import { Field, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
 
 /**
  * Importing user defined packages

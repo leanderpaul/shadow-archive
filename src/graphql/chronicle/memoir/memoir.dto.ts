@@ -1,7 +1,7 @@
 /**
  * Importing npm packages
  */
-import { ArgsType, Int, Field, ObjectType, InputType, PartialType } from '@nestjs/graphql';
+import { ArgsType, Field, InputType, Int, ObjectType, PartialType } from '@nestjs/graphql';
 
 /**
  * Importing user defined packages

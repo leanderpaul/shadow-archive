@@ -10,7 +10,7 @@ import { Logger } from 'winston';
  */
 import { AppError } from './app.error';
 import { ErrorCode, ErrorType } from './error-code.error';
-import { ValidationError, FieldError } from './validation.error';
+import { FieldError, ValidationError } from './validation.error';
 
 /**
  * Defining types

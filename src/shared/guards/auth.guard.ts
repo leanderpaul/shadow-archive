@@ -1,7 +1,7 @@
 /**
  * Importing npm packages
  */
-import { ExecutionContext, mixin, Injectable, Type, CanActivate } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable, Type, mixin } from '@nestjs/common';
 import { FastifyReply } from 'fastify';
 
 /**

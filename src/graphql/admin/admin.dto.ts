@@ -2,11 +2,11 @@
  * Importing npm packages
  */
 import { ArgsType, Field, InputType, registerEnumType } from '@nestjs/graphql';
-import { PageInput, SortOrder } from '@app/graphql/common';
 
 /**
  * Importing user defined packages
  */
+import { PageInput, SortOrder } from '@app/graphql/common';
 
 /**
  * Defining types

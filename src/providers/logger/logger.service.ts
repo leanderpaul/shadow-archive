@@ -1,7 +1,7 @@
 /**
  * Importing npm packages
  */
-import { Injectable, Optional, LoggerService, OnApplicationShutdown } from '@nestjs/common';
+import { Injectable, LoggerService, OnApplicationShutdown, Optional } from '@nestjs/common';
 
 /**
  * Importing user defined packages
@@ -46,7 +46,7 @@ export class NestLogger implements LoggerService, OnApplicationShutdown {
     const label = context || this.context;
     if (message instanceof Error) {
       const { message: msg, name, stack, ...meta } = message;
-      return NestLogger.logger.error(msg, { context, stack: [trace || message.stack], value: message, errName: name, ...meta });
+      return NestLogger.logger.error(msg, { context, stack: [trace || stack], value: message, errName: name, ...meta });
     }
     if (typeof message === 'object') {
       const { message: msg, ...meta } = message;

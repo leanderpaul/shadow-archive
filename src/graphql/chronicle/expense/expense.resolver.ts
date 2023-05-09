@@ -1,7 +1,7 @@
 /**
  * Importing npm packages
  */
-import { Resolver, Query, Mutation, Args, Info } from '@nestjs/graphql';
+import { Args, Info, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { GraphQLResolveInfo } from 'graphql';
 
 /**

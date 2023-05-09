@@ -2,7 +2,7 @@
  * Importing npm packages
  */
 import { NestFastifyApplication } from '@nestjs/platform-fastify';
-import { FastifyRequest, FastifyReply } from 'fastify';
+import { FastifyReply, FastifyRequest } from 'fastify';
 
 /**
  * Importing user defined packages

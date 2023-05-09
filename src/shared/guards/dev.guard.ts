@@ -1,14 +1,14 @@
 /**
  * Importing npm packages
  */
-import { ConfigService } from '@nestjs/config';
 import { CanActivate, Injectable, Type, mixin } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 /**
  * Importing user defined packages
  */
-import { ContextService } from '@app/providers/context';
 import { ConfigRecord } from '@app/config';
+import { ContextService } from '@app/providers/context';
 import { AppError, ErrorCode } from '@app/shared/errors';
 
 /**

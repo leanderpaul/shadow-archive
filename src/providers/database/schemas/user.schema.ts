@@ -1,16 +1,16 @@
 /**
  * Importing npm packages
  */
-import sagus from 'sagus';
 
-import { Schema, Prop, SchemaFactory, MongooseModule } from '@nestjs/mongoose';
+import { MongooseModule, Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ObjectId } from 'mongodb';
-import { Model, Document, Query } from 'mongoose';
+import { Document, Model, Query } from 'mongoose';
+import sagus from 'sagus';
 
 /**
  * Importing user defined packages
  */
-import { transformId, defaultOptionsPlugin } from '../database.utils';
+import { defaultOptionsPlugin, transformId } from '../database.utils';
 
 /**
  * Defining types
@@ -31,7 +31,7 @@ export interface OAuthUserModel extends Model<OAuthUser>, UserStaticMethods {}
  * Declaring the constants
  */
 
-const nameRegex = /^[a-zA-Z\ ]{3,32}$/;
+const nameRegex = /^[a-zA-Z ]{3,32}$/;
 const uriRegex = /^(?:[a-z][a-z0-9+\-.]*:)(?:\/?\/)?[^\s]*$/i;
 const passwordRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/;
 const emailRegex = /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/i;

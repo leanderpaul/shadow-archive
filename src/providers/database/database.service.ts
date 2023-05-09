@@ -2,14 +2,16 @@
  * Importing npm packages
  */
 import { Injectable, OnApplicationShutdown, OnModuleInit } from '@nestjs/common';
-import { InjectModel, InjectConnection } from '@nestjs/mongoose';
+import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
 
 /**
  * Importing user defined packages
  */
-import { User, UserModel, NativeUser, NativeUserModel, OAuthUser, OAuthUserModel } from './schemas';
-import { Expense, ExpenseModel, Metadata, MetadataModel, ChronicleMetadata, ChronicleMetadataModel, Memoir, MemoirModel } from './schemas';
+import { Expense, ExpenseModel } from './schemas/expense.schema';
+import { Memoir, MemoirModel } from './schemas/memoir.schema';
+import { ChronicleMetadata, ChronicleMetadataModel, Metadata, MetadataModel } from './schemas/metadata.schema';
+import { NativeUser, NativeUserModel, OAuthUser, OAuthUserModel, User, UserModel } from './schemas/user.schema';
 
 /**
  * Defining types

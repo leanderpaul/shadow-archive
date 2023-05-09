@@ -2,12 +2,12 @@
  * Importing npm packages
  */
 import fs from 'fs';
-import mustache from 'mustache';
-import sagus from 'sagus';
 
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { MailService as SendGridMail, MailDataRequired } from '@sendgrid/mail';
+import { MailDataRequired, MailService as SendGridMail } from '@sendgrid/mail';
+import mustache from 'mustache';
+import sagus from 'sagus';
 
 /**
  * Importing user defined packages

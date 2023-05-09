@@ -2,20 +2,20 @@
  * Importing npm packages
  */
 import crypto from 'crypto';
-import moment from 'moment';
-import sagus from 'sagus';
-import useragent from 'useragent';
 
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { FastifyRequest, FastifyReply } from 'fastify';
+import { FastifyReply, FastifyRequest } from 'fastify';
+import moment from 'moment';
+import sagus from 'sagus';
+import { parse } from 'useragent';
 
 /**
  * Importing user defined packages
  */
 import { ConfigRecord } from '@app/config';
 import { ContextService } from '@app/providers/context';
-import { DBUtils, DatabaseService, UserVariant, User, UserSession } from '@app/providers/database';
+import { DBUtils, DatabaseService, User, UserSession, UserVariant } from '@app/providers/database';
 import { MailService, MailType } from '@app/providers/mail';
 import { AppError, ErrorCode } from '@app/shared/errors';
 
@@ -119,7 +119,7 @@ export class AuthService {
   private generateUserSession() {
     const session: UserSession = { id: sagus.genRandom(32, 'base64'), accessedAt: new Date() };
     const req = this.contextService.getCurrentRequest();
-    const agent = useragent.parse(req.headers['user-agent']);
+    const agent = parse(req.headers['user-agent']);
     if (agent.family != 'Other') session.browser = agent.toAgent();
     if (agent.os.family != 'Other') session.os = agent.os.toString();
     if (agent.device.family != 'Other') session.device = agent.device.toString();

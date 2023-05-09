@@ -6,10 +6,10 @@ import { Injectable } from '@nestjs/common';
 /**
  * Importing user defined packages
  */
+import { PageInput } from '@app/graphql/common';
 import { DatabaseService, User } from '@app/providers/database';
 import { Projection } from '@app/shared/utils';
 
-import { PageInput } from '../common';
 import { UserSort } from './admin.dto';
 import { User as GUser } from './admin.entity';
 

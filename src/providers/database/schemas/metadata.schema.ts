@@ -1,7 +1,7 @@
 /**
  * Importing npm packages
  */
-import { Schema, Prop, SchemaFactory, MongooseModule } from '@nestjs/mongoose';
+import { MongooseModule, Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ObjectId } from 'mongodb';
 import { Model } from 'mongoose';
 
@@ -21,7 +21,7 @@ export type ChronicleMetadataModel = Model<ChronicleMetadata>;
 /**
  * Declaring the constants
  */
-const nameRegex = /^[a-zA-Z0-9\-_\ ]{3,32}$/;
+const nameRegex = /^[a-zA-Z0-9\-_ ]{3,32}$/;
 
 /**
  * Defining the schemas

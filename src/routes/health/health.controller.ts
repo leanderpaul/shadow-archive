@@ -2,7 +2,7 @@
  * Importing npm packages
  */
 import { Controller, Get, Res, ServiceUnavailableException } from '@nestjs/common';
-import { HealthCheckService, HealthCheck, MemoryHealthIndicator, MongooseHealthIndicator } from '@nestjs/terminus';
+import { HealthCheck, HealthCheckService, MemoryHealthIndicator, MongooseHealthIndicator } from '@nestjs/terminus';
 import { FastifyReply } from 'fastify';
 
 /**

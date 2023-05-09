@@ -1,10 +1,9 @@
 /**
  * Importing npm packages
  */
-import sagus from 'sagus';
-import moment from 'moment';
-
 import { Injectable } from '@nestjs/common';
+import moment from 'moment';
+import sagus from 'sagus';
 
 /**
  * Importing user defined packages

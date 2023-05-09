@@ -4,10 +4,10 @@
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { Type } from '@nestjs/common';
 import { GraphQLModule as NestGraphQLModule } from '@nestjs/graphql';
-import { FastifyRequest, FastifyReply } from 'fastify';
+import { FastifyReply, FastifyRequest } from 'fastify';
 import { GraphQLError, ValidationContext, ValidationRule } from 'graphql';
 import { applyMiddleware } from 'graphql-middleware';
-import { rule, shield, allow } from 'graphql-shield';
+import { allow, rule, shield } from 'graphql-shield';
 
 /**
  * Importing user defined packages
@@ -17,7 +17,7 @@ import { Context } from '@app/providers/context';
 import { Logger } from '@app/providers/logger';
 import { AppError, ErrorCode, ErrorUtils } from '@app/shared/errors';
 import { AuthType } from '@app/shared/guards';
-import { AuthService, AuthModule } from '@app/shared/modules';
+import { AuthModule, AuthService } from '@app/shared/modules';
 import { Utils } from '@app/shared/utils';
 
 /**

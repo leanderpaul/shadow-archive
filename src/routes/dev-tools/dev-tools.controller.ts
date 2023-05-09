@@ -1,17 +1,16 @@
 /**
  * Importing npm packages
  */
-import moment from 'moment';
-
 import { Controller, Get, Query, Render, UseGuards } from '@nestjs/common';
+import moment from 'moment';
 
 /**
  * Importing user defined packages
  */
+import { ContextService } from '@app/providers/context';
 import { DevGuard } from '@app/shared/guards';
 import { AuthService } from '@app/shared/modules';
 import { Utils } from '@app/shared/utils';
-import { ContextService } from '@app/providers/context';
 
 /**
  * Defining types

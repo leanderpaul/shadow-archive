@@ -2,13 +2,13 @@
  * Importing npm packages.
  */
 import fs from 'fs';
-import winston from 'winston';
 
 import { cyan, gray, yellow } from '@colors/colors/safe';
 import { Logtail } from '@logtail/node';
 import { LogtailTransport } from '@logtail/winston';
-import { FastifyRequest, FastifyReply } from 'fastify';
+import { FastifyReply, FastifyRequest } from 'fastify';
 import { LEVEL } from 'triple-beam';
+import winston, { createLogger as createWinstonLogger, format, transports } from 'winston';
 
 /**
  * Importing user defined packages.
@@ -49,9 +49,6 @@ declare module 'fastify' {
 /**
  * Declaring the constants.
  */
-const { Console, File } = winston.transports;
-const { combine, printf, errors, colorize, json } = winston.format;
-
 const logColorFormat = { info: 'green', error: 'bold red', warn: 'yellow', debug: 'magenta', http: 'cyan' };
 const sensitiveFields = ['password'];
 
@@ -118,7 +115,7 @@ function removeSensitiveFields(data: Record<string, any>) {
  * @returns
  */
 function getFileIndex(filename: string) {
-  const filenameArr = filename.split(/[\-\.]/);
+  const filenameArr = filename.split(/[-.]/);
   return parseInt(filenameArr[filenameArr.length - 2]!);
 }
 
@@ -128,17 +125,17 @@ function getFileIndex(filename: string) {
  */
 function createLogger() {
   /** Creating the logger object */
-  const contextFormat = winston.format(appendLogMetadata);
-  const logFormat = combine(contextFormat(), errors({ stack: true }), json({}));
-  const logger = winston.createLogger({ level: Config.getLog('LEVEL') });
+  const contextFormat = format(appendLogMetadata);
+  const logFormat = format.combine(contextFormat(), format.errors({ stack: true }), format.json({}));
+  const logger = createWinstonLogger({ level: Config.getLog('LEVEL') });
 
   /** Logger setup for development mode */
   if (Config.getNodeEnv() === 'development') {
-    const consoleFormat = printf(printConsoleMessage);
-    const consoleColor = colorize({ level: true, colors: logColorFormat, message: true });
-    const uppercaseLevel = winston.format(info => ({ ...info, level: info.level.toUpperCase() }));
-    const consoleLogFormat = combine(errors({ stack: true }), uppercaseLevel(), consoleColor, consoleFormat);
-    logger.add(new Console({ format: consoleLogFormat }));
+    const consoleFormat = format.printf(printConsoleMessage);
+    const consoleColor = format.colorize({ level: true, colors: logColorFormat, message: true });
+    const uppercaseLevel = format(info => ({ ...info, level: info.level.toUpperCase() }));
+    const consoleLogFormat = format.combine(format.errors({ stack: true }), uppercaseLevel(), consoleColor, consoleFormat);
+    logger.add(new transports.Console({ format: consoleLogFormat }));
   }
 
   if (Config.getNodeEnv() === 'production') {
@@ -165,7 +162,7 @@ function createLogger() {
       fs.renameSync(`${logDir}/${filename}`, `${logDir}/${appName}-${num + 1}.log`);
     }
 
-    logger.add(new File({ format: logFormat, filename: `${Config.getLog('DIR')}/${Config.getAppName()}-0.log` }));
+    logger.add(new transports.File({ format: logFormat, filename: `${Config.getLog('DIR')}/${Config.getAppName()}-0.log` }));
   }
 
   return logger;

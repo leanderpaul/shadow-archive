@@ -1,7 +1,7 @@
 /**
  * Importing npm packages
  */
-import { InputType, Field, Int } from '@nestjs/graphql';
+import { Field, InputType, Int } from '@nestjs/graphql';
 
 /**
  * Importing user defined packages
