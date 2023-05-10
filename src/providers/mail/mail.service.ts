@@ -12,7 +12,7 @@ import sagus from 'sagus';
 /**
  * Importing user defined packages
  */
-import { ConfigRecord } from '@app/config';
+import { type ConfigRecord } from '@app/config';
 import { Logger } from '@app/providers/logger';
 
 /**

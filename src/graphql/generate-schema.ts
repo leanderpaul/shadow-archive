@@ -3,8 +3,7 @@
  */
 import fs from 'fs';
 
-import {} from '@fastify/cookie';
-import { Type } from '@nestjs/common';
+import { type Type } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { GraphQLSchemaBuilderModule, GraphQLSchemaFactory } from '@nestjs/graphql';
 import { printSchema } from 'graphql';
@@ -18,6 +17,7 @@ import { chronicleResolvers } from './chronicle';
 /**
  * Defining types
  */
+import '@fastify/cookie';
 
 /**
  * Declaring the constants

@@ -1,8 +1,8 @@
 /**
  * Importing npm packages
  */
-import { NestFastifyApplication } from '@nestjs/platform-fastify';
-import { FastifyReply, FastifyRequest } from 'fastify';
+import { type NestFastifyApplication } from '@nestjs/platform-fastify';
+import { type FastifyReply, type FastifyRequest } from 'fastify';
 
 /**
  * Importing user defined packages

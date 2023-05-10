@@ -6,9 +6,9 @@ import fs from 'fs';
 import { cyan, gray, yellow } from '@colors/colors/safe';
 import { Logtail } from '@logtail/node';
 import { LogtailTransport } from '@logtail/winston';
-import { FastifyReply, FastifyRequest } from 'fastify';
+import { type FastifyReply, type FastifyRequest } from 'fastify';
 import { LEVEL } from 'triple-beam';
-import winston, { createLogger as createWinstonLogger, format, transports } from 'winston';
+import { type Logform, type Logger as WinstonLogger, createLogger as createWinstonLogger, format, transports } from 'winston';
 
 /**
  * Importing user defined packages.
@@ -52,7 +52,7 @@ declare module 'fastify' {
 const logColorFormat = { info: 'green', error: 'bold red', warn: 'yellow', debug: 'magenta', http: 'cyan' };
 const sensitiveFields = ['password'];
 
-let logger: winston.Logger;
+let logger: WinstonLogger;
 let logtail: Logtail;
 let timestamp: number;
 
@@ -61,7 +61,7 @@ let timestamp: number;
  * @param info
  * @returns
  */
-function appendLogMetadata(info: winston.Logform.TransformableInfo) {
+function appendLogMetadata(info: Logform.TransformableInfo) {
   const rid = Context.getRID();
   if (rid) info.rid = rid;
   info.dt = new Date();
@@ -73,7 +73,7 @@ function appendLogMetadata(info: winston.Logform.TransformableInfo) {
  * @param info
  * @returns
  */
-function printConsoleMessage(info: winston.Logform.TransformableInfo) {
+function printConsoleMessage(info: Logform.TransformableInfo) {
   const level = info[LEVEL];
   const prevTime = timestamp;
   timestamp = Date.now();

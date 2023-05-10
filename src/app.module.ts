@@ -1,7 +1,7 @@
 /**
  * Importing npm packages
  */
-import { Module, OnModuleInit } from '@nestjs/common';
+import { Module, type OnModuleInit } from '@nestjs/common';
 import { APP_FILTER } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
 

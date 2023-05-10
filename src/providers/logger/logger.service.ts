@@ -1,7 +1,7 @@
 /**
  * Importing npm packages
  */
-import { Injectable, LoggerService, OnApplicationShutdown, Optional } from '@nestjs/common';
+import { Injectable, type LoggerService, type OnApplicationShutdown, Optional } from '@nestjs/common';
 
 /**
  * Importing user defined packages

@@ -3,11 +3,12 @@
  */
 import { Controller, Get, Res, ServiceUnavailableException } from '@nestjs/common';
 import { HealthCheck, HealthCheckService, MemoryHealthIndicator, MongooseHealthIndicator } from '@nestjs/terminus';
-import { FastifyReply } from 'fastify';
+import { type FastifyReply } from 'fastify';
 
 /**
  * Importing user defined packages
  */
+
 import { ContextService } from '@app/providers/context';
 
 /**

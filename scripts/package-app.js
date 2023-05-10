@@ -1,33 +1,35 @@
 /**
  * Importing npm packages.
  */
-const fs = require('fs');
+const { writeFileSync, rmSync, readFileSync } = require('fs');
 const { execSync } = require('child_process');
 
 /**
  * Declaring the constants.
  */
-const rootDir = `${__dirname}/..`;
-const distDir = `${rootDir}/dist`;
 
 function copyPackageJson() {
   /** Removing unneccessary scripts from package.json and copying */
-  const packageJson = require('../package.json');
+  const packageJson = JSON.parse(readFileSync(`package.json`).toString());
   const distPackageJson = { ...packageJson, scripts: { postinstall: 'patch-package' } };
-  fs.writeFileSync(`${distDir}/package.json`, JSON.stringify(distPackageJson, null, 2));
+  writeFileSync(`dist/package.json`, JSON.stringify(distPackageJson, null, 2));
 }
 
 function packageApp() {
   /** Building the package */
-  execSync('nest build', { cwd: rootDir });
+  try {
+    execSync('nest build');
+  } catch (err) {
+    console.log(err.stdout.toString());
+  }
 
   /** Copying the required files */
   copyPackageJson();
-  execSync(`cp ${rootDir}/package-lock.json ${distDir}/package-lock.json`);
-  execSync(`cp -r ${rootDir}/patches ${distDir}/patches`);
+  execSync(`cp package-lock.json dist/package-lock.json`);
+  execSync(`cp -r patches dist/patches`);
 
   /** Deleting the unneccesary files */
-  fs.rmSync(`${distDir}/tsconfig.build.tsbuildinfo`);
+  rmSync(`dist/tsconfig.build.tsbuildinfo`);
 }
 
 packageApp();

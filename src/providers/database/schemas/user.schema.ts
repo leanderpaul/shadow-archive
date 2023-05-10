@@ -3,8 +3,8 @@
  */
 
 import { MongooseModule, Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { ObjectId } from 'mongodb';
-import { Document, Model, Query } from 'mongoose';
+import { type ObjectId } from 'mongodb';
+import { type Document, type Model, type Query } from 'mongoose';
 import sagus from 'sagus';
 
 /**

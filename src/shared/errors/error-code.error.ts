@@ -7,7 +7,7 @@
  */
 import { Context } from '@app/providers/context';
 
-import { FormattedError } from './util.error';
+import { type FormattedError } from './util.error';
 
 /**
  * Defining types

@@ -1,17 +1,17 @@
 /**
  * Importing npm packages
  */
-import { Injectable, OnApplicationShutdown, OnModuleInit } from '@nestjs/common';
+import { Injectable, type OnApplicationShutdown, type OnModuleInit } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
 
 /**
  * Importing user defined packages
  */
-import { Expense, ExpenseModel } from './schemas/expense.schema';
-import { Memoir, MemoirModel } from './schemas/memoir.schema';
-import { ChronicleMetadata, ChronicleMetadataModel, Metadata, MetadataModel } from './schemas/metadata.schema';
-import { NativeUser, NativeUserModel, OAuthUser, OAuthUserModel, User, UserModel } from './schemas/user.schema';
+import { Expense, type ExpenseModel } from './schemas/expense.schema';
+import { Memoir, type MemoirModel } from './schemas/memoir.schema';
+import { ChronicleMetadata, type ChronicleMetadataModel, Metadata, type MetadataModel } from './schemas/metadata.schema';
+import { NativeUser, type NativeUserModel, OAuthUser, type OAuthUserModel, User, type UserModel } from './schemas/user.schema';
 
 /**
  * Defining types

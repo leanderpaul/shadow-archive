@@ -1,12 +1,12 @@
 /**
  * Importing npm packages
  */
-import { GraphQLResolveInfo, Kind, SelectionSetNode } from 'graphql';
+import { type GraphQLResolveInfo, Kind, type SelectionSetNode } from 'graphql';
 
 /**
  * Importing user defined packages
  */
-import { PageInput, PaginatedType } from '@app/graphql/common';
+import { PageInput, type PaginatedType } from '@app/graphql/common';
 
 /**
  * Defining types

@@ -1,8 +1,8 @@
 /**
  * Importing npm packages
  */
-import { CanActivate, ExecutionContext, Injectable, Type, mixin } from '@nestjs/common';
-import { FastifyReply } from 'fastify';
+import { type CanActivate, type ExecutionContext, Injectable, type Type, mixin } from '@nestjs/common';
+import { type FastifyReply } from 'fastify';
 
 /**
  * Importing user defined packages

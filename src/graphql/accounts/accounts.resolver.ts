@@ -6,7 +6,7 @@ import { Args, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/g
 /**
  * Importing user defined packages
  */
-import { User } from '@app/providers/database';
+import { type User } from '@app/providers/database';
 import { AuthType, UseAuth } from '@app/shared/decorators';
 
 import { LoginArgs, RegisterArgs, ResetPasswordArgs, UpdatePasswordArgs } from './accounts.dto';

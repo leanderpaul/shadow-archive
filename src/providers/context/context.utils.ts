@@ -1,21 +1,20 @@
 /**
  * Importing npm packages
  */
-
 import { AsyncLocalStorage } from 'async_hooks';
 
-import { FastifyReply, FastifyRequest } from 'fastify';
+import { type FastifyReply, type FastifyRequest } from 'fastify';
 import sagus from 'sagus';
 
 /**
  * Importing user defined packages
  */
+import { type User, type UserSession } from '@app/providers/database';
 import { Utils } from '@app/shared/utils/common.utils';
 
 /**
  * Defining types
  */
-import type { User, UserSession } from '@app/providers/database';
 
 /**
  * Declaring the constants

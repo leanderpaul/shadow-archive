@@ -2,8 +2,8 @@
  * Importing npm packages
  */
 import { MongooseModule, Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { ObjectId } from 'mongodb';
-import { Model } from 'mongoose';
+import { type ObjectId } from 'mongodb';
+import { type Model } from 'mongoose';
 
 /**
  * Importing user defined packages

@@ -7,7 +7,7 @@ import { Error as MongooseError } from 'mongoose';
  * Importing user defined packages
  */
 import { ErrorCode } from './error-code.error';
-import { FormattedError } from './util.error';
+import { type FormattedError } from './util.error';
 
 /**
  * Defining types

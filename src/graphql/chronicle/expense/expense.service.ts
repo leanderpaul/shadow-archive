@@ -6,12 +6,12 @@ import { Injectable } from '@nestjs/common';
 /**
  * Importing user defined packages
  */
-import { PageInput } from '@app/graphql/common';
+import { type PageInput } from '@app/graphql/common';
 import { ContextService } from '@app/providers/context';
 import { DBUtils, DatabaseService, MetadataVariant } from '@app/providers/database';
 import { Logger } from '@app/providers/logger';
 import { AppError, ErrorCode } from '@app/shared/errors';
-import { Projection } from '@app/shared/utils';
+import { type Projection } from '@app/shared/utils';
 
 import { AddExpenseInput, ExpenseItemInput, ExpenseQuery, ExpenseSort, UpdateExpenseInput } from './expense.dto';
 

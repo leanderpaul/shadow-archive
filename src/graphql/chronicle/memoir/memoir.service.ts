@@ -10,9 +10,9 @@ import moment from 'moment';
 import { ContextService } from '@app/providers/context';
 import { DatabaseService } from '@app/providers/database';
 import { AppError, ErrorCode } from '@app/shared/errors';
-import { Projection } from '@app/shared/utils';
+import { type Projection } from '@app/shared/utils';
 
-import { SleepInput } from './memoir.dto';
+import { type SleepInput } from './dto/common.args';
 
 /**
  * Defining types

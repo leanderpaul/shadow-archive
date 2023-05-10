@@ -1,11 +1,10 @@
 /**
  * Importing npm packages
  */
-import fastifyCookie from '@fastify/cookie';
-import request, { Response, Request } from 'supertest';
-
+import { fastifyCookie } from '@fastify/cookie';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 import { Test } from '@nestjs/testing';
+import request, { type Request, type Response } from 'supertest';
 
 /**
  * Importing user defined packages
@@ -13,7 +12,7 @@ import { Test } from '@nestjs/testing';
 import { AppModule } from '@app/app.module';
 import { Config } from '@app/config';
 import { Context } from '@app/providers/context';
-import { ErrorCode, GraphQLFormattedErrorExtensions } from '@app/shared/errors';
+import { ErrorCode, type GraphQLFormattedErrorExtensions } from '@app/shared/errors';
 
 /**
  * Defining types
@@ -171,7 +170,7 @@ export class ShadowArchiveResponse {
    */
   expectCookies(key?: string) {
     const cookie = this.response.get('Set-Cookie');
-    expect(cookie).toEqual(expect.arrayContaining([expect.stringMatching(/^sasid=[a-zA-Z0-9%= \-\/\\;]{30,}$/)]));
+    expect(cookie).toEqual(expect.arrayContaining([expect.stringMatching(/^sasid=[a-zA-Z0-9%= \-/\\;]{30,}$/)]));
     if (key && cookie[0]) {
       const values = cookie[0].split(';');
       const cookieValue = values.find(v => v.startsWith(Config.get('COOKIE_NAME')));

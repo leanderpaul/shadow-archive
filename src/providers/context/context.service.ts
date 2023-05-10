@@ -6,7 +6,7 @@ import { Injectable } from '@nestjs/common';
 /**
  * Importing user defined packages
  */
-import { User, UserSession } from '@app/providers/database';
+import { type User, type UserSession } from '@app/providers/database';
 import { AppError, ErrorCode } from '@app/shared/errors';
 
 import { Context } from './context.utils';

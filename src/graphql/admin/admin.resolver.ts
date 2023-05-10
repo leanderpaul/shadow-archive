@@ -3,7 +3,7 @@
  */
 
 import { Args, Info, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { GraphQLResolveInfo } from 'graphql';
+import { type GraphQLResolveInfo } from 'graphql';
 
 /**
  * Importing user defined packages

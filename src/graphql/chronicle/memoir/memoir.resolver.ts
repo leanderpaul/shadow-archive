@@ -2,26 +2,17 @@
  * Importing npm packages
  */
 import { Args, Info, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { GraphQLResolveInfo } from 'graphql';
+import { type GraphQLResolveInfo } from 'graphql';
 
 /**
  * Importing user defined packages
  */
 import { GraphQLUtils } from '@app/shared/utils';
 
-import {
-  AddActivityArgs,
-  AddExerciseArgs,
-  AddFoodArgs,
-  AddStringArgs,
-  DeleteArgs,
-  GetMemoirArgs,
-  SleepArgs,
-  UpdateActivityArgs,
-  UpdateExerciseArgs,
-  UpdateFoodArgs,
-  UpdateStringArgs,
-} from './memoir.dto';
+import { AddActivityArgs, UpdateActivityArgs } from './dto/activity.args';
+import { AddStringArgs, DeleteArgs, GetMemoirArgs, SleepArgs, UpdateStringArgs } from './dto/common.args';
+import { AddExerciseArgs, UpdateExerciseArgs } from './dto/exercise.args';
+import { AddFoodArgs, UpdateFoodArgs } from './dto/food.args';
 import { Activity, Exercise, Food, Memoir, Sleep } from './memoir.entity';
 import { MemoirService } from './memoir.service';
 

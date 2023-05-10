@@ -2,10 +2,10 @@
  * Importing npm packages
  */
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { Type } from '@nestjs/common';
+import { type Type } from '@nestjs/common';
 import { GraphQLModule as NestGraphQLModule } from '@nestjs/graphql';
-import { FastifyReply, FastifyRequest } from 'fastify';
-import { GraphQLError, ValidationContext, ValidationRule } from 'graphql';
+import { type FastifyReply, type FastifyRequest } from 'fastify';
+import { GraphQLError, type ValidationContext, type ValidationRule } from 'graphql';
 import { applyMiddleware } from 'graphql-middleware';
 import { allow, rule, shield } from 'graphql-shield';
 

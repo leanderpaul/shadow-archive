@@ -17,12 +17,13 @@
     "@typescript-eslint/explicit-function-return-type": "off",
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "@typescript-eslint/no-explicit-any": "off",
+    "import/consistent-type-specifier-style": ["warn", "prefer-inline"],
     "import/newline-after-import": ["error", { "considerComments": true }],
     "import/no-unresolved": "error",
     "import/order": [
       "error",
       {
-        "groups": ["builtin", "external", "internal", ["parent", "sibling"], "type"],
+        "groups": ["builtin", "external", "internal", ["parent", "sibling"]],
         "newlines-between": "always",
         "alphabetize": { "order": "asc", "caseInsensitive": true }
       }

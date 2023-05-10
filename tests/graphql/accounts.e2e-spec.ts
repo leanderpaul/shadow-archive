@@ -5,7 +5,7 @@
 /**
  * Importing user defined packages
  */
-import { ShadowArchive, GraphQLModule } from '@tests/common';
+import { GraphQLModule, ShadowArchive } from '@tests/common';
 
 /**
  * Defining types

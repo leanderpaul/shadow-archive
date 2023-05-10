@@ -5,7 +5,7 @@ import crypto from 'crypto';
 
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { FastifyReply, FastifyRequest } from 'fastify';
+import { type FastifyReply, type FastifyRequest } from 'fastify';
 import moment from 'moment';
 import sagus from 'sagus';
 import { parse } from 'useragent';
@@ -13,9 +13,9 @@ import { parse } from 'useragent';
 /**
  * Importing user defined packages
  */
-import { ConfigRecord } from '@app/config';
+import { type ConfigRecord } from '@app/config';
 import { ContextService } from '@app/providers/context';
-import { DBUtils, DatabaseService, User, UserSession, UserVariant } from '@app/providers/database';
+import { DBUtils, DatabaseService, type User, type UserSession, UserVariant } from '@app/providers/database';
 import { MailService, MailType } from '@app/providers/mail';
 import { AppError, ErrorCode } from '@app/shared/errors';
 

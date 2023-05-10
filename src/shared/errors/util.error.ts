@@ -1,16 +1,16 @@
 /**
  * Importing npm packages
  */
-import { GraphQLError, GraphQLFormattedError } from 'graphql';
+import { GraphQLError, type GraphQLFormattedError } from 'graphql';
 import { Error as MongooseError } from 'mongoose';
-import { Logger } from 'winston';
+import { type Logger } from 'winston';
 
 /**
  * Importing user defined packages
  */
 import { AppError } from './app.error';
 import { ErrorCode, ErrorType } from './error-code.error';
-import { FieldError, ValidationError } from './validation.error';
+import { type FieldError, ValidationError } from './validation.error';
 
 /**
  * Defining types

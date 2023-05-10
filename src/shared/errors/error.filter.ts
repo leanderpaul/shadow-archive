@@ -2,7 +2,7 @@
  * Importing npm packages
  */
 import { ArgumentsHost, Catch, ExceptionFilter, ForbiddenException, NotFoundException } from '@nestjs/common';
-import { FastifyReply } from 'fastify';
+import { type FastifyReply } from 'fastify';
 
 /**
  * Importing user defined packages

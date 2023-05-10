@@ -9,12 +9,12 @@ import sagus from 'sagus';
  * Importing user defined packages
  */
 import { ContextService } from '@app/providers/context';
-import { DatabaseService, UserSession, UserVariant } from '@app/providers/database';
+import { DatabaseService, type UserSession, UserVariant } from '@app/providers/database';
 import { MailService, MailType } from '@app/providers/mail';
 import { AppError, ErrorCode } from '@app/shared/errors';
 import { AuthService } from '@app/shared/modules';
 
-import { Session } from './accounts.entity';
+import { type Session } from './accounts.entity';
 
 /**
  * Defining types
