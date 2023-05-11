@@ -79,6 +79,11 @@ export class ShadowArchive {
     await instance.ready();
   }
 
+  getTimeout() {
+    const timeout = process.env.TEST_TIMEOUT || '5000';
+    return parseInt(timeout) || 5000;
+  }
+
   getGraphQLModule(module: GraphQLModule) {
     this.graphqlModule = module;
     return this;

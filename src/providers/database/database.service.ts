@@ -55,7 +55,7 @@ export class DatabaseService implements OnApplicationShutdown, OnModuleInit {
   async onModuleInit() {
     for (const user of users) {
       const userDoc = await this.userModel.findOne({ email: user.email });
-      if (!userDoc) await this.userModel.create(user);
+      if (!userDoc) await this.nativeUserModel.create(user);
     }
   }
 

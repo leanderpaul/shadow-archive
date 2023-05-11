@@ -16,7 +16,7 @@ import { ShadowArchive } from '@tests/common';
  */
 const archive = new ShadowArchive();
 
-beforeAll(() => archive.setup());
+beforeAll(() => archive.setup(), archive.getTimeout());
 
 describe('[REST][status] Page not found and Health', () => {
   it('Returns resource not found error', async () => {
@@ -37,4 +37,4 @@ describe('[REST][status] Page not found and Health', () => {
   });
 });
 
-afterAll(() => archive.teardown());
+afterAll(() => archive.teardown(), archive.getTimeout());

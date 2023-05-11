@@ -18,7 +18,7 @@ const USER = { email: 'test-user@mail.com', name: 'Test User', password: 'Passwo
 
 const archive = new ShadowArchive(GraphQLModule.ACCOUNTS);
 
-beforeAll(() => archive.setup());
+beforeAll(() => archive.setup(), archive.getTimeout());
 
 describe('[GraphQL][accounts:mutation] Register', () => {
   const query = /* GraphQL */ `
@@ -157,4 +157,4 @@ describe('[GraphQL][accounts:query] VerifySession', function () {
   });
 });
 
-afterAll(() => archive.teardown());
+afterAll(() => archive.teardown(), archive.getTimeout());

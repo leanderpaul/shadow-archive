@@ -21,7 +21,7 @@ interface UserStaticMethods {
   isOAuthUser(user: User): user is OAuthUser;
 }
 
-export interface UserModel extends Model<User>, UserStaticMethods {}
+export interface UserModel extends Omit<Model<User>, 'create' | 'insert' | 'insertMany'>, UserStaticMethods {}
 
 export interface NativeUserModel extends Model<NativeUser>, UserStaticMethods {}
 

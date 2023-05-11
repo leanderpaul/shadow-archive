@@ -17,6 +17,10 @@ env:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      NODE_ENV: ${{ vars.TEST_NODE_ENV }}
+      TEST_TIMEOUT: ${{ vars.TEST_TIMEOUT }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3

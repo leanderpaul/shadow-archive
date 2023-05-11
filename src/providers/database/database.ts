@@ -26,6 +26,7 @@ const debug = (colName: string, methodName: string, ...args: any[]) => logger.de
 
 const MongoDBModule = MongooseModule.forRoot(Config.get('DB_URI'), {
   appName: Config.getAppName(),
+  writeConcern: { w: 'majority' },
   connectionFactory(connection: Connection) {
     /** Setting mongoose options */
     connection.set('id', false);
