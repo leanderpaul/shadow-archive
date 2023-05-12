@@ -1,0 +1,30 @@
+name: Publish docker image
+
+on:
+  pull_request:
+    branches:
+      - master
+
+env:
+  DB_URI: ${{ secrets.DATABASE_CONNECTION_STRING }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: ${{ vars.TEST_NODE_ENV }}
+      TEST_TIMEOUT: ${{ vars.TEST_TIMEOUT }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js version
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+
+      - name: Testing the application
+        run: |
+          npm install
+          npm test
