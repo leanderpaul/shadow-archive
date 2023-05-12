@@ -39,7 +39,7 @@ export class ExpenseService {
     return items.reduce((acc, item) => acc + Math.round(item.price * item.qty), 0);
   }
 
-  findOneExpense<T extends object>(eid: string, projection?: Projection<T>) {
+  getExpense<T extends object>(eid: string, projection?: Projection<T>) {
     const user = this.contextService.getCurrentUser(true);
     const id = DBUtils.toObjectID(eid);
     if (!id) return null;

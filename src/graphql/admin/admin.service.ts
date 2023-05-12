@@ -39,7 +39,7 @@ export class AdminService {
     return user ? this.convertUser(user) : null;
   }
 
-  async searchUsers<T extends object>(projection: Projection<T>, sort: UserSort, page: PageInput, email?: string) {
+  async findUsers<T extends object>(projection: Projection<T>, sort: UserSort, page: PageInput, email?: string) {
     const users = await this.userModel
       .find(email ? { email: new RegExp(email) } : {}, projection)
       .sort({ [sort.field]: sort.order })

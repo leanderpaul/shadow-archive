@@ -29,38 +29,15 @@ export class ExpenseResolver {
   @Query(() => Expense, { name: 'expense' })
   getExpense(@Info() info: GraphQLResolveInfo, @Args('eid') eid: string) {
     const projection = GraphQLUtils.getProjection<Expense>(info);
-    return this.expenseService.findOneExpense(eid, projection);
+    return this.expenseService.getExpense(eid, projection);
   }
 
   @Query(() => ExpenseConnection, { name: 'expenses' })
   async getExpenseConnection(@Info() info: GraphQLResolveInfo, @Args() args: GetExpensesArgs) {
-    /** Validations */
-    PageInput.isValid(args.page);
-
-    const promises = [] as Promise<unknown>[];
-    const result = {} as Partial<ExpenseConnection>;
-    const projection = GraphQLUtils.getProjection<ExpenseConnection>(info);
-
-    if (projection.items) {
-      const promise = this.expenseService.findExpenses(projection.items, args.sort, args.page, args.query);
-      promise.then(items => (result.items = items));
-      promises.push(promise);
-    }
-
-    if (projection.page || projection.totalCount) {
-      const promise = this.expenseService.getTotalExpenses(args.query);
-      promise.then(count => (result.totalCount = count));
-      promises.push(promise);
-    }
-
-    await Promise.all(promises);
-    if (projection.page && result.totalCount) {
-      const hasPrev = args.page.offset > 0;
-      const hasNext = result.totalCount > args.page.offset + args.page.limit;
-      result.page = { hasPrev, hasNext };
-    }
-
-    return result;
+    return GraphQLUtils.getPaginationResult(info, args.page, {
+      getCount: () => this.expenseService.getTotalExpenses(args.query),
+      getItems: projection => this.expenseService.findExpenses(projection, args.sort, args.page, args.query),
+    });
   }
 
   @Mutation(() => Expense)

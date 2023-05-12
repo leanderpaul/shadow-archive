@@ -34,7 +34,7 @@ export class AdminResolver {
   @Query(() => UserConnection, { name: 'users' })
   getUserConnection(@Info() info: GraphQLResolveInfo, @Args() args: UserQuery): Promise<UserConnection> {
     return GraphQLUtils.getPaginationResult(info, args.page, {
-      getItems: projection => this.adminService.searchUsers(projection, args.sort, args.page, args.email),
+      getItems: projection => this.adminService.findUsers(projection, args.sort, args.page, args.email),
       getCount: () => this.adminService.getTotalUsers(args.email),
     });
   }
