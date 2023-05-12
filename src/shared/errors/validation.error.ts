@@ -37,7 +37,7 @@ export class ValidationError extends Error {
     const fields = errors.map(e => e.field);
     return fields.length === 1
       ? `Validation failed for ${fields[0]}`
-      : `Validation failed for ${fields.join(', ').replace(fields[fields.length - 1]!, `and ${fields[fields.length - 1]}`)}`;
+      : `Validation failed for ${fields.join(', ').replace(fields[fields.length - 1] as string, `and ${fields[fields.length - 1]}`)}`;
   }
 
   static formatMongooseValidationError(error: MongooseError.ValidationError): FormattedError {

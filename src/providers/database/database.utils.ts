@@ -7,7 +7,7 @@ import { mongooseLeanVirtuals } from 'mongoose-lean-virtuals';
 /**
  * Importing user defined packages
  */
-import { AppError, ErrorCode } from '@app/shared/errors';
+import { AppError, ErrorCode, NeverError } from '@app/shared/errors';
 
 /**
  * Defining types
@@ -35,7 +35,8 @@ function runUpdateValidations(this: Query<unknown, unknown>) {
 }
 
 export function transformId(this: Document<unknown>) {
-  return this._id!.toString();
+  if (!this._id) throw new NeverError('ObjectID is falsy');
+  return this._id.toString();
 }
 
 export function defaultOptionsPlugin(schema: Schema) {

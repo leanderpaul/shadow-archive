@@ -116,7 +116,8 @@ function removeSensitiveFields(data: Record<string, any>) {
  */
 function getFileIndex(filename: string) {
   const filenameArr = filename.split(/[-.]/);
-  return parseInt(filenameArr[filenameArr.length - 2]!);
+  const num = filenameArr[filenameArr.length - 2] || '0';
+  return parseInt(num);
 }
 
 /**
@@ -138,8 +139,9 @@ function createLogger() {
     logger.add(new transports.Console({ format: consoleLogFormat }));
   }
 
-  if (Config.getNodeEnv() === 'production') {
-    logtail = new Logtail(Config.get('LOGTAIL_SOURCE_TOKEN')!);
+  const logtailAPIToken = Config.get('LOGTAIL_SOURCE_TOKEN');
+  if (Config.getNodeEnv() === 'production' && logtailAPIToken) {
+    logtail = new Logtail(logtailAPIToken);
     logger.add(new LogtailTransport(logtail, { format: logFormat }));
   } else {
     /** Creating the log directory if it does not exist */
@@ -156,8 +158,7 @@ function createLogger() {
     const regex = new RegExp(`^(${appName}-)[0-9]+(.log)$`);
     const appLogFiles = logFiles.filter(filename => regex.test(filename));
     const sortedFilenames = appLogFiles.sort((a, b) => getFileIndex(b) - getFileIndex(a));
-    for (let index = 0; index < sortedFilenames.length; index++) {
-      const filename = sortedFilenames[index]!;
+    for (const filename of sortedFilenames) {
       const num = getFileIndex(filename);
       fs.renameSync(`${logDir}/${filename}`, `${logDir}/${appName}-${num + 1}.log`);
     }

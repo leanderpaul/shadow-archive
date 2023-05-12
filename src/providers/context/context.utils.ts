@@ -25,13 +25,11 @@ export const Context = {
   init() {
     return (req: FastifyRequest, res: FastifyReply, next: () => void) => {
       req.body = typeof req.body === 'object' ? Utils.sanitize(req.body as object) : req.body;
-      asyncLocalStorage.run(new Map(), () => {
-        const store = asyncLocalStorage.getStore()!;
-        store.set('RID', sagus.genUUID());
-        store.set('CURRENT_REQUEST', req);
-        store.set('CURRENT_RESPONSE', res);
-        next();
-      });
+      const store = new Map<string, any>();
+      store.set('RID', sagus.genUUID());
+      store.set('CURRENT_REQUEST', req);
+      store.set('CURRENT_RESPONSE', res);
+      asyncLocalStorage.run(store, () => next());
     };
   },
 
