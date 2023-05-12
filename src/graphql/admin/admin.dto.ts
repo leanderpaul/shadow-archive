@@ -14,8 +14,7 @@ import { PageInput, SortOrder } from '@app/graphql/common';
 
 export enum UserSortField {
   EMAIL = 'email',
-  CREATED_DATE = 'createdAt',
-  UPDATED_DATE = 'updatedAt',
+  CREATED_DATE = '_id',
 }
 
 /**
