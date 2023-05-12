@@ -11,7 +11,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME: ghcr.io/${{ github.repository }}
   DB_URI: ${{ secrets.DATABASE_CONNECTION_STRING }}
 
 jobs:
@@ -38,6 +38,8 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     needs: test
+    outputs:
+      digest: ${{ steps.docker-build.outputs.digest }}
     permissions:
       contents: read
       packages: write
@@ -60,7 +62,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.IMAGE_NAME }}
 
       - name: Build and push Docker image
         id: docker-build
@@ -73,10 +75,15 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+  deploy:
+    runs-on: ubuntu-latest
+    needs: publish
+    if: inputs.deploy
+
+    steps:
       - name: Deploy to azure app service
-        if: inputs.deploy
         uses: azure/webapps-deploy@v2
         with:
           app-name: shadow-archive
-          images: leanderpaul/shadow-archive@${{ steps.docker-build.outputs.Digest }}
+          images: ${{ env.IMAGE_NAME }}@${{ needs.publish.outputs.digest }}
           publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
