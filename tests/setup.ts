@@ -19,7 +19,7 @@ process.env.DB_URI = process.env.DB_URI || 'mongodb://localhost/shadow-test';
 
 module.exports = async function () {
   /** Deleting old test data */
-  await mongoose.connect(process.env.DB_URI!);
+  await mongoose.connect(process.env.DB_URI as string);
   await mongoose.connection.db.dropDatabase();
   await mongoose.connection.close();
 };

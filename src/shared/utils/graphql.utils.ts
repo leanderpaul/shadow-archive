@@ -26,7 +26,7 @@ function getProjectionSelectionSetNode<T extends object>(node: SelectionSetNode,
     if (selectionNode.kind === Kind.FIELD) {
       const value = selectionNode.selectionSet ? getProjectionSelectionSetNode<T>(selectionNode.selectionSet, info, aliases) : 1;
       let key = selectionNode.name.value;
-      if (aliases?.[key]) key = aliases[key]!;
+      if (aliases?.[key]) key = aliases[key] as string;
       fields[key] = value;
     } else if (selectionNode.kind === Kind.FRAGMENT_SPREAD) {
       const fragmentName = selectionNode.name.value;
@@ -67,9 +67,9 @@ export class GraphQLUtils {
     }
 
     await Promise.all(promises);
-    if (projection.page) {
+    if (projection.page && result.totalCount != undefined) {
       const hasPrev = page.offset > 0;
-      const hasNext = result.totalCount! > page.offset + page.limit;
+      const hasNext = result.totalCount > page.offset + page.limit;
       result.page = { hasPrev, hasNext };
     }
 

@@ -185,7 +185,7 @@ export class ShadowArchiveResponse {
 
   expectGraphQLError(code: string, type?: string, index = 0) {
     const response = this.response as GraphQLErrorResponse;
-    const error = response.body.errors[index]!;
+    const error = response.body.errors[index] as GraphQLFormattedError;
     expect(response.body.data).toBeNull();
     expect(error.extensions.code).toBe(code);
     expect(error.extensions.type).toBe(type || ((ErrorCode as any)[code] as ErrorCode).getType());
@@ -194,7 +194,7 @@ export class ShadowArchiveResponse {
 
   expectGraphQLErrorFields(fields: string[], index = 0) {
     const response = this.response as GraphQLErrorResponse;
-    const error = (response as GraphQLErrorResponse).body.errors[index]!;
+    const error = (response as GraphQLErrorResponse).body.errors[index] as GraphQLFormattedError;
     expect(error.extensions.fields).toHaveLength(fields.length);
     expect(error.extensions.fields?.map((obj: any) => obj.field)).toEqual(expect.arrayContaining(fields));
   }
