@@ -9,7 +9,7 @@ import { Args, Int, Mutation, Parent, Query, ResolveField, Resolver } from '@nes
 import { type User } from '@app/providers/database';
 import { AuthType, UseAuth } from '@app/shared/decorators';
 
-import { LoginArgs, RegisterArgs, ResetPasswordArgs, UpdatePasswordArgs } from './accounts.dto';
+import { LoginArgs, RegisterArgs, ResetPasswordArgs, UpdatePasswordArgs, UpdateUserArgs } from './accounts.dto';
 import { Session, Viewer } from './accounts.entity';
 import { AccountsService } from './accounts.service';
 
@@ -83,5 +83,10 @@ export class AccountsResolver {
   async logout(@Args({ name: 'sessionId', nullable: true, description: 'pass -1 to clear all sessions', type: () => Int }) sessionId?: number) {
     await this.accountsService.logoutUser(sessionId);
     return true;
+  }
+
+  @Mutation(() => Viewer)
+  updateUserProfile(@Args() update: UpdateUserArgs) {
+    return this.accountsService.updateUser(update);
   }
 }

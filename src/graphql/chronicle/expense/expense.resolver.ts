@@ -7,7 +7,6 @@ import { type GraphQLResolveInfo } from 'graphql';
 /**
  * Importing user defined packages
  */
-import { PageInput } from '@app/graphql/common';
 import { GraphQLUtils } from '@app/shared/utils';
 
 import { AddExpenseInput, GetExpensesArgs, UpdateExpenseInput } from './expense.dto';

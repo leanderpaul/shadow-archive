@@ -45,4 +45,13 @@ export class Utils {
   static getCache<T>(key: string): T | null {
     return cache[key] ?? null;
   }
+
+  static isChanged<T extends object, U extends T>(original: U, update: T) {
+    for (const [key, value] of Object.entries(update)) {
+      const originalValue = (original as any)[key];
+      if (typeof value === 'object' && Utils.isChanged(originalValue, value)) return true;
+      else if (originalValue != value) return true;
+    }
+    return false;
+  }
 }

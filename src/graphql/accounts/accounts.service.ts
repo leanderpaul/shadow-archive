@@ -13,7 +13,9 @@ import { DatabaseService, type UserSession, UserVariant } from '@app/providers/d
 import { MailService, MailType } from '@app/providers/mail';
 import { AppError, ErrorCode } from '@app/shared/errors';
 import { AuthService } from '@app/shared/modules';
+import { Utils } from '@app/shared/utils';
 
+import { type UpdateUserArgs } from './accounts.dto';
 import { type Session } from './accounts.entity';
 
 /**
@@ -27,6 +29,7 @@ import { type Session } from './accounts.entity';
 @Injectable()
 export class AccountsService {
   private readonly nativeUserModel;
+  private readonly userModel;
 
   constructor(
     private readonly authService: AuthService,
@@ -35,6 +38,7 @@ export class AccountsService {
     databaseService: DatabaseService,
   ) {
     this.nativeUserModel = databaseService.getUserModel(UserVariant.NATIVE);
+    this.userModel = databaseService.getUserModel();
   }
 
   getUser() {
@@ -126,5 +130,11 @@ export class AccountsService {
     const user = this.getUser();
     const session = this.contextService.getCurrentSession(true);
     return this.authService.removeSession(user, sessionId ?? session.id);
+  }
+
+  async updateUser(update: UpdateUserArgs) {
+    const user = this.getUser();
+    if (!Utils.isChanged(user, update)) return user;
+    return this.userModel.findOneAndUpdate({ _id: user._id }, { $set: update }).lean();
   }
 }
