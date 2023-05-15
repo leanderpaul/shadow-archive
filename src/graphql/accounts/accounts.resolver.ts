@@ -1,7 +1,7 @@
 /**
  * Importing npm packages
  */
-import { Args, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
+import { Args, Int, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
 
 /**
  * Importing user defined packages
@@ -80,7 +80,8 @@ export class AccountsResolver {
   }
 
   @Mutation(() => Boolean, { name: 'logout' })
-  logout(@Args({ name: 'sessionId', nullable: true }) sessionId: string) {
-    return this.accountsService.logoutUser(sessionId === '*');
+  async logout(@Args({ name: 'sessionId', nullable: true, description: 'pass -1 to clear all sessions', type: () => Int }) sessionId?: number) {
+    await this.accountsService.logoutUser(sessionId);
+    return true;
   }
 }

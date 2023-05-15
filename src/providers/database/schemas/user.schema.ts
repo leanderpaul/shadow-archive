@@ -42,12 +42,19 @@ const emailRegex = /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-
 
 @Schema({ _id: false, versionKey: false })
 export class UserSession {
-  /** User session id. This is the value stored in the user's cookie */
+  /** User session ID used to identify the session */
+  @Prop({
+    type: 'number',
+    required: true,
+  })
+  id: number;
+
+  /** User session token. This is the value stored in the user's cookie */
   @Prop({
     type: 'string',
     required: true,
   })
-  id: string;
+  token: string;
 
   /** The browser from which the session was created */
   @Prop({ type: 'string' })

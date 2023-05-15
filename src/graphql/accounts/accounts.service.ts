@@ -122,9 +122,9 @@ export class AccountsService {
     return result.modifiedCount === 1;
   }
 
-  logoutUser(clearAllSessions: boolean) {
+  logoutUser(sessionId?: number) {
     const user = this.getUser();
     const session = this.contextService.getCurrentSession(true);
-    return this.authService.removeSession(user, clearAllSessions ? '*' : session.id);
+    return this.authService.removeSession(user, sessionId ?? session.id);
   }
 }
