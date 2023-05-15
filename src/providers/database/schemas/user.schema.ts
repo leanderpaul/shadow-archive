@@ -10,7 +10,9 @@ import sagus from 'sagus';
 /**
  * Importing user defined packages
  */
-import { defaultOptionsPlugin, transformId } from '../database.utils';
+import { AppError, ErrorCode } from '@app/shared/errors';
+
+import { defaultOptionsPlugin, handleDuplicateKeyError, transformId } from '../database.utils';
 
 /**
  * Defining types
@@ -30,11 +32,11 @@ export interface OAuthUserModel extends Model<OAuthUser>, UserStaticMethods {}
 /**
  * Declaring the constants
  */
-
 const nameRegex = /^[a-zA-Z ]{3,32}$/;
 const uriRegex = /^(?:[a-z][a-z0-9+\-.]*:)(?:\/?\/)?[^\s]*$/i;
 const passwordRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/;
 const emailRegex = /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/i;
+const duplicateEmailError = new AppError(ErrorCode.R003);
 
 /**
  * Defining the schemas
@@ -42,12 +44,19 @@ const emailRegex = /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-
 
 @Schema({ _id: false, versionKey: false })
 export class UserSession {
-  /** User session id. This is the value stored in the user's cookie */
+  /** User session ID used to identify the session */
+  @Prop({
+    type: 'number',
+    required: true,
+  })
+  id: number;
+
+  /** User session token. This is the value stored in the user's cookie */
   @Prop({
     type: 'string',
     required: true,
   })
-  id: string;
+  token: string;
 
   /** The browser from which the session was created */
   @Prop({ type: 'string' })
@@ -190,7 +199,7 @@ UserSchema.static('isOAuthUser', (user: User) => 'refreshToken' in user);
  */
 UserSchema.virtual('uid').get(transformId);
 UserSchema.plugin(defaultOptionsPlugin);
-
+UserSchema.post('save', handleDuplicateKeyError(duplicateEmailError));
 /**
  * Setting up the indexes
  */

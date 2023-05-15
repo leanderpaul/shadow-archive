@@ -9,7 +9,8 @@
     "build": "node scripts/package-app.js",
     "dev": "nest start --watch",
     "gen:schemas": "ts-node -r tsconfig-paths/register src/graphql/generate-schema.ts",
-    "lint": "eslint \"{src,tests}/**/*.ts\" --fix",
+    "lint": "eslint \"{src,tests}/**/*.ts\"",
+    "lint:fix": "eslint \"{src,tests}/**/*.ts\" --fix",
     "postinstall": "patch-package",
     "prepare": "husky install",
     "test": "jest --config ./tests/jest-e2e.json"

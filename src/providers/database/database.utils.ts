@@ -1,6 +1,7 @@
 /**
  * Importing npm packages
  */
+import { MongoServerError } from 'mongodb';
 import { type Document, Query, type Schema, Types } from 'mongoose';
 import { mongooseLeanVirtuals } from 'mongoose-lean-virtuals';
 
@@ -29,14 +30,21 @@ function defaultLean(this: Query<unknown, unknown>) {
   if (this._mongooseOptions.lean === true) this.lean({ virtuals: true });
 }
 
-function runUpdateValidations(this: Query<unknown, unknown>) {
-  const opts = this.getOptions();
-  if (opts.runValidators === undefined) opts.runValidators = true;
-}
-
 export function transformId(this: Document<unknown>) {
   if (!this._id) throw new NeverError('ObjectID is falsy');
   return this._id.toString();
+}
+
+export function handleDuplicateKeyError(throwError: AppError<any> | Record<string, AppError<any>>) {
+  return function (error: Error, _result: unknown, next: (error?: Error) => void) {
+    if (error instanceof MongoServerError && error.code === 11000) {
+      if (throwError instanceof AppError) return next(throwError);
+      for (const [key, value] of Object.entries(throwError)) {
+        if (error.message.includes(key)) return next(value);
+      }
+    }
+    return next(error);
+  };
 }
 
 export function defaultOptionsPlugin(schema: Schema) {
@@ -46,11 +54,6 @@ export function defaultOptionsPlugin(schema: Schema) {
   schema.pre('findOne', defaultLean);
   schema.pre('findOneAndUpdate', defaultLean);
   schema.pre('findOneAndDelete', defaultLean);
-
-  schema.pre('update', runUpdateValidations);
-  schema.pre('updateOne', runUpdateValidations);
-  schema.pre('updateMany', runUpdateValidations);
-  schema.pre('findOneAndUpdate', runUpdateValidations);
 }
 
 export class DBUtils {

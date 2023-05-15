@@ -3,7 +3,7 @@
  */
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Connection } from 'mongoose';
+import mongoose, { Connection } from 'mongoose';
 
 /**
  * Importing user defined packages
@@ -24,16 +24,16 @@ import { ExpenseMongooseModule, MemoirMongooseModule, MetadataMongooseModule, Us
 const logger = Logger.getLogger('database');
 const debug = (colName: string, methodName: string, ...args: any[]) => logger.debug(`db.${colName}.${methodName}(${args.map(obj => JSON.stringify(obj)).join(', ')})`);
 
+/** Setting mongoose options */
+mongoose.set('id', false);
+mongoose.set('runValidators', true);
+mongoose.set('returnOriginal', false);
+mongoose.set('toObject', { virtuals: true });
+mongoose.set('debug', Config.get('LOG_LEVEL') === 'debug' ? debug : false);
+
 const MongoDBModule = MongooseModule.forRoot(Config.get('DB_URI'), {
   appName: Config.getAppName(),
-  writeConcern: { w: 'majority' },
   connectionFactory(connection: Connection) {
-    /** Setting mongoose options */
-    connection.set('id', false);
-    connection.set('returnOriginal', false);
-    connection.set('toObject', { virtuals: true });
-    if (Config.get('LOG_LEVEL') === 'debug') connection.set('debug', debug);
-
     /** Handling mongoose connection errors */
     connection.on('error', (err: Error) => logger.error(err));
     connection.on('close', () => logger.debug(`mongodb connection closed`));

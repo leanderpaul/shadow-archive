@@ -85,6 +85,8 @@ export class ErrorCode {
   static readonly R001 = new ErrorCode('R001', ErrorType.NOT_FOUND, 'Resource not found');
   /** Resource input validation failed */
   static readonly R002 = new ErrorCode('R002', ErrorType.CLIENT_ERROR, 'Resource input validation failed');
+  /** Email address is already taken */
+  static readonly R003 = new ErrorCode('R003', ErrorType.HTTP_ERROR, 'Email address is already taken');
 
   /*!
    * List of all server related errrors

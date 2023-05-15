@@ -1,7 +1,7 @@
 /**
  * Importing npm packages
  */
-import { Field, GraphQLISODateTime, ID, ObjectType } from '@nestjs/graphql';
+import { Field, GraphQLISODateTime, ID, Int, ObjectType } from '@nestjs/graphql';
 
 /**
  * Importing user defined packages
@@ -17,6 +17,9 @@ import { Field, GraphQLISODateTime, ID, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
 export class Session {
+  @Field(() => Int)
+  id: number;
+
   @Field({ nullable: true })
   browser?: string;
 

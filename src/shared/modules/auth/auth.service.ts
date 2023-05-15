@@ -65,13 +65,13 @@ export class AuthService {
     return result.toString();
   }
 
-  private encodeCookie(uid: string, sid: string) {
-    return uid + '|' + sid;
+  private encodeCookie(uid: string, token: string) {
+    return uid + '|' + token;
   }
 
   private decodeCookie(cookie: string) {
     const data = cookie.split('|') as [string, string];
-    return { uid: data[0], sid: data[1] };
+    return { uid: data[0], token: data[1] };
   }
 
   private clearCookies(res?: FastifyReply) {
@@ -81,10 +81,10 @@ export class AuthService {
     return null;
   }
 
-  private setCookies(uid: string, sid: string, res?: FastifyReply) {
+  private setCookies(uid: string, token: string, res?: FastifyReply) {
     const name = this.configService.get('COOKIE_NAME');
     const maxAge = this.configService.get('COOKIE_MAX_AGE');
-    const value = this.encodeCookie(uid, sid);
+    const value = this.encodeCookie(uid, token);
     const secure = this.configService.get('IS_PROD_SERVER');
     const domain = secure ? this.configService.get('DOMAIN') : undefined;
     if (!res?.setCookie) res = this.contextService.getCurrentResponse();
@@ -94,7 +94,7 @@ export class AuthService {
   generateCSRFToken(expireAt: moment.Moment) {
     const session = this.contextService.getCurrentSession(true);
     const md5 = crypto.createHash('md5');
-    const payload = expireAt.unix() + '|' + session.id;
+    const payload = expireAt.unix() + '|' + session.token;
     return expireAt.unix() + '|' + md5.update(payload).digest('base64url');
   }
 
@@ -116,8 +116,9 @@ export class AuthService {
     return true;
   }
 
-  private generateUserSession() {
-    const session: UserSession = { id: sagus.genRandom(32, 'base64'), accessedAt: new Date() };
+  private generateUserSession(user?: User) {
+    const prevId = user?.sessions[user.sessions.length - 1]?.id || 0;
+    const session: UserSession = { id: prevId + 1, token: sagus.genRandom(32, 'base64'), accessedAt: new Date() };
     const req = this.contextService.getCurrentRequest();
     const agent = parse(req.headers['user-agent']);
     if (agent.family != 'Other') session.browser = agent.toAgent();
@@ -140,14 +141,14 @@ export class AuthService {
     const cookieName = this.configService.get('COOKIE_NAME');
     const cookie = req.cookies[cookieName] as string | undefined;
     if (!cookie) return null;
-    const { uid, sid } = this.decodeCookie(cookie);
+    const { uid, token } = this.decodeCookie(cookie);
 
     /** Verifying the cookie */
     const _id = DBUtils.toObjectID(uid);
     if (!_id) return null;
     const user = await this.userModel.findOne({ _id }).lean();
     if (!user) return this.clearCookies(res);
-    const session = user.sessions.find(s => s.id === sid);
+    const session = user.sessions.find(s => s.token === token);
     if (!session) return this.clearCookies(res);
     const maxAge = this.configService.get('COOKIE_MAX_AGE');
     const expireAt = moment().subtract(maxAge, 'seconds');
@@ -166,12 +167,12 @@ export class AuthService {
   }
 
   async initUserSession(user: User) {
-    const session = this.generateUserSession();
+    const session = this.generateUserSession(user);
     const maxAge = this.configService.get('COOKIE_MAX_AGE');
     const expireAt = moment().subtract(maxAge, 'seconds').toDate();
     const validSessions = user.sessions.filter(s => s.accessedAt > expireAt);
     await this.userModel.updateOne({ _id: user._id }, { $set: { sessions: [...validSessions, session] } });
-    this.setCookies(user.uid, session.id);
+    this.setCookies(user.uid, session.token);
     this.contextService.setCurrentSession(session);
     return session;
   }
@@ -184,7 +185,7 @@ export class AuthService {
 
     if (createSession && user.sessions[0]) {
       const session = user.sessions[0];
-      this.setCookies(user.uid, session.id);
+      this.setCookies(user.uid, session.token);
       this.contextService.setCurrentUser(user);
       this.contextService.setCurrentSession(session);
     }
@@ -195,9 +196,10 @@ export class AuthService {
     return user;
   }
 
-  async removeSession(user: User, sessionId: string) {
-    const updateSession = sessionId === '*' ? { $set: { sessions: [] } } : { $pull: { sessions: { id: sessionId } } };
+  async removeSession(user: User, sessionId: number) {
+    const updateSession = sessionId === -1 ? { $set: { sessions: [] } } : { $pull: { sessions: { id: sessionId } } };
     await this.userModel.updateOne({ _id: user._id }, updateSession);
-    this.clearCookies();
+    const currentSession = this.contextService.getCurrentSession(true);
+    if (sessionId === -1 || currentSession.id === sessionId) this.clearCookies();
   }
 }

@@ -47,3 +47,12 @@ export class UpdatePasswordArgs {
   @Field()
   newPassword: string;
 }
+
+@ArgsType()
+export class UpdateUserArgs {
+  @Field({ nullable: true })
+  name?: string;
+
+  @Field({ nullable: true })
+  imageUrl?: string;
+}
