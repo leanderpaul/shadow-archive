@@ -28,6 +28,7 @@ export interface LogMetadata {
 
 export interface RequestMetadata {
   rid?: string;
+  host?: string;
   method?: string;
   url?: string;
   status?: number;
@@ -206,6 +207,7 @@ export const Logger = {
       metadata.url = req.url;
       metadata.method = req.method;
       metadata.status = res.statusCode;
+      metadata.host = req.headers.host;
       metadata.reqLen = req.headers['content-length'];
       metadata.reqIp = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress;
       metadata.resLen = res.getHeader('content-length') as string;
