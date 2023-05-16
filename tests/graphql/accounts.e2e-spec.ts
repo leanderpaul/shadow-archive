@@ -1,6 +1,7 @@
 /**
  * Importing npm packages
  */
+import { expect } from '@jest/globals';
 
 /**
  * Importing user defined packages

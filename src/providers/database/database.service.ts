@@ -10,7 +10,6 @@ import { Connection } from 'mongoose';
  */
 import { Expense, type ExpenseModel } from './schemas/expense.schema';
 import { Memoir, type MemoirModel } from './schemas/memoir.schema';
-import { ChronicleMetadata, type ChronicleMetadataModel, Metadata, type MetadataModel } from './schemas/metadata.schema';
 import { NativeUser, type NativeUserModel, OAuthUser, type OAuthUserModel, User, type UserModel } from './schemas/user.schema';
 
 /**
@@ -20,10 +19,6 @@ import { NativeUser, type NativeUserModel, OAuthUser, type OAuthUserModel, User,
 export enum UserVariant {
   NATIVE,
   OAUTH,
-}
-
-export enum MetadataVariant {
-  CHRONICLE,
 }
 
 /**
@@ -47,8 +42,6 @@ export class DatabaseService implements OnApplicationShutdown, OnModuleInit {
     @InjectModel(NativeUser.name) private readonly nativeUserModel: NativeUserModel,
     @InjectModel(OAuthUser.name) private readonly oauthUserModel: OAuthUserModel,
     @InjectModel(Expense.name) private readonly expenseModel: ExpenseModel,
-    @InjectModel(Metadata.name) private readonly metadataModel: MetadataModel,
-    @InjectModel(ChronicleMetadata.name) private readonly chronicleMetadataModel: ChronicleMetadataModel,
     @InjectModel(Memoir.name) private readonly memoirModel: MemoirModel,
   ) {}
 
@@ -72,12 +65,6 @@ export class DatabaseService implements OnApplicationShutdown, OnModuleInit {
 
   getExpenseModel() {
     return this.expenseModel;
-  }
-
-  getMetadataModel(): MetadataModel;
-  getMetadataModel(variant: MetadataVariant.CHRONICLE): ChronicleMetadataModel;
-  getMetadataModel(variant?: MetadataVariant): MetadataModel | ChronicleMetadataModel {
-    return variant === undefined ? this.metadataModel : this.chronicleMetadataModel;
   }
 
   getMemoirModel() {

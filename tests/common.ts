@@ -2,6 +2,7 @@
  * Importing npm packages
  */
 import { fastifyCookie } from '@fastify/cookie';
+import { expect } from '@jest/globals';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 import { Test } from '@nestjs/testing';
 import request, { type Request, type Response } from 'supertest';
@@ -17,6 +18,12 @@ import { ErrorCode, type GraphQLFormattedErrorExtensions } from '@app/shared/err
 /**
  * Defining types
  */
+
+declare module 'expect' {
+  export interface AsymmetricMatchers {
+    nullableAny(sample: unknown): void;
+  }
+}
 
 export enum GraphQLModule {
   ACCOUNTS = 'accounts',
@@ -60,6 +67,45 @@ const expectRID = expect.stringMatching(/^[0-9A-F]{8}-[0-9A-F]{4}-[1][0-9A-F]{3}
 const OContext = { ...Context };
 Context.getCurrentRequest = () => OContext.getCurrentRequest() || { headers: {} };
 Context.getCurrentResponse = () => OContext.getCurrentResponse() || { setCookie: jest.fn(), clearCookie: jest.fn() };
+
+expect.extend({
+  nullableAny(actual: unknown, sample: unknown) {
+    if (typeof sample === 'undefined') throw new TypeError('optionalAny() expects to be passed a constructor function.');
+
+    let pass: boolean;
+    let type: string;
+    if (sample == String) {
+      type = 'string';
+      pass = typeof actual == 'string' || actual instanceof String;
+    } else if (sample == Number) {
+      type = 'number';
+      pass = typeof actual == 'number' || actual instanceof Number;
+    } else if (sample == Function) {
+      type = 'function';
+      pass = typeof actual == 'function' || actual instanceof Function;
+    } else if (sample == Boolean) {
+      type = 'boolean';
+      pass = typeof actual == 'boolean' || actual instanceof Boolean;
+    } else if (sample == BigInt) {
+      type = 'BigInt';
+      pass = typeof actual == 'bigint' || actual instanceof BigInt;
+    } else if (sample == Symbol) {
+      type = 'symbol';
+      pass = typeof actual == 'symbol' || actual instanceof Symbol;
+    } else if (sample == Object) {
+      type = 'object';
+      pass = typeof actual == 'object';
+    } else {
+      type = (sample as any).name;
+      pass = actual instanceof (sample as any);
+    }
+    if (actual === null) pass = true;
+
+    const message = pass ? () => `expected ${actual} not to be Any<${type}> or Null` : () => `expected ${actual} to be Any<${type}> or Null`;
+
+    return { message, pass };
+  },
+});
 
 export class ShadowArchive {
   private app: NestFastifyApplication;
@@ -154,7 +200,7 @@ export class ShadowArchiveResponse {
     return this.response.body;
   }
 
-  expectRESTData(obj: object) {
+  expectRESTData(obj: Record<string, unknown>) {
     expect(this.getBody()).toMatchObject(obj);
   }
 
@@ -199,7 +245,7 @@ export class ShadowArchiveResponse {
     expect(error.extensions.fields?.map((obj: any) => obj.field)).toEqual(expect.arrayContaining(fields));
   }
 
-  expectGraphQLData(obj: object) {
+  expectGraphQLData(obj: Record<string, unknown>) {
     const response = this.response as GraphQLDataResponse;
     expect(response.body.data).toBeDefined();
     expect(Object.keys(response.body.data).length).toBeGreaterThan(0);

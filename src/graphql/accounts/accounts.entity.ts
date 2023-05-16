@@ -32,7 +32,7 @@ export class Session {
   @Field(() => GraphQLISODateTime)
   accessedAt: Date;
 
-  @Field(() => Boolean, { nullable: true })
+  @Field(() => Boolean, { defaultValue: false })
   currentSession?: boolean;
 }
 

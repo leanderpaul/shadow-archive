@@ -15,6 +15,7 @@ import { Utils } from '@app/shared/utils/common.utils';
 /**
  * Defining types
  */
+export type CurrentUser = Pick<User, '_id' | 'uid' | 'email' | 'admin' | 'verified'>;
 
 /**
  * Declaring the constants
@@ -55,10 +56,10 @@ export const Context = {
   },
 
   getCurrentUser() {
-    return Context.get<User>('CURRENT_USER');
+    return Context.get<CurrentUser>('CURRENT_USER');
   },
 
-  setCurrentUser(user: User) {
+  setCurrentUser(user: CurrentUser) {
     Context.set('CURRENT_USER', user);
     return this;
   },

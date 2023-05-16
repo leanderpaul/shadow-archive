@@ -9,11 +9,11 @@ import sagus from 'sagus';
  * Importing user defined packages
  */
 import { ContextService } from '@app/providers/context';
-import { DatabaseService, type UserSession, UserVariant } from '@app/providers/database';
+import { DatabaseService, type User, UserActivityType, type UserSession, UserVariant } from '@app/providers/database';
 import { MailService, MailType } from '@app/providers/mail';
 import { AppError, ErrorCode } from '@app/shared/errors';
 import { AuthService } from '@app/shared/modules';
-import { Utils } from '@app/shared/utils';
+import { type Projection } from '@app/shared/utils';
 
 import { type UpdateUserArgs } from './accounts.dto';
 import { type Session } from './accounts.entity';
@@ -41,8 +41,9 @@ export class AccountsService {
     this.userModel = databaseService.getUserModel();
   }
 
-  getUser() {
-    return this.contextService.getCurrentUser(true);
+  getUser(projection: Projection<User>) {
+    const { _id } = this.contextService.getCurrentUser(true);
+    return this.userModel.findOne({ _id }, projection).lean() as Promise<User>;
   }
 
   convertSession(userSession: UserSession) {
@@ -83,19 +84,19 @@ export class AccountsService {
     this.nativeUserModel.updateOne({ email }, { $unset: { emailVerificationCode: '' } });
   }
 
-  resendEmailVerificationMail() {
-    const user = this.getUser();
+  async resendEmailVerificationMail() {
+    const user = await this.getUser({ email: 1, emailVerificationCode: 1, name: 1 });
     if (!user.emailVerificationCode) throw new AppError(ErrorCode.IAM012);
     const code = Buffer.from(user.email).toString('base64') + '|' + user.emailVerificationCode;
     this.mailService.sendMail(MailType.EMAIL_VERIFICATION, user.email, { code, name: user.name });
   }
 
   async forgotPassword(email: string) {
-    const user = await this.nativeUserModel.findOne({ email }).lean();
+    const user = await this.nativeUserModel.findOne({ email }, 'email name').lean();
     if (!user) return;
     const expiry = moment().add(1, 'day').format('X');
     const passwordResetCode = expiry + '.' + sagus.genRandom(16);
-    await this.nativeUserModel.updateOne({ email }, { $set: { passwordResetCode } });
+    await this.nativeUserModel.updateOne({ _id: user._id }, { $set: { passwordResetCode } });
     const code = Buffer.from(user.email).toString('base64url') + '|' + passwordResetCode;
     this.mailService.sendMail(MailType.RESET_PASSWORD, user.email, { code, name: user.name });
   }
@@ -105,36 +106,37 @@ export class AccountsService {
     if (!encodedEmail || !passwordResetCode) throw new AppError(ErrorCode.IAM010);
 
     const email = Buffer.from(encodedEmail, 'base64url').toString();
-    const user = await this.nativeUserModel.findOneAndUpdate({ email, passwordResetCode }).lean();
+    const user = await this.nativeUserModel.findOne({ email, passwordResetCode }, 'passwordResetCode').lean();
     if (!user || !user.passwordResetCode) throw new AppError(ErrorCode.IAM010);
 
     const [expiry] = user.passwordResetCode.split('.') as [string, string];
     if (moment().isAfter(expiry)) {
-      await this.nativeUserModel.updateOne({ email }, { $unset: { passwordResetCode: '' } });
+      await this.nativeUserModel.updateOne({ _id: user._id }, { $unset: { passwordResetCode: '' } });
       return 'Password reset code is expired';
     }
-    await this.nativeUserModel.updateOne({ email }, { $set: { password: newPassword }, $unset: { passwordResetCode: '' } });
+    await this.nativeUserModel.updateOne({ _id: user._id }, { $set: { password: newPassword }, $unset: { passwordResetCode: '' } });
     return 'Password reset successfully';
   }
 
   async updatePassword(oldPassword: string, newPassword: string) {
-    const user = this.getUser();
-    if (!this.nativeUserModel.isNativeUser(user)) throw new AppError(ErrorCode.IAM007);
+    const { _id } = this.contextService.getCurrentUser(true);
+    const user = await this.nativeUserModel.findOne({ _id }, 'email password');
+    if (!user) throw new AppError(ErrorCode.IAM007);
     const isValid = await sagus.compareHash(oldPassword, user.password);
     if (!isValid) throw new AppError(ErrorCode.IAM008);
-    const result = await this.nativeUserModel.updateOne({ email: user.email }, { $set: { password: newPassword } });
+    const activity = { type: UserActivityType.CHANGE_PASSWORD };
+    const result = await this.nativeUserModel.updateOne({ email: user.email }, { $set: { password: newPassword }, $push: { activities: activity } });
     return result.modifiedCount === 1;
   }
 
   logoutUser(sessionId?: number) {
-    const user = this.getUser();
+    const user = this.contextService.getCurrentUser(true);
     const session = this.contextService.getCurrentSession(true);
-    return this.authService.removeSession(user, sessionId ?? session.id);
+    return this.authService.removeSession(user._id, sessionId ?? session.id);
   }
 
   async updateUser(update: UpdateUserArgs) {
-    const user = this.getUser();
-    if (!Utils.isChanged(user, update)) return user;
+    const user = this.contextService.getCurrentUser(true);
     return this.userModel.findOneAndUpdate({ _id: user._id }, { $set: update }).lean();
   }
 }
