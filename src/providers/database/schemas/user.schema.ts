@@ -182,7 +182,7 @@ export class User {
   activities: UserActivity[];
 
   /** chronicle app user metadata */
-  @Prop({ type: [SchemaFactory.createForClass(ChronicleMetadata)], default: { expenseCount: 0, pms: [], groups: [] } })
+  @Prop({ type: SchemaFactory.createForClass(ChronicleMetadata), default: { expenseCount: 0, pms: [], groups: [] } })
   chronicle?: ChronicleMetadata;
 
   /** Date the user account was created */
