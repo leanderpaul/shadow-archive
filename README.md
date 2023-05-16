@@ -2,6 +2,22 @@
 
 An Archive server that is the central node for all the shadow applications.
 
+## Preview deployment
+
+A development server is running in [Render](render.com) using a dummy dataset.
+
+The URL for the server is [archive.dev.shadow-apps.com](archive.dev.shadow-apps.com)
+
+All the push to the master branch will redeploy the development server. The deployment can also be manually triggered using the github actions workflow 'Deploy to render'
+
+## Production deployment
+
+The production server is deployed to azure app service. A build update to the production server can be triggered using the github actions workflow 'Publish docker image' and ticking the checkbox to deploy to azure.
+
+This github action will first test the code, then build a docker image for the release and publish it to the github container registry. Then the azure app service is triggered, which will pull the image from the github container registry and deploy it to the app service.
+
+The URL for the server is [archive.shadow-apps.com](archive.shadow-apps.com)
+
 ## Installation
 
 ```bash
