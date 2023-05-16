@@ -22,7 +22,7 @@ export class User extends OmitType(Viewer, ['csrfToken'] as const) {
   @Field()
   type: string;
 
-  @Field({ nullable: true })
+  @Field({ defaultValue: false })
   admin?: boolean;
 
   @Field()
@@ -30,9 +30,6 @@ export class User extends OmitType(Viewer, ['csrfToken'] as const) {
 
   @Field(() => GraphQLISODateTime)
   createdAt: Date;
-
-  @Field(() => GraphQLISODateTime)
-  updatedAt: Date;
 }
 
 @ObjectType()

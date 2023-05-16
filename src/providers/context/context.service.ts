@@ -6,10 +6,10 @@ import { Injectable } from '@nestjs/common';
 /**
  * Importing user defined packages
  */
-import { type User, type UserSession } from '@app/providers/database';
+import { type UserSession } from '@app/providers/database';
 import { AppError, ErrorCode } from '@app/shared/errors';
 
-import { Context } from './context.utils';
+import { Context, type CurrentUser } from './context.utils';
 
 /**
  * Defining types
@@ -33,15 +33,15 @@ export class ContextService {
     return Context.getRID();
   }
 
-  getCurrentUser(required?: false): User | undefined;
-  getCurrentUser(required: true): User;
+  getCurrentUser(required?: false): CurrentUser | undefined;
+  getCurrentUser(required: true): CurrentUser;
   getCurrentUser(required?: boolean) {
     const user = Context.getCurrentUser();
     if (!user && required) throw new AppError(ErrorCode.IAM009);
     return user;
   }
 
-  setCurrentUser(user: User) {
+  setCurrentUser(user: CurrentUser) {
     Context.setCurrentUser(user);
     return this;
   }

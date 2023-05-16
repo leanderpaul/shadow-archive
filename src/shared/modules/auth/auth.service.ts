@@ -7,6 +7,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { type FastifyReply, type FastifyRequest } from 'fastify';
 import moment from 'moment';
+import { type ObjectId } from 'mongodb';
 import sagus from 'sagus';
 import { parse } from 'useragent';
 
@@ -121,9 +122,10 @@ export class AuthService {
     const session: UserSession = { id: prevId + 1, token: sagus.genRandom(32, 'base64'), accessedAt: new Date() };
     const req = this.contextService.getCurrentRequest();
     const agent = parse(req.headers['user-agent']);
-    if (agent.family != 'Other') session.browser = agent.toAgent();
-    if (agent.os.family != 'Other') session.os = agent.os.toString();
-    if (agent.device.family != 'Other') session.device = agent.device.toString();
+    if (agent.family != 'Other') session.browser = agent.family;
+    if (agent.os.family != 'Other') session.os = agent.os.family;
+    if (agent.device.family != 'Other') session.device = agent.device.family;
+    if (!session.device && session.os) session.device = ['Windows', 'Linux', 'Mac'].includes(session.os) ? 'Computer' : 'Mobile';
     return session;
   }
 
@@ -146,7 +148,7 @@ export class AuthService {
     /** Verifying the cookie */
     const _id = DBUtils.toObjectID(uid);
     if (!_id) return null;
-    const user = await this.userModel.findOne({ _id }).lean();
+    const user = await this.userModel.findOne({ _id }, 'uid email admin verified sessions').lean();
     if (!user) return this.clearCookies(res);
     const session = user.sessions.find(s => s.token === token);
     if (!session) return this.clearCookies(res);
@@ -196,9 +198,9 @@ export class AuthService {
     return user;
   }
 
-  async removeSession(user: User, sessionId: number) {
+  async removeSession(uid: ObjectId, sessionId: number) {
     const updateSession = sessionId === -1 ? { $set: { sessions: [] } } : { $pull: { sessions: { id: sessionId } } };
-    await this.userModel.updateOne({ _id: user._id }, updateSession);
+    await this.userModel.updateOne({ _id: uid }, updateSession);
     const currentSession = this.contextService.getCurrentSession(true);
     if (sessionId === -1 || currentSession.id === sessionId) this.clearCookies();
   }

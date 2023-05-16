@@ -1,13 +1,15 @@
 /**
  * Importing npm packages
  */
-import { Args, Int, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
+import { Args, Info, Int, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
+import { type GraphQLResolveInfo } from 'graphql';
 
 /**
  * Importing user defined packages
  */
 import { type User } from '@app/providers/database';
 import { AuthType, UseAuth } from '@app/shared/decorators';
+import { GraphQLUtils } from '@app/shared/utils';
 
 import { LoginArgs, RegisterArgs, ResetPasswordArgs, UpdatePasswordArgs, UpdateUserArgs } from './accounts.dto';
 import { Session, Viewer } from './accounts.entity';
@@ -27,8 +29,9 @@ export class AccountsResolver {
 
   @UseAuth(AuthType.AUTHENTICATED)
   @Query(() => Viewer, { name: 'viewer' })
-  getCurrentUser() {
-    return this.accountsService.getUser();
+  getCurrentUser(@Info() info: GraphQLResolveInfo) {
+    const projection = GraphQLUtils.getProjection(info);
+    return this.accountsService.getUser(projection);
   }
 
   @ResolveField(() => String, { name: 'csrfToken' })

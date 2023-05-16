@@ -8,7 +8,7 @@ import { Injectable } from '@nestjs/common';
  */
 import { type PageInput } from '@app/graphql/common';
 import { ContextService } from '@app/providers/context';
-import { DBUtils, DatabaseService, MetadataVariant } from '@app/providers/database';
+import { DBUtils, DatabaseService } from '@app/providers/database';
 import { Logger } from '@app/providers/logger';
 import { AppError, ErrorCode } from '@app/shared/errors';
 import { type Projection } from '@app/shared/utils';
@@ -28,11 +28,11 @@ const removeableFields = ['bid', 'time', 'storeLoc', 'pm', 'desc'] as const;
 @Injectable()
 export class ExpenseService {
   private readonly expenseModel;
-  private readonly metadataModel;
+  private readonly userModel;
 
   constructor(private readonly contextService: ContextService, databaseService: DatabaseService) {
     this.expenseModel = databaseService.getExpenseModel();
-    this.metadataModel = databaseService.getMetadataModel(MetadataVariant.CHRONICLE);
+    this.userModel = databaseService.getUserModel();
   }
 
   private calculateTotal(items: ExpenseItemInput[]) {
@@ -87,10 +87,7 @@ export class ExpenseService {
     const user = this.contextService.getCurrentUser(true);
     const expense = await this.expenseModel.create({ uid: user._id, ...input, total });
 
-    this.metadataModel
-      .updateOne({ uid: user._id }, { $inc: { expenseCount: 1 }, $addToSet: { pms: input.pm } })
-      .then(result => (result.modifiedCount === 0 ? this.metadataModel.create({ uid: user._id, expenseCount: 1, pms: input.pm ? [input.pm] : [] }) : null))
-      .catch(err => logger.error(err));
+    this.userModel.updateOne({ _id: user._id }, { $inc: { 'chronicle.expenseCount': 1 }, $addToSet: { 'chronicle.pms': input.pm } }).catch(err => logger.error(err));
 
     return expense;
   }
@@ -120,7 +117,7 @@ export class ExpenseService {
     const user = this.contextService.getCurrentUser(true);
     const expense = await this.expenseModel.findOneAndDelete({ uid: user._id, _id: id }).lean();
     if (!expense) throw new AppError(ErrorCode.R001);
-    await this.metadataModel.updateOne({ uid: user._id }, { $inc: { billCount: -1 } });
+    await this.userModel.updateOne({ _id: user._id }, { $inc: { 'chronicle.expenseCount': -1 } });
     return expense;
   }
 }

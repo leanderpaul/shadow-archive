@@ -18,6 +18,10 @@ import { defaultOptionsPlugin, handleDuplicateKeyError, transformId } from '../d
  * Defining types
  */
 
+export enum UserActivityType {
+  CHANGE_PASSWORD = 'CHANGE_PASSWORD',
+}
+
 interface UserStaticMethods {
   isNativeUser(user: User): user is NativeUser;
   isOAuthUser(user: User): user is OAuthUser;
@@ -42,20 +46,18 @@ const duplicateEmailError = new AppError(ErrorCode.R003);
  * Defining the schemas
  */
 
+/**
+ * @class
+ * Contains user session related data
+ */
 @Schema({ _id: false, versionKey: false })
 export class UserSession {
   /** User session ID used to identify the session */
-  @Prop({
-    type: 'number',
-    required: true,
-  })
+  @Prop({ type: 'number', required: true })
   id: number;
 
   /** User session token. This is the value stored in the user's cookie */
-  @Prop({
-    type: 'string',
-    required: true,
-  })
+  @Prop({ type: 'string', required: true })
   token: string;
 
   /** The browser from which the session was created */
@@ -71,18 +73,70 @@ export class UserSession {
   device?: string;
 
   /** session last activity */
-  @Prop({
-    type: 'date',
-    required: true,
-  })
+  @Prop({ type: 'date', required: true })
   accessedAt: Date;
 }
 
-@Schema({
-  versionKey: false,
-  timestamps: true,
-  discriminatorKey: 'type',
-})
+/**
+ * @class
+ * Contains user account activity
+ */
+@Schema({ _id: false })
+export class UserActivity {
+  @Prop({ type: 'string', required: true, enum: Object.values(UserActivityType) })
+  type: UserActivityType;
+
+  @Prop({ type: 'date', default: () => new Date() })
+  time: Date;
+}
+
+/**
+ * @class
+ * Contains data on how to group items in the chronicle app
+ */
+@Schema({ _id: false })
+export class ExpenseGroup {
+  /** Expense group ID */
+  @Prop({ type: 'number', required: true, min: 1 })
+  id: number;
+
+  @Prop({ type: 'string', required: [true, 'Expense group name is required'], validate: [nameRegex, `Expense group name '{VALUE}' is invalid`] })
+  /** Name of the expense group */
+  name: string;
+
+  @Prop({
+    type: ['string'],
+    required: true,
+    match: [nameRegex, `Expense group word '{VALUE}' is invalid`],
+  })
+  /** Words to include in expense group */
+  words: string[];
+}
+
+/**
+ * @class
+ * Contains all the metadata related details related for the chronicle app
+ */
+@Schema({ _id: false })
+export class ChronicleMetadata {
+  /** The total count of the expenses or bills that the user has added */
+  @Prop({ type: 'number', required: true, default: 0, min: 0 })
+  expenseCount: number;
+
+  /** Array containg payment methods associated with the user */
+  @Prop({ type: ['string'], required: true, match: [nameRegex, `Payment Method '{VALUE}' is invalid`] })
+  pms: string[];
+
+  /** Array containg the expense groups associated with the user */
+  @Prop({ type: [SchemaFactory.createForClass(ExpenseGroup)], requried: true })
+  groups: ExpenseGroup[];
+}
+
+/**
+ * @class
+ * Contains all the data associated aith the user
+ */
+@Schema({ versionKey: false, timestamps: { createdAt: true }, discriminatorKey: 'type' })
 export class User {
   _id: ObjectId;
 
@@ -92,29 +146,15 @@ export class User {
   type: 'NativeUser' | 'OAuthUser';
 
   /** User's email address */
-  @Prop({
-    trim: true,
-    type: 'string',
-    lowercase: true,
-    required: [true, 'Email is required'],
-    validate: [emailRegex, 'should be an email'],
-  })
+  @Prop({ trim: true, type: 'string', lowercase: true, required: [true, 'Email is required'], validate: [emailRegex, 'should be an email'] })
   email: string;
 
   /** User's name */
-  @Prop({
-    trim: true,
-    type: 'string',
-    required: [true, 'should have 3 - 32 characters and only contain alphabets and space'],
-    validate: [nameRegex, "Name '{VALUE}' is invalid"],
-  })
+  @Prop({ trim: true, type: 'string', required: [true, 'should have 3 - 32 characters and only contain alphabets and space'], validate: [nameRegex, "Name '{VALUE}' is invalid"] })
   name: string;
 
   /** URL containing the user's profile pic */
-  @Prop({
-    type: 'string',
-    validate: [uriRegex, 'should be a uri'],
-  })
+  @Prop({ type: 'string', validate: [uriRegex, 'should be a uri'] })
   imageUrl?: string;
 
   /** Determines whether the user is an admin or not */
@@ -122,18 +162,11 @@ export class User {
   admin?: boolean;
 
   /** Denotes whether a user email address is verified or not */
-  @Prop({
-    type: 'boolean',
-    required: true,
-    default: false,
-  })
+  @Prop({ type: 'boolean', required: true, default: false })
   verified: boolean;
 
   /** Array storing the session details of the user */
-  @Prop({
-    type: [SchemaFactory.createForClass(UserSession)],
-    required: true,
-  })
+  @Prop({ type: [SchemaFactory.createForClass(UserSession)], required: true })
   sessions: UserSession[];
 
   /** Email verification code sent to the user to verify the email address. It is a base64 string */
@@ -144,11 +177,22 @@ export class User {
   @Prop({ type: 'string' })
   passwordResetCode?: string;
 
-  createdAt: Date;
+  /** Last 30 user activity logs */
+  @Prop({ type: [SchemaFactory.createForClass(UserActivity)], required: true })
+  activities: UserActivity[];
 
-  updatedAt: Date;
+  /** chronicle app user metadata */
+  @Prop({ type: [SchemaFactory.createForClass(ChronicleMetadata)], default: { expenseCount: 0, pms: [], groups: [] } })
+  chronicle?: ChronicleMetadata;
+
+  /** Date the user account was created */
+  createdAt: Date;
 }
 
+/**
+ * @class
+ * Contains extra fields that are only required in a native user
+ */
 @Schema()
 export class NativeUser extends User {
   /** User's hashed password */
@@ -167,20 +211,19 @@ export class NativeUser extends User {
   password: string;
 }
 
+/**
+ * @class
+ * Contains extra fields that are only required in a oauth user
+ */
+
 @Schema()
 export class OAuthUser extends User {
   /** Service provider's user id */
-  @Prop({
-    type: 'string',
-    required: true,
-  })
+  @Prop({ type: 'string', required: true })
   spuid: string;
 
   /** Service Provider's hashed refresh token */
-  @Prop({
-    type: 'string',
-    required: true,
-  })
+  @Prop({ type: 'string', required: true })
   refreshToken: string;
 }
 
