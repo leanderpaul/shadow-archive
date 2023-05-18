@@ -68,8 +68,8 @@ export class ErrorCode {
   static readonly IAM008 = new ErrorCode('IAM008', ErrorType.CLIENT_ERROR, 'Incorrect password');
   /** You are not authorized to access this resource */
   static readonly IAM009 = new ErrorCode('IAM009', ErrorType.UNAUTHORIZED, 'You are not authorized to access this resource');
-  /** Invalid password reset code */
-  static readonly IAM010 = new ErrorCode('IAM010', ErrorType.CLIENT_ERROR, 'Invalid password reset code');
+  /** Invalid or expired password reset code */
+  static readonly IAM010 = new ErrorCode('IAM010', ErrorType.CLIENT_ERROR, 'Invalid or expired password reset code');
   /** Invalid email verification code */
   static readonly IAM011 = new ErrorCode('IAM011', ErrorType.CLIENT_ERROR, 'Invalid email verification code');
   /** Email address already verified */
