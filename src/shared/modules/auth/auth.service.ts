@@ -78,7 +78,9 @@ export class AuthService {
   private clearCookies(res?: FastifyReply) {
     const cookieName = this.configService.get('COOKIE_NAME');
     if (!res?.clearCookie) res = this.contextService.getCurrentResponse();
-    res.clearCookie(cookieName);
+    const secure = this.configService.get('IS_PROD_SERVER');
+    const domain = secure ? this.configService.get('DOMAIN') : undefined;
+    res.clearCookie(cookieName, { domain });
     return null;
   }
 
@@ -141,6 +143,7 @@ export class AuthService {
 
     /** Parsing the cookie */
     const cookieName = this.configService.get('COOKIE_NAME');
+    const maxAge = this.configService.get('COOKIE_MAX_AGE');
     const cookie = req.cookies[cookieName] as string | undefined;
     if (!cookie) return null;
     const { uid, token } = this.decodeCookie(cookie);
@@ -148,18 +151,17 @@ export class AuthService {
     /** Verifying the cookie */
     const _id = DBUtils.toObjectID(uid);
     if (!_id) return null;
-    const user = await this.userModel.findOne({ _id }, 'uid email admin verified sessions').lean();
+    const promise = this.userModel.findOne({ _id });
+    promise.setUpdate({ $pull: { sessions: { accessedAt: { $lt: moment().subtract(maxAge, 'seconds').toDate() } } } });
+    promise.projection('uid email admin verified sessions');
+    promise.setOptions({ runValidators: false });
+    const user = await promise.lean();
     if (!user) return this.clearCookies(res);
     const session = user.sessions.find(s => s.token === token);
     if (!session) return this.clearCookies(res);
-    const maxAge = this.configService.get('COOKIE_MAX_AGE');
-    const expireAt = moment().subtract(maxAge, 'seconds');
-    const validSession = moment(session.accessedAt).isAfter(expireAt);
-    if (!validSession) {
-      this.clearCookies(res);
-      this.userModel.updateOne({ _id }, { $pullAll: { 'sessions.accessedAt': { $lt: expireAt } } });
-      throw new AppError(ErrorCode.IAM013);
-    }
+
+    /** Updating the last accessed time in user seesion */
+    this.userModel.updateOne({ _id, 'sessions.id': session.id }, { $set: { 'sessions.$.accessedAt': new Date() } }).then();
 
     /** Setting up the request context values */
     this.contextService.setCurrentUser(user);

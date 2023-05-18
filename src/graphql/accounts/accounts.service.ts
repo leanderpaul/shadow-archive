@@ -43,6 +43,7 @@ export class AccountsService {
 
   getUser(projection: Projection<User>) {
     const { _id } = this.contextService.getCurrentUser(true);
+    if (projection.sessions) projection.sessions.id = 1;
     return this.userModel.findOne({ _id }, projection).lean() as Promise<User>;
   }
 
