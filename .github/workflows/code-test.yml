@@ -24,7 +24,11 @@ jobs:
         with:
           node-version: '18.x'
 
-      - name: Testing the application
-        run: |
-          npm install
-          npm test
+      - name: Install dependencies
+        run: npm install
+
+      - name: Lint code
+        run: npm run lint
+
+      - name: End-to-End test
+        run: npm test
