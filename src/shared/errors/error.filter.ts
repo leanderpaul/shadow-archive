@@ -7,6 +7,8 @@ import { type FastifyReply } from 'fastify';
 /**
  * Importing user defined packages
  */
+import { Logger } from '@app/providers/logger';
+
 import { AppError } from './app.error';
 import { ErrorCode, ErrorType } from './error-code.error';
 import { ErrorUtils } from './util.error';
@@ -18,6 +20,7 @@ import { ErrorUtils } from './util.error';
 /**
  * Declaring the constants
  */
+const logger = Logger.getLogger('error:filter');
 
 @Catch()
 export class ErrorFilter implements ExceptionFilter {
@@ -29,6 +32,7 @@ export class ErrorFilter implements ExceptionFilter {
     /** Converting the errors into AppError */
     if (error instanceof NotFoundException) error = new AppError(ErrorCode.R001);
     else if (error instanceof ForbiddenException) error = new AppError(ErrorCode.IAM004);
+    else logger.error(error);
 
     /** Generating the response payload and status code */
     const payload = ErrorUtils.formatError(error);
