@@ -111,12 +111,12 @@ export class AccountsService {
     if (!user || !user.passwordResetCode) throw new AppError(ErrorCode.IAM010);
 
     const [expiry] = user.passwordResetCode.split('.') as [string, string];
-    if (moment().isAfter(expiry)) {
-      await this.nativeUserModel.updateOne({ _id: user._id }, { $unset: { passwordResetCode: '' } });
-      return 'Password reset code is expired';
-    }
-    await this.nativeUserModel.updateOne({ _id: user._id }, { $set: { password: newPassword }, $unset: { passwordResetCode: '' } });
-    return 'Password reset successfully';
+    if (moment().isAfter(expiry)) throw new AppError(ErrorCode.IAM010);
+    if (!newPassword) return false;
+
+    const activity = { type: UserActivityType.RESET_PASSWORD };
+    await this.nativeUserModel.updateOne({ _id: user._id }, { $push: { activities: activity }, $set: { password: newPassword }, $unset: { passwordResetCode: '' } });
+    return true;
   }
 
   async updatePassword(oldPassword: string, newPassword: string) {
