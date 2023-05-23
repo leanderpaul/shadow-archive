@@ -56,18 +56,18 @@ $ npm run gen:schemas
 
 All the code lives inside the `src` directory. The code is splitting into 4 directories which are as follows
 
-- **config** - contains all the configuration files
 - **graphql** - contains resolvers, services and types to run the graphql server
   - **common** - contains dtos, entities, etc which are common to all the graphql modules
-  - The other folders are graphql modules and each graphql module contains dtos, entities, services and resolver that are specific to that module.
-- **providers** - contains all the providers needs for the entire project such as database connection, context and logger
+  - The other folders are graphql modules and each graphql module contains dtos, entities, services and resolver that are specific to that module
+- **modules** - contains all shared modules
+- **providers** - contains all the providers needs for the entire project such as logger and mail provider
 - **routes** - contains all the API routes
 - **shared** - common code shared by all the modules, it contains decorators, guards, modules, errors and utility methods
   - **decorators** - contains all shared decorators
   - **errors** - contains all error types
   - **guards** - contails all guards
-  - **modules** - contains all shared modules
-  - **utils** - contails all utility classes
+  - **interfaces** - contails all types and interfaces common to all files
+  - **service** - contails all services which are global to the entire application and is outside the nestjs dependency injection
 
 # Commit Messages
 

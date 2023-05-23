@@ -3,13 +3,13 @@
  */
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import mongoose, { Connection } from 'mongoose';
+import mongoose, { type Connection } from 'mongoose';
 
 /**
  * Importing user defined packages
  */
-import { Config } from '@app/config';
 import { Logger } from '@app/providers/logger';
+import { Config } from '@app/shared/services';
 
 import { DatabaseService } from './database.service';
 import { ExpenseMongooseModule, MemoirMongooseModule, UserMongooseModule } from './schemas';
@@ -21,19 +21,18 @@ import { ExpenseMongooseModule, MemoirMongooseModule, UserMongooseModule } from 
 /**
  * Declaring the constants
  */
-const logger = Logger.getLogger('database');
-const debug = (colName: string, methodName: string, ...args: any[]) => logger.debug(`db.${colName}.${methodName}(${args.map(obj => JSON.stringify(obj)).join(', ')})`);
+const logger = Logger.getLogger('MongooseModule');
 
-/** Setting mongoose options */
-mongoose.set('id', false);
-mongoose.set('runValidators', true);
-mongoose.set('returnOriginal', false);
-mongoose.set('toObject', { virtuals: true });
-mongoose.set('debug', Config.get('LOG_LEVEL') === 'debug' ? debug : false);
-
-const MongoDBModule = MongooseModule.forRoot(Config.get('DB_URI'), {
-  appName: Config.getAppName(),
+const MongoDBModule = MongooseModule.forRoot(Config.get('db.uri'), {
+  appName: Config.get('app.name'),
   connectionFactory(connection: Connection) {
+    /** Setting mongoose options */
+    mongoose.set('id', false);
+    mongoose.set('runValidators', true);
+    mongoose.set('returnOriginal', false);
+    mongoose.set('toObject', { virtuals: true });
+    mongoose.set('debug', Config.get('log.level') === 'debug');
+
     /** Handling mongoose connection errors */
     connection.on('error', (err: Error) => logger.error(err));
     connection.on('close', () => logger.debug(`mongodb connection closed`));

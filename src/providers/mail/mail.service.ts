@@ -4,7 +4,6 @@
 import fs from 'fs';
 
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { MailDataRequired, MailService as SendGridMail } from '@sendgrid/mail';
 import mustache from 'mustache';
 import sagus from 'sagus';
@@ -12,8 +11,8 @@ import sagus from 'sagus';
 /**
  * Importing user defined packages
  */
-import { type ConfigRecord } from '@app/config';
 import { Logger } from '@app/providers/logger';
+import { Config } from '@app/shared/services';
 
 /**
  * Defining types
@@ -57,18 +56,18 @@ export class MailService {
   private readonly defaultData: Record<string, string>;
   private isEnabled = false;
 
-  constructor(configService: ConfigService<ConfigRecord>) {
+  constructor() {
     this.mail = new SendGridMail();
-    const apiKey = configService.get('SENDGRID_API_KEY');
-    const domain = configService.get('DOMAIN');
-    if (apiKey && !configService.get('IS_TEST_SERVER')) {
+    const apiKey = Config.get('mail.sendgrid.apikey');
+    const domain = Config.get('app.domain');
+    if (apiKey) {
       this.mail.setApiKey(apiKey);
       this.isEnabled = true;
     }
     this.defaultData = { domain };
   }
 
-  private getTemplate(mailType: MailType) {
+  private getTemplate(mailType: MailType): ITemplate {
     let template = this.templates.get(mailType);
     if (template) return template;
 
@@ -82,7 +81,7 @@ export class MailService {
     return template;
   }
 
-  private async _sendMail(data: MailDataRequired, retryAttempt = 1) {
+  private async _sendMail(data: MailDataRequired, retryAttempt = 1): Promise<void> {
     if (!this.isEnabled) {
       const obj = sagus.pickKeys(data, ['from', 'to', 'subject', 'html']);
       logger.warn(`mail service disabled, but got '${data.subject}' mail to '${data.to}'`, obj);
@@ -97,7 +96,7 @@ export class MailService {
   }
 
   sendMail(mailType: MailType.EMAIL_VERIFICATION | MailType.RESET_PASSWORD, to: string, data: ICodeMailPayload): void;
-  sendMail(mailType: MailType, to: string, data: object) {
+  sendMail(mailType: MailType, to: string, data: object): void {
     const template = this.getTemplate(mailType);
     const html = mustache.render(template.html, data);
     this._sendMail({ ...this.defaultData, ...template, html, to });

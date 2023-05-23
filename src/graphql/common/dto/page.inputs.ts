@@ -24,7 +24,7 @@ export class PageInput {
   @Field(() => Int, { defaultValue: 0, nullable: true })
   offset: number;
 
-  static isValid(input: PageInput) {
+  static isValid(input: PageInput): true {
     const error = new ValidationError();
     if (input.limit < 1) error.addFieldError('limit', 'should be greater than 0');
     if (input.offset < 0) error.addFieldError('offset', 'should be greater than or equal to 0');

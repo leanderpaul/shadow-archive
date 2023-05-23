@@ -6,8 +6,8 @@ import { Module } from '@nestjs/common';
 /**
  * Importing user defined packages
  */
-import { ContextService } from '@app/providers/context';
-import { DatabaseModule } from '@app/providers/database';
+import { GraphQLService } from '@app/graphql/common';
+import { DatabaseModule } from '@app/modules/database';
 
 import { MemoirResolver } from './memoir.resolver';
 import { MemoirService } from './memoir.service';
@@ -22,6 +22,6 @@ import { MemoirService } from './memoir.service';
 
 @Module({
   imports: [DatabaseModule],
-  providers: [MemoirResolver, MemoirService, ContextService],
+  providers: [MemoirResolver, MemoirService, GraphQLService],
 })
 export class MemoirModule {}

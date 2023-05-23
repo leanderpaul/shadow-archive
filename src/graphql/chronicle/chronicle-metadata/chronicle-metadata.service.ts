@@ -6,8 +6,9 @@ import { Injectable } from '@nestjs/common';
 /**
  * Importing user defined packages
  */
-import { ContextService } from '@app/providers/context';
-import { DatabaseService } from '@app/providers/database';
+import { type ChronicleMetadata, DatabaseService } from '@app/modules/database';
+import { NeverError } from '@app/shared/errors';
+import { Context } from '@app/shared/services';
 
 /**
  * Defining types
@@ -21,13 +22,14 @@ import { DatabaseService } from '@app/providers/database';
 export class ChronicleMetadataService {
   private readonly userModel;
 
-  constructor(private readonly contextService: ContextService, databaseService: DatabaseService) {
+  constructor(databaseService: DatabaseService) {
     this.userModel = databaseService.getUserModel();
   }
 
-  async getUserMetadata() {
-    const user = this.contextService.getCurrentUser(true);
-    const result = await this.userModel.findOne({ _id: user._id }, 'chronicle').lean();
-    return result?.chronicle;
+  async getUserMetadata(): Promise<ChronicleMetadata> {
+    const { _id } = Context.getCurrentUser(true);
+    const user = await this.userModel.findOne({ _id }, 'chronicle').lean();
+    if (!user) throw new NeverError('user not found');
+    return user.chronicle;
   }
 }

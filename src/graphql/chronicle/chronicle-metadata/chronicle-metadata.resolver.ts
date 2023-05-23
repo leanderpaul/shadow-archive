@@ -22,8 +22,7 @@ export class ChronicleMetadataResolver {
   constructor(private readonly chronicleMetadataService: ChronicleMetadataService) {}
 
   @Query(() => Metadata, { name: 'metadata' })
-  async getMetadata() {
-    const metadata = await this.chronicleMetadataService.getUserMetadata();
-    return metadata || {};
+  getMetadata(): Promise<Metadata> {
+    return this.chronicleMetadataService.getUserMetadata();
   }
 }

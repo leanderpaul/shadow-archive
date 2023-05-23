@@ -14,33 +14,33 @@ import { ArgsType, Field, InputType, Int, ObjectType } from '@nestjs/graphql';
 
 export interface AddField<T> {
   date: number;
-  input: T;
+  input: T extends String ? string : T; // eslint-disable-line @typescript-eslint/ban-types
 }
 
 export interface UpdateField<T> {
   date: number;
   index: number;
-  update: T;
+  update: T extends String ? string : T; // eslint-disable-line @typescript-eslint/ban-types
 }
 
 /**
  * Declaring the constants
  */
 
-export function addField<T>(classRef: Type<T>) {
+export function addField<T>(classRef: Type<T>): Type<AddField<T>> {
   @ObjectType({ isAbstract: true })
   abstract class AddFieldType implements AddField<T> {
     @Field(() => Int)
     date: number;
 
     @Field(() => classRef)
-    input: T;
+    input: T extends String ? string : T; // eslint-disable-line @typescript-eslint/ban-types
   }
 
   return AddFieldType as Type<AddField<T>>;
 }
 
-export function updateField<T>(classRef: Type<T>) {
+export function updateField<T>(classRef: Type<T>): Type<UpdateField<T>> {
   @ObjectType({ isAbstract: true })
   abstract class UpdateFieldType implements UpdateField<T> {
     @Field(() => Int)
@@ -50,7 +50,7 @@ export function updateField<T>(classRef: Type<T>) {
     index: number;
 
     @Field(() => classRef)
-    update: T;
+    update: T extends String ? string : T; // eslint-disable-line @typescript-eslint/ban-types
   }
 
   return UpdateFieldType as Type<UpdateField<T>>;

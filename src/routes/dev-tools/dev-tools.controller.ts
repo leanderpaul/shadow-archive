@@ -7,10 +7,9 @@ import moment from 'moment';
 /**
  * Importing user defined packages
  */
-import { ContextService } from '@app/providers/context';
+import { AuthService } from '@app/modules/auth';
 import { DevGuard } from '@app/shared/guards';
-import { AuthService } from '@app/shared/modules';
-import { Utils } from '@app/shared/utils';
+import { Context, Storage } from '@app/shared/services';
 
 /**
  * Defining types
@@ -22,16 +21,16 @@ import { Utils } from '@app/shared/utils';
 
 @Controller('dev-tools')
 export class DevToolsController {
-  constructor(private readonly authService: AuthService, private readonly contextService: ContextService) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Get('graphiql')
   @UseGuards(DevGuard(true))
   @Render('admin.hbs')
-  getGraphiQL(@Query('app') app: string) {
-    const apps = Utils.getCache<string[]>('graphql') || [];
+  getGraphiQL(@Query('app') app: string): { url: string; csrfToken?: string } {
+    const apps = Storage.get<string[]>('graphql', []);
     const url = `/graphql/${apps.includes(app) ? app : 'admin'}`;
 
-    const user = this.contextService.getCurrentUser();
+    const user = Context.getCurrentUser();
     if (!user?.admin) return { url };
 
     const expireAt = moment().add(2, 'hour');

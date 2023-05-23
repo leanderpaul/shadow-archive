@@ -5,14 +5,10 @@
 /**
  * Importing user defined packages
  */
-import { Context } from '@app/providers/context';
-
-import { type FormattedError } from './util.error';
 
 /**
  * Defining types
  */
-
 export enum ErrorType {
   CLIENT_ERROR = 'CLIENT_ERROR',
   HTTP_ERROR = 'HTTP_ERROR',
@@ -20,30 +16,39 @@ export enum ErrorType {
   UNAUTHORIZED = 'UNAUTHORIZED',
   VALIDATION_ERROR = 'VALIDATION_ERROR',
   SERVER_ERROR = 'SERVER_ERROR',
-  CUSTOM_ERROR = 'CUSTOM_ERROR',
 }
 
 /**
  * Declaring the constants
  */
+const ERROR_STATUS_CODES: Record<ErrorType, number> = {
+  [ErrorType.CLIENT_ERROR]: 400,
+  [ErrorType.HTTP_ERROR]: 400,
+  [ErrorType.NOT_FOUND]: 404,
+  [ErrorType.SERVER_ERROR]: 500,
+  [ErrorType.UNAUTHORIZED]: 403,
+  [ErrorType.VALIDATION_ERROR]: 400,
+};
 
 export class ErrorCode {
-  private constructor(private readonly code: string, private readonly type: ErrorType, private readonly msg: string) {}
+  private constructor(private readonly code: string, private readonly type: ErrorType, private readonly msg: string, private readonly statusCode?: number) {
+    if (!statusCode) this.statusCode = ERROR_STATUS_CODES[type];
+  }
 
-  getCode() {
+  getCode(): string {
     return this.code;
   }
 
-  getType() {
+  getType(): ErrorType {
     return this.type;
   }
 
-  getMessage() {
+  getMessage(): string {
     return this.msg;
   }
 
-  getFormattedError(): FormattedError {
-    return { rid: Context.getRID(), code: this.getCode(), type: this.getType(), message: this.getMessage() };
+  getStatusCode(): number {
+    return this.statusCode || 500;
   }
 
   /*!
@@ -94,8 +99,6 @@ export class ErrorCode {
 
   /** Unexpected server error */
   static readonly S001 = new ErrorCode('S001', ErrorType.SERVER_ERROR, 'Unexpected server error');
-  /** only to be used when setting custom error type and message in `AppError` */
-  static readonly S002 = new ErrorCode('S002', ErrorType.CUSTOM_ERROR, 'Custom error');
   /** Introspection queries are not allowed */
   static readonly S003 = new ErrorCode('S003', ErrorType.UNAUTHORIZED, 'Introspection queries are not allowed');
 }

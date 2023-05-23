@@ -38,7 +38,7 @@ export class PageInfo {
   hasNext: boolean;
 }
 
-export function Paginated<T>(classRef: Type<T>) {
+export function Paginated<T>(classRef: Type<T>): Type<PaginatedType<T>> {
   @ObjectType({ isAbstract: true })
   abstract class Connection implements PaginatedType<T> {
     @Field(() => PageInfo, { description: 'Connection page details' })

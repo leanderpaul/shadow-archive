@@ -26,17 +26,17 @@ Query.prototype.unset = function (this: any, path) {
   return this;
 };
 
-function defaultLean(this: Query<unknown, unknown>) {
+function defaultLean(this: Query<unknown, unknown>): void {
   if (this._mongooseOptions.lean === true) this.lean({ virtuals: true });
 }
 
-export function transformId(this: Document<unknown>) {
+export function transformId(this: Document<unknown>): string {
   if (!this._id) throw new NeverError('ObjectID is falsy');
   return this._id.toString();
 }
 
-export function handleDuplicateKeyError(throwError: AppError<any> | Record<string, AppError<any>>) {
-  return function (error: Error, _result: unknown, next: (error?: Error) => void) {
+export function handleDuplicateKeyError(throwError: AppError | Record<string, AppError>): (error: Error, _result: unknown, next: (error?: Error) => void) => void {
+  return function (error, _result, next) {
     if (error instanceof MongoServerError && error.code === 11000) {
       if (throwError instanceof AppError) return next(throwError);
       for (const [key, value] of Object.entries(throwError)) {
@@ -47,7 +47,7 @@ export function handleDuplicateKeyError(throwError: AppError<any> | Record<strin
   };
 }
 
-export function defaultOptionsPlugin(schema: Schema) {
+export function defaultOptionsPlugin(schema: Schema): void {
   schema.plugin(mongooseLeanVirtuals);
 
   schema.pre('find', defaultLean);
@@ -59,7 +59,7 @@ export function defaultOptionsPlugin(schema: Schema) {
 export class DBUtils {
   static toObjectID(id: string, throwError: true): Types.ObjectId;
   static toObjectID(id: string, throwError?: false): Types.ObjectId | null;
-  static toObjectID(id: string, throwError?: boolean) {
+  static toObjectID(id: string, throwError?: boolean): Types.ObjectId | null {
     try {
       return new Types.ObjectId(id);
     } catch (err) {

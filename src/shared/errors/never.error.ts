@@ -20,6 +20,6 @@
 export class NeverError extends Error {
   constructor(message?: string) {
     super(message);
-    this.name = 'NeverError';
+    this.name = this.constructor.name;
   }
 }

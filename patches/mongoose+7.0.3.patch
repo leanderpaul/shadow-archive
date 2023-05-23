@@ -7,7 +7,7 @@ index 15b973b..daaf9cc 100644
      set(path: string | Record<string, unknown>, value?: any): this;
  
 +    /**
-+     * Adds a `$unset` to this query's update withou changing the operation.
++     * Adds a `$unset` to this query's update without changing the operation
 +     */
 +    unset(path: string | string[]): this;
 +

@@ -6,11 +6,10 @@ import { Module } from '@nestjs/common';
 /**
  * Importing user defined packages
  */
-import { GraphQLModule } from '@app/graphql/common';
-import { ContextService } from '@app/providers/context';
-import { DatabaseModule } from '@app/providers/database';
+import { GraphQLModule, GraphQLService } from '@app/graphql/common';
+import { AuthModule } from '@app/modules/auth';
+import { DatabaseModule } from '@app/modules/database';
 import { MailService } from '@app/providers/mail';
-import { AuthModule } from '@app/shared/modules';
 
 import { AccountsResolver } from './accounts.resolver';
 import { AccountsService } from './accounts.service';
@@ -27,7 +26,7 @@ export const accountsResolvers = [AccountsResolver];
 
 @Module({
   imports: [AuthModule, DatabaseModule],
-  providers: [AccountsResolver, AccountsService, ContextService, MailService],
+  providers: [AccountsResolver, AccountsService, MailService, GraphQLService],
 })
 class AccountsModule {}
 

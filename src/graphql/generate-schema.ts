@@ -12,6 +12,7 @@ import { printSchema } from 'graphql';
  * Importing user defined packages
  */
 import { accountsResolvers } from './accounts';
+import { adminResolvers } from './admin';
 import { chronicleResolvers } from './chronicle';
 
 /**
@@ -24,10 +25,11 @@ import '@fastify/cookie';
  */
 const graphqlEndpoint: Record<string, Type[]> = {
   accounts: accountsResolvers,
+  admin: adminResolvers,
   chronicle: chronicleResolvers,
 };
 
-async function generateSchema() {
+async function generateSchema(): Promise<void> {
   const app = await NestFactory.create(GraphQLSchemaBuilderModule, { logger: ['error', 'warn'] });
   await app.init();
 

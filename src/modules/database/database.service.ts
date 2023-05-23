@@ -45,14 +45,14 @@ export class DatabaseService implements OnApplicationShutdown, OnModuleInit {
     @InjectModel(Memoir.name) private readonly memoirModel: MemoirModel,
   ) {}
 
-  async onModuleInit() {
+  async onModuleInit(): Promise<void> {
     for (const user of users) {
       const userDoc = await this.userModel.findOne({ email: user.email });
       if (!userDoc) await this.nativeUserModel.create(user);
     }
   }
 
-  onApplicationShutdown() {
+  onApplicationShutdown(): Promise<void> {
     return this.connection.close();
   }
 
@@ -63,11 +63,11 @@ export class DatabaseService implements OnApplicationShutdown, OnModuleInit {
     return variant === undefined ? this.userModel : variant === UserVariant.NATIVE ? this.nativeUserModel : this.oauthUserModel;
   }
 
-  getExpenseModel() {
+  getExpenseModel(): ExpenseModel {
     return this.expenseModel;
   }
 
-  getMemoirModel() {
+  getMemoirModel(): MemoirModel {
     return this.memoirModel;
   }
 }

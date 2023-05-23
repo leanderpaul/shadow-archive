@@ -152,7 +152,7 @@ export class ChronicleMetadata {
     type: ['string'],
     required: true,
   })
-  pms: string[];
+  paymentMethods: string[];
 
   /** Array containg the expense groups associated with the user */
   @Prop({
@@ -244,9 +244,9 @@ export class User {
   /** chronicle app user metadata */
   @Prop({
     type: SchemaFactory.createForClass(ChronicleMetadata),
-    default: { expenseCount: 0, pms: [], groups: [] },
+    default: { expenseCount: 0, paymentMethods: [], groups: [] },
   })
-  chronicle?: ChronicleMetadata;
+  chronicle: ChronicleMetadata;
 
   /** Date the user account was created */
   createdAt: Date;

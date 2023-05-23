@@ -11,9 +11,8 @@ import request, { type Request, type Response } from 'supertest';
  * Importing user defined packages
  */
 import { AppModule } from '@app/app.module';
-import { Config } from '@app/config';
-import { Context } from '@app/providers/context';
-import { ErrorCode, type GraphQLFormattedErrorExtensions } from '@app/shared/errors';
+import { ErrorCode } from '@app/shared/errors';
+import { Config, Middleware } from '@app/shared/services';
 
 /**
  * Defining types
@@ -41,7 +40,7 @@ export interface GraphQLFormattedError {
   message: string;
   locations: SourceLocation[];
   path: (string | number)[];
-  extensions: GraphQLFormattedErrorExtensions;
+  extensions: any;
 }
 
 export interface GraphQLErrorResponse extends Response {
@@ -64,9 +63,6 @@ export type GraphQLResponse<T = any> = GraphQLErrorResponse | GraphQLDataRespons
  */
 const cookies = new Map<string, string>();
 const expectRID = expect.stringMatching(/^[0-9A-F]{8}-[0-9A-F]{4}-[1][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i);
-const OContext = { ...Context };
-Context.getCurrentRequest = () => OContext.getCurrentRequest() || { headers: {} };
-Context.getCurrentResponse = () => OContext.getCurrentResponse() || { setCookie: jest.fn(), clearCookie: jest.fn() };
 
 expect.extend({
   nullableAny(actual: unknown, sample: unknown) {
@@ -112,41 +108,42 @@ export class ShadowArchive {
 
   constructor(private graphqlModule: GraphQLModule = GraphQLModule.ACCOUNTS) {}
 
-  async setup() {
+  async setup(): Promise<void> {
     const adapter = new FastifyAdapter();
     const instance = adapter.getInstance();
+
     await instance.register(fastifyCookie);
-    instance.addHook('preHandler', Context.init());
 
     const moduleFixture = await Test.createTestingModule({ imports: [AppModule] }).compile();
     this.app = moduleFixture.createNestApplication<NestFastifyApplication>(adapter, { logger: false });
+    Middleware.init(this.app, instance);
 
     await this.app.init();
     await instance.ready();
   }
 
-  getTimeout() {
+  getTimeout(): number {
     const timeout = process.env.TEST_TIMEOUT || '5000';
     return parseInt(timeout) || 5000;
   }
 
-  getGraphQLModule(module: GraphQLModule) {
+  getGraphQLModule(module: GraphQLModule): ShadowArchive {
     this.graphqlModule = module;
     return this;
   }
 
-  rest(method: RestMethod, url: string) {
+  rest(method: RestMethod, url: string): ShadowArchiveRequest {
     const mtd = method.toLowerCase() as Lowercase<RestMethod>;
     const apiRequest = request(this.app.getHttpServer())[mtd](url);
     return new ShadowArchiveRequest(apiRequest);
   }
 
-  graphql(query: string, variables: object = {}, module?: GraphQLModule) {
+  graphql(query: string, variables: object = {}, module?: GraphQLModule): ShadowArchiveRequest {
     const response = this.rest('POST', `/graphql/${module || this.graphqlModule}`).send({ query, variables });
     return response;
   }
 
-  async teardown() {
+  async teardown(): Promise<void> {
     await this.app.close();
   }
 }
@@ -154,38 +151,39 @@ export class ShadowArchive {
 export class ShadowArchiveRequest {
   constructor(private readonly request: Request) {}
 
-  private async execute() {
+  private async execute(): Promise<ShadowArchiveResponse> {
     const response = await this.request;
     return new ShadowArchiveResponse(response, this.request.url === '/graphql');
   }
 
-  send(data: object) {
+  send(data: object): ShadowArchiveRequest {
     this.request.send(data);
     return this;
   }
 
-  cookie(cookie: string) {
-    const value = cookie.startsWith(Config.getCookieName()) ? cookie : Config.getCookieName() + '=' + cookie;
+  cookie(cookie: string): ShadowArchiveRequest {
+    const cookieName = Config.get('cookie.name');
+    const value = cookie.startsWith(cookieName) ? cookie : cookieName + '=' + cookie;
     this.request.set('Cookie', value);
     return this;
   }
 
-  session(key: string) {
+  session(key: string): ShadowArchiveRequest {
     const cookie = cookies.get(key);
     if (!cookie) throw new Error(`Cookie '${key}' not present in cookie store`);
     this.cookie(cookie);
     return this;
   }
 
-  then(resolve: (value: ShadowArchiveResponse) => ShadowArchiveResponse, reject: (reason: any) => void) {
+  then(resolve: (value: ShadowArchiveResponse) => ShadowArchiveResponse, reject: (reason: any) => void): Promise<ShadowArchiveResponse | void> {
     return this.execute().then(resolve, reject);
   }
 
-  catch(reject: (reason: any) => void) {
+  catch(reject: (reason: any) => void): Promise<ShadowArchiveResponse | void> {
     return this.execute().then(null, reject);
   }
 
-  finally(callback: () => void) {
+  finally(callback: () => void): Promise<ShadowArchiveResponse> {
     return this.execute().finally(callback);
   }
 }
@@ -196,22 +194,22 @@ export class ShadowArchiveResponse {
     if (isGraphQLRequest) expect(response.status).toBe(200);
   }
 
-  getBody() {
+  getBody(): Record<string, any> {
     return this.response.body;
   }
 
-  expectRESTData(obj: Record<string, unknown>) {
+  expectRESTData(obj: Record<string, unknown>): void {
     expect(this.getBody()).toMatchObject(obj);
   }
 
-  expectRESTError(code: string, type?: string) {
+  expectRESTError(code: string, type?: string): void {
     const error = this.getBody();
     expect(error.code).toBe(code);
     expect(error.type).toBe(type || ((ErrorCode as any)[code] as ErrorCode).getType());
     expect(error.rid).toEqual(expectRID);
   }
 
-  expectStatusCode(statusCode: number) {
+  expectStatusCode(statusCode: number): void {
     expect(this.response.statusCode).toBe(statusCode);
   }
 
@@ -219,17 +217,18 @@ export class ShadowArchiveResponse {
    * Expects token to be present and if key is provided, it store cookie for future use
    * @param key
    */
-  expectCookies(key?: string) {
+  expectCookies(key?: string): void {
     const cookie = this.response.get('Set-Cookie');
     expect(cookie).toEqual(expect.arrayContaining([expect.stringMatching(/^sasid=[a-zA-Z0-9%= \-/\\;]{30,}$/)]));
     if (key && cookie[0]) {
       const values = cookie[0].split(';');
-      const cookieValue = values.find(v => v.startsWith(Config.get('COOKIE_NAME')));
+      const cookieName = Config.get('cookie.name');
+      const cookieValue = values.find(v => v.startsWith(cookieName));
       if (cookieValue) cookies.set(key, decodeURIComponent(cookieValue));
     }
   }
 
-  expectGraphQLError(code: string, type?: string, index = 0) {
+  expectGraphQLError(code: string, type?: string, index = 0): void {
     const response = this.response as GraphQLErrorResponse;
     const error = response.body.errors[index] as GraphQLFormattedError;
     expect(response.body.data).toBeNull();
@@ -238,14 +237,14 @@ export class ShadowArchiveResponse {
     expect(error.extensions.rid).toEqual(expectRID);
   }
 
-  expectGraphQLErrorFields(fields: string[], index = 0) {
+  expectGraphQLErrorFields(fields: string[], index = 0): void {
     const response = this.response as GraphQLErrorResponse;
     const error = (response as GraphQLErrorResponse).body.errors[index] as GraphQLFormattedError;
     expect(error.extensions.fields).toHaveLength(fields.length);
     expect(error.extensions.fields?.map((obj: any) => obj.field)).toEqual(expect.arrayContaining(fields));
   }
 
-  expectGraphQLData(obj: Record<string, unknown>) {
+  expectGraphQLData(obj: Record<string, unknown>): void {
     const response = this.response as GraphQLDataResponse;
     expect(response.body.data).toBeDefined();
     expect(Object.keys(response.body.data).length).toBeGreaterThan(0);
