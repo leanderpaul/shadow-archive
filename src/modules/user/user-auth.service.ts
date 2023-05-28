@@ -81,11 +81,12 @@ export class UserAuthService {
     return user;
   }
 
-  async sendEmailVerificationMail(uid?: Types.ObjectId): Promise<void> {
-    if (!uid) uid = Context.getCurrentUser(true).uid;
+  async sendEmailVerificationMail(): Promise<void> {
+    const { verified, uid } = Context.getCurrentUser(true);
+    if (verified) throw new AppError(ErrorCode.IAM012);
     const user = await this.userService.getNativeUser(uid, ['email', 'name', 'emailVerificationCode']);
     if (!user) throw new NeverError('user not found');
-    if (user.emailVerificationCode) throw new AppError(ErrorCode.IAM012);
+    if (!user.emailVerificationCode) throw new AppError(ErrorCode.IAM012);
     const code = Buffer.from(user.email).toString('base64') + '|' + user.emailVerificationCode;
     this.mailService.sendMail(MailType.EMAIL_VERIFICATION, user.email, { code, name: user.name });
   }
@@ -109,7 +110,7 @@ export class UserAuthService {
     if (user?.passwordResetCode !== passwordResetCode) throw new AppError(ErrorCode.IAM010);
 
     const [expiry] = user.passwordResetCode.split('.') as [string, string];
-    if (moment().isAfter(expiry)) throw new AppError(ErrorCode.IAM010);
+    if (moment(expiry, 'X').isBefore()) throw new AppError(ErrorCode.IAM010);
     if (!newPassword) return false;
 
     const activity = { type: UserActivityType.RESET_PASSWORD };

@@ -1,6 +1,5 @@
 {
   "detectOpenHandles": true,
-  "displayName": "Shadow Archive End to End Test",
   "globalSetup": "<rootDir>/setup.ts",
   "moduleFileExtensions": ["js", "json", "ts"],
   "moduleNameMapper": {
@@ -12,6 +11,5 @@
   "testRegex": ".e2e-spec.ts$",
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
-  },
-  "verbose": true
+  }
 }

@@ -85,6 +85,7 @@ export class AccountsResolver {
     return await this.userAuthService.resetPassword(args.code, args.newPassword);
   }
 
+  @UseAuth(AuthType.AUTHENTICATED)
   @Mutation(() => Boolean)
   async updatePassword(@Args() args: UpdatePasswordArgs): Promise<boolean> {
     await this.userService.updatePassword(args.oldPassword, args.newPassword);
@@ -98,6 +99,7 @@ export class AccountsResolver {
     return true;
   }
 
+  @UseAuth(AuthType.AUTHENTICATED)
   @Mutation(() => Boolean, { name: 'logout' })
   async logout(@Args({ name: 'sessionId', nullable: true, description: 'pass -1 to clear all sessions', type: () => Int }) sessionId?: number): Promise<boolean> {
     const { uid } = Context.getCurrentUser(true);
@@ -106,6 +108,7 @@ export class AccountsResolver {
     return true;
   }
 
+  @UseAuth(AuthType.AUTHENTICATED)
   @Mutation(() => Viewer)
   updateUserProfile(@Args() update: UpdateUserArgs): Promise<ResolvedViewer> {
     const { uid } = Context.getCurrentUser(true);
