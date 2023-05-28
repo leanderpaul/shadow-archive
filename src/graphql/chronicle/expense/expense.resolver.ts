@@ -8,10 +8,11 @@ import { type GraphQLResolveInfo } from 'graphql';
  * Importing user defined packages
  */
 import { GraphQLService } from '@app/graphql/common';
+import { ExpenseService } from '@app/modules/chronicle';
+import { AuthType, UseAuth } from '@app/shared/decorators';
 
 import { AddExpenseInput, GetExpensesArgs, UpdateExpenseInput } from './expense.dto';
 import { Expense, ExpenseConnection } from './expense.entity';
-import { ExpenseService } from './expense.service';
 
 /**
  * Defining types
@@ -22,6 +23,7 @@ import { ExpenseService } from './expense.service';
  */
 
 @Resolver()
+@UseAuth(AuthType.VERIFIED)
 export class ExpenseResolver {
   constructor(private readonly expenseService: ExpenseService, private readonly graphqlService: GraphQLService) {}
 
@@ -34,8 +36,8 @@ export class ExpenseResolver {
   @Query(() => ExpenseConnection, { name: 'expenses' })
   getExpenseConnection(@Info() info: GraphQLResolveInfo, @Args() args: GetExpensesArgs): Promise<ExpenseConnection> {
     return this.graphqlService.getPaginationResult<Expense, ExpenseConnection>(info, args.page, {
-      getCount: () => this.expenseService.getTotalExpenses(args.query),
-      getItems: projection => this.expenseService.findExpenses(projection, args.sort, args.page, args.query),
+      getCount: () => this.expenseService.getExpensesCount(args.filter),
+      getItems: projection => this.expenseService.getExpenseList(args, projection),
     });
   }
 

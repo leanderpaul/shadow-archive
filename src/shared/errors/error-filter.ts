@@ -76,7 +76,7 @@ export class ErrorFilter implements ExceptionFilter {
       return new GraphQLError(message, { extensions });
     }
 
-    const response = Context.getCurrentResponse();
-    return response.status(statusCode).send(payload);
+    const res = Context.getCurrentResponse();
+    return res.status(statusCode).send(payload);
   }
 }

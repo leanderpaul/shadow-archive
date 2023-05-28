@@ -6,8 +6,12 @@ import { Query, Resolver } from '@nestjs/graphql';
 /**
  * Importing user defined packages
  */
+import { UserService } from '@app/modules/user';
+import { AuthType, UseAuth } from '@app/shared/decorators';
+import { NeverError } from '@app/shared/errors';
+import { Context } from '@app/shared/services';
+
 import { Metadata } from './chronicle-metadata.entity';
-import { ChronicleMetadataService } from './chronicle-metadata.service';
 
 /**
  * Defining types
@@ -18,11 +22,15 @@ import { ChronicleMetadataService } from './chronicle-metadata.service';
  */
 
 @Resolver()
+@UseAuth(AuthType.VERIFIED)
 export class ChronicleMetadataResolver {
-  constructor(private readonly chronicleMetadataService: ChronicleMetadataService) {}
+  constructor(private readonly userService: UserService) {}
 
   @Query(() => Metadata, { name: 'metadata' })
-  getMetadata(): Promise<Metadata> {
-    return this.chronicleMetadataService.getUserMetadata();
+  async getMetadata(): Promise<Metadata> {
+    const { uid } = Context.getCurrentUser(true);
+    const user = await this.userService.getUser(uid, ['chronicle']);
+    if (!user) throw new NeverError('user not found when authenticated');
+    return user.chronicle;
   }
 }

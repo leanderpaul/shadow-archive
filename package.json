@@ -37,7 +37,7 @@
     "graphql-shield": "^7.6.5",
     "handlebars": "^4.7.7",
     "moment": "^2.29.4",
-    "mongoose": "^7.0.3",
+    "mongoose": "^7.2.0",
     "mongoose-lean-virtuals": "^0.9.1",
     "mustache": "^4.2.0",
     "patch-package": "^6.5.1",

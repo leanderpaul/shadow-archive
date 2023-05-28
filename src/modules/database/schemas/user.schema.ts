@@ -2,8 +2,7 @@
  * Importing npm packages
  */
 import { MongooseModule, Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { type ObjectId } from 'mongodb';
-import { type Document, type Model, type Query } from 'mongoose';
+import { type Document, type Model, type Query, type Types } from 'mongoose';
 import sagus from 'sagus';
 
 /**
@@ -11,7 +10,7 @@ import sagus from 'sagus';
  */
 import { AppError, ErrorCode } from '@app/shared/errors';
 
-import { defaultOptionsPlugin, handleDuplicateKeyError, transformId } from '../database.utils';
+import { defaultOptionsPlugin, handleDuplicateKeyError } from '../database.utils';
 
 /**
  * Defining types
@@ -54,6 +53,7 @@ export class UserSession {
   @Prop({
     type: 'string',
     required: true,
+    default: () => sagus.genRandom(32, 'base64'),
   })
   token: string;
 
@@ -79,6 +79,7 @@ export class UserSession {
   @Prop({
     type: 'date',
     required: true,
+    default: () => new Date(),
   })
   accessedAt: Date;
 }
@@ -147,6 +148,14 @@ export class ChronicleMetadata {
   })
   expenseCount: number;
 
+  /** Difference between the expense security level 1 and -1  */
+  @Prop({
+    type: 'number',
+    required: true,
+    default: 0,
+  })
+  deviation: number;
+
   /** Array containg payment methods associated with the user */
   @Prop({
     type: ['string'],
@@ -166,12 +175,10 @@ export class ChronicleMetadata {
  * @class
  * Contains all the data associated aith the user
  */
-@Schema({ versionKey: false, timestamps: { createdAt: true }, discriminatorKey: 'type' })
+@Schema({ versionKey: false, timestamps: { updatedAt: false }, discriminatorKey: 'type' })
 export class User {
-  _id: ObjectId;
-
   /** User ID, alias of _id */
-  uid: string;
+  uid: Types.ObjectId;
 
   type: 'NativeUser' | 'OAuthUser';
 
@@ -225,14 +232,9 @@ export class User {
   /** Email verification code sent to the user to verify the email address. It is a base64 string */
   @Prop({
     type: 'string',
+    default: (doc: User) => (doc.verified ? undefined : sagus.genRandom(16)),
   })
   emailVerificationCode?: string;
-
-  /** Password reset code sent to the user to verify the password reset link. It is of the format '<expiry date in unix timestamp>|<base64 code>' */
-  @Prop({
-    type: 'string',
-  })
-  passwordResetCode?: string;
 
   /** Last 30 user activity logs */
   @Prop({
@@ -272,6 +274,12 @@ export class NativeUser extends User {
     },
   })
   password: string;
+
+  /** Password reset code sent to the user to verify the password reset link. It is of the format '<expiry date in unix timestamp>|<base64 code>' */
+  @Prop({
+    type: 'string',
+  })
+  passwordResetCode?: string;
 }
 
 /**
@@ -309,14 +317,14 @@ UserSchema.static('isOAuthUser', (user: User) => 'refreshToken' in user);
 /**
  * Setting up middlewares
  */
-UserSchema.virtual('uid').get(transformId);
+UserSchema.alias('_id', 'uid');
 UserSchema.plugin(defaultOptionsPlugin);
 UserSchema.post('save', handleDuplicateKeyError(new AppError(ErrorCode.R003)));
 
 /**
  * Setting up the indexes
  */
-UserSchema.index({ email: 1 }, { name: 'UNIQUE_EMAIL_INDEX', unique: true, background: true });
+UserSchema.index({ email: 1 }, { name: 'UNIQUE_EMAIL', unique: true, background: true });
 
 /**
  * Creating the mongoose module

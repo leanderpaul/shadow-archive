@@ -172,23 +172,23 @@ export class Logger implements LoggerService, OnApplicationShutdown {
     return Logger.close();
   }
 
-  log(message: string, context?: string): void {
-    this.instance.info(message, { context });
+  log(message: string, label?: string): void {
+    this.instance.info(message, { label });
   }
 
-  error(message: string, trace?: string, context?: string): void {
-    this.instance.error(trace || message, { trace, context, msg: message });
+  error(message: string, trace?: string, label?: string): void {
+    this.instance.error(trace || message, { trace, label, msg: message });
   }
 
-  warn(message: string, context?: string): void {
-    this.instance.warn(message, { context });
+  warn(message: string, label?: string): void {
+    this.instance.warn(message, { label });
   }
 
-  debug(message: string, context?: string): void {
-    this.instance.debug(message, { context });
+  debug(message: string, label?: string): void {
+    this.instance.debug(message, { label });
   }
 
-  verbose(message: string, context?: string): void {
-    this.instance.verbose(message, { context });
+  verbose(message: string, label?: string): void {
+    this.instance.verbose(message, { label });
   }
 }

@@ -2,13 +2,12 @@
  * Importing npm packages
  */
 import { MongooseModule, Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { type ObjectId } from 'mongodb';
-import { type Model } from 'mongoose';
+import { type Model, type Types } from 'mongoose';
 
 /**
  * Importing user defined packages
  */
-import { defaultOptionsPlugin, transformId } from '../database.utils';
+import { defaultOptionsPlugin } from '../database.utils';
 
 /**
  * Defining types
@@ -66,20 +65,29 @@ export class ExpenseItem {
 @Schema({ versionKey: false })
 export class Expense {
   /** Expense ID, alias of _id  */
-  eid: string;
+  eid: Types.ObjectId;
 
   /** User ID to whom this expense is associated with' */
   @Prop({
     type: 'ObjectID',
     required: true,
   })
-  uid: ObjectId;
+  uid: Types.ObjectId;
 
   /** Bill ID that is mentioned in the bill or invoice */
   @Prop({
     type: 'string',
   })
   bid?: string;
+
+  /** Secrecy level. 0 - can be viewed by all, 1 - actual expense, -1 - fake expense to cover level 1 expense  */
+  @Prop({
+    type: 'number',
+    required: true,
+    default: 0,
+    enum: [-1, 0, 1],
+  })
+  level: number;
 
   /** Name of the store from which this bill or invoice is issued */
   @Prop({
@@ -129,7 +137,7 @@ export class Expense {
     type: 'string',
     trim: true,
   })
-  pm?: string;
+  paymentMethod?: string;
 
   /** Description of the expense */
   @Prop({
@@ -161,13 +169,13 @@ export const ExpenseSchema = SchemaFactory.createForClass(Expense);
 /**
  * Setting up middlewares
  */
-ExpenseSchema.virtual('eid').get(transformId);
+ExpenseSchema.alias('_id', 'eid');
 ExpenseSchema.plugin(defaultOptionsPlugin);
 
 /**
  * Setting up the indexes
  */
-ExpenseSchema.index({ uid: 1, _id: 1 }, { name: 'UNIQUE_UID_AND_EID_INDEX', unique: true, background: true });
+ExpenseSchema.index({ uid: 1, date: 1, level: 1 }, { name: 'UID_DATE_LEVEL', background: true });
 
 /**
  * Creating the mongoose module

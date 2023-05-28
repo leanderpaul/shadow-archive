@@ -29,8 +29,8 @@ export const consoleFormat = format.printf(info => {
   const stack = info.stack ? '\n' + (Array.isArray(info.stack) ? info.stack.join('\n') : info.stack) : '';
   const isGraphQL = info.method === 'POST' && Storage.get<string[]>('graphql', []).includes(info.url.substring(9));
 
-  if (level != 'http') return `${info.level} ${yellow(`[${info.label || '-'}]`)} ${info.message} ${timeTaken} ${stack}`;
-  if (!isGraphQL) return cyan(`HTTP [REST] ${info.method} ${info.url} - ${info.timeTaken}ms`);
+  if (level != 'http') return `${(info.level + '  ').substring(0, 15)} ${yellow(`[${info.label || '-'}]`)} ${info.message} ${timeTaken} ${stack}`;
+  if (!isGraphQL) return cyan(`HTTP  [REST] ${info.method} ${info.url} - ${info.timeTaken}ms`);
 
   /** Parsing GraphQL Request */
   const body = info.body || {};
@@ -41,7 +41,7 @@ export const consoleFormat = format.printf(info => {
     const queryArr = query.substring(0, query.indexOf('{')).trim().split(' ');
     opName = queryArr.find(w => w && !/(query|mutation)/.test(w.toLowerCase()));
   }
-  return cyan(`HTTP [GraphQL] ${op} ${opName} - ${info.timeTaken}ms`);
+  return cyan(`HTTP  [GraphQL] ${op} ${opName} - ${info.timeTaken}ms`);
 });
 
 /** Appends the time and the request ID to the log metadata */

@@ -6,16 +6,14 @@ import { type GraphQLResolveInfo, Kind, type SelectionSetNode } from 'graphql';
 /**
  * Importing user defined packages
  */
+import { type Projection } from '@app/shared/interfaces';
+
 import { PageInput } from './dto';
 import { type PaginatedType } from './entities';
 
 /**
  * Defining types
  */
-
-export type Projection<T extends object> = {
-  [K in keyof T]?: T[K] extends object[] ? Projection<T[K][number]> : T[K] extends object ? Projection<T[K]> : 1;
-};
 
 export interface PaginationResolvers<T extends object, U extends PaginatedType<T>> {
   getItems(projection: Projection<T>): Promise<U['items']>;

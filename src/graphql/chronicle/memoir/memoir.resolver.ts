@@ -8,13 +8,11 @@ import { type GraphQLResolveInfo } from 'graphql';
  * Importing user defined packages
  */
 import { GraphQLService } from '@app/graphql/common';
+import { MemoirService } from '@app/modules/chronicle';
+import { AuthType, UseAuth } from '@app/shared/decorators';
 
-import { AddActivityArgs, UpdateActivityArgs } from './dto/activity.args';
-import { AddStringArgs, DeleteArgs, GetMemoirArgs, SleepArgs, UpdateStringArgs } from './dto/common.args';
-import { AddExerciseArgs, UpdateExerciseArgs } from './dto/exercise.args';
-import { AddFoodArgs, UpdateFoodArgs } from './dto/food.args';
-import { Activity, Exercise, Food, Memoir, Sleep } from './memoir.entity';
-import { MemoirService } from './memoir.service';
+import { AddStringArgs, DeleteArgs, GetMemoirArgs, SleepArgs, UpdateStringArgs } from './dto';
+import { Memoir, Sleep } from './memoir.entity';
 
 /**
  * Defining types
@@ -25,6 +23,7 @@ import { MemoirService } from './memoir.service';
  */
 
 @Resolver()
+@UseAuth(AuthType.VERIFIED)
 export class MemoirResolver {
   constructor(private readonly memoirService: MemoirService, private readonly graphqlService: GraphQLService) {}
 
@@ -38,51 +37,6 @@ export class MemoirResolver {
   @Mutation(() => Sleep)
   async addSleepRecord(@Args() args: SleepArgs): Promise<Sleep> {
     return await this.memoirService.updateMemoirSleep(args.date, args.input);
-  }
-
-  @Mutation(() => Exercise)
-  async addExerciseRecord(@Args() args: AddExerciseArgs): Promise<Exercise> {
-    return await this.memoirService.addMemoirField(args.date, 'exercises', args.input);
-  }
-
-  @Mutation(() => Exercise)
-  async updateExerciseRecord(@Args() args: UpdateExerciseArgs): Promise<Exercise> {
-    return await this.memoirService.updateMemoirField(args.date, 'exercises', args.index, args.update);
-  }
-
-  @Mutation(() => Exercise)
-  async deleteExerciseRecord(@Args() args: DeleteArgs): Promise<Exercise> {
-    return await this.memoirService.deleteMemoirField(args.date, 'exercises', args.index);
-  }
-
-  @Mutation(() => Activity)
-  async addActivityRecord(@Args() args: AddActivityArgs): Promise<Activity> {
-    return await this.memoirService.addMemoirField(args.date, 'activities', args.input);
-  }
-
-  @Mutation(() => Activity)
-  async updateActivityRecord(@Args() args: UpdateActivityArgs): Promise<Activity> {
-    return await this.memoirService.updateMemoirField(args.date, 'activities', args.index, args.update);
-  }
-
-  @Mutation(() => Activity)
-  async deleteActivityRecord(@Args() args: DeleteArgs): Promise<Activity> {
-    return await this.memoirService.deleteMemoirField(args.date, 'activities', args.index);
-  }
-
-  @Mutation(() => Food)
-  async addFoodRecord(@Args() args: AddFoodArgs): Promise<Food> {
-    return await this.memoirService.addMemoirField(args.date, 'foods', args.input);
-  }
-
-  @Mutation(() => Food)
-  async updateFoodRecord(@Args() args: UpdateFoodArgs): Promise<Food> {
-    return await this.memoirService.updateMemoirField(args.date, 'foods', args.index, args.update);
-  }
-
-  @Mutation(() => Food)
-  async deleteFoodRecord(@Args() args: DeleteArgs): Promise<Food> {
-    return await this.memoirService.deleteMemoirField(args.date, 'foods', args.index);
   }
 
   @Mutation(() => String)

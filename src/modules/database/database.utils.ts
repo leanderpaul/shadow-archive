@@ -2,13 +2,13 @@
  * Importing npm packages
  */
 import { MongoServerError } from 'mongodb';
-import { type Document, Query, type Schema, Types } from 'mongoose';
+import { Query, type Schema, Types } from 'mongoose';
 import { mongooseLeanVirtuals } from 'mongoose-lean-virtuals';
 
 /**
  * Importing user defined packages
  */
-import { AppError, ErrorCode, NeverError } from '@app/shared/errors';
+import { AppError, ErrorCode } from '@app/shared/errors';
 
 /**
  * Defining types
@@ -28,11 +28,6 @@ Query.prototype.unset = function (this: any, path) {
 
 function defaultLean(this: Query<unknown, unknown>): void {
   if (this._mongooseOptions.lean === true) this.lean({ virtuals: true });
-}
-
-export function transformId(this: Document<unknown>): string {
-  if (!this._id) throw new NeverError('ObjectID is falsy');
-  return this._id.toString();
 }
 
 export function handleDuplicateKeyError(throwError: AppError | Record<string, AppError>): (error: Error, _result: unknown, next: (error?: Error) => void) => void {

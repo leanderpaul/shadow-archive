@@ -2,6 +2,7 @@
  * Importing npm packages
  */
 import { Field, Float, ID, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { type Types } from 'mongoose';
 
 /**
  * Importing user defined packages
@@ -21,9 +22,20 @@ export enum Currency {
   INR = 'INR',
 }
 
+export enum VisibilityLevel {
+  STANDARD = 0,
+  HIDDEN = 1,
+  DISGUISE = -1,
+}
+
 registerEnumType(Currency, {
   name: 'Currency',
   description: 'Supported currencies',
+});
+
+registerEnumType(VisibilityLevel, {
+  name: 'VisibilityLevel',
+  description: 'The different visibility levels',
 });
 
 @ObjectType({})
@@ -41,13 +53,16 @@ export class ExpenseItem {
 @ObjectType({})
 export class Expense {
   @Field(() => ID, { description: 'Expense ID' })
-  eid: string;
+  eid: Types.ObjectId;
 
   @Field({ description: 'Bill ID', nullable: true })
   bid?: string;
 
   @Field(() => Int, { description: 'Date of the expense in the format YYMMDD' })
   date: number;
+
+  @Field(() => VisibilityLevel, { description: 'Visibility level' })
+  level: VisibilityLevel;
 
   @Field(() => Int, { description: 'Time of the bill in the 24 hour format HHMM', nullable: true })
   time?: number;
@@ -62,7 +77,7 @@ export class Expense {
   currency: Currency;
 
   @Field({ description: 'Payment mode or method', nullable: true })
-  pm?: string;
+  paymentMethod?: string;
 
   @Field({ description: 'Description for this expense' })
   desc?: string;

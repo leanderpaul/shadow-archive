@@ -1,55 +1,42 @@
 /**
  * Importing npm packages
  */
-import { ArgsType, Field, Float, InputType, Int, PartialType, registerEnumType } from '@nestjs/graphql';
+import { ArgsType, Field, Float, InputType, Int, PartialType } from '@nestjs/graphql';
 
 /**
  * Importing user defined packages
  */
-import { IntQuery, PageInput, SortOrder } from '@app/graphql/common';
+import { PageInput, SortOrder } from '@app/graphql/common';
 
-import { Currency } from './expense.entity';
+import { Currency, VisibilityLevel } from './expense.entity';
 
 /**
  * Defining types
  */
 
-export enum ExpenseSortField {
-  DATE = 'date',
-  TOTAL = 'total',
-}
-
 /**
  * Declaring the constants
  */
 
-registerEnumType(ExpenseSortField, { name: 'ExpenseSortField' });
-
 @InputType()
-export class ExpenseQuery {
+export class ExpenseFilter {
   @Field({ nullable: true })
   store?: string;
 
-  @Field(() => IntQuery, { nullable: true })
-  date?: IntQuery;
+  @Field(() => Int, { nullable: true })
+  fromDate?: number;
+
+  @Field(() => Int, { nullable: true })
+  toDate?: number;
+
+  @Field(() => [VisibilityLevel], { nullable: true })
+  levels?: VisibilityLevel[];
 
   @Field(() => Currency, { nullable: true })
   currency?: Currency;
 
-  @Field(() => IntQuery, { nullable: true })
-  total?: IntQuery;
-
   @Field({ nullable: true })
-  pm?: string;
-}
-
-@InputType()
-export class ExpenseSort {
-  @Field(() => ExpenseSortField)
-  field: ExpenseSortField;
-
-  @Field(() => SortOrder, { defaultValue: SortOrder.ASC, nullable: true })
-  order: SortOrder;
+  paymentMethod?: string;
 }
 
 @InputType()
@@ -69,6 +56,9 @@ export class AddExpenseInput {
   @Field({ description: 'Bill ID', nullable: true })
   bid?: string;
 
+  @Field(() => VisibilityLevel, { nullable: true })
+  level: VisibilityLevel;
+
   @Field(() => Int, { description: 'Bill date in format YYMMDD' })
   date: number;
 
@@ -82,7 +72,7 @@ export class AddExpenseInput {
   storeLoc?: string;
 
   @Field({ description: 'Payment mode or method', nullable: true })
-  pm?: string;
+  paymentMethod?: string;
 
   @Field({ description: 'Description', nullable: true })
   desc?: string;
@@ -99,12 +89,12 @@ export class UpdateExpenseInput extends PartialType(AddExpenseInput) {}
 
 @ArgsType()
 export class GetExpensesArgs {
-  @Field(() => ExpenseQuery, { nullable: true })
-  query?: ExpenseQuery;
+  @Field(() => ExpenseFilter, { nullable: true })
+  filter?: ExpenseFilter;
 
   @Field(() => PageInput, { nullable: true })
   page: PageInput = { offset: 0, limit: 20 };
 
-  @Field(() => ExpenseSort, { nullable: true })
-  sort: ExpenseSort = { field: ExpenseSortField.DATE, order: SortOrder.DESC };
+  @Field(() => SortOrder, { nullable: true })
+  sortOrder: SortOrder = SortOrder.ASC;
 }

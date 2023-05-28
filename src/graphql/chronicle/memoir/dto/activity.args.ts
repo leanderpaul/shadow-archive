@@ -30,7 +30,7 @@ export class AddActivityInput {
   duration: number;
 
   @Field(() => [String], { nullable: true, description: 'Description or details of the activity' })
-  description?: string[];
+  desc?: string[];
 }
 
 @InputType()

@@ -8,9 +8,9 @@ import { Module } from '@nestjs/common';
  * Importing user defined packages
  */
 import { DatabaseModule } from '@app/modules/database';
-import { UserModule } from '@app/modules/user';
 
-import { AuthService } from './auth.service';
+import { ExpenseService } from './expense.service';
+import { MemoirService } from './memoir.service';
 
 /**
  * Defining types
@@ -21,8 +21,8 @@ import { AuthService } from './auth.service';
  */
 
 @Module({
-  imports: [DatabaseModule, UserModule],
-  providers: [AuthService],
-  exports: [AuthService],
+  imports: [DatabaseModule],
+  providers: [ExpenseService, MemoirService],
+  exports: [ExpenseService, MemoirService],
 })
-export class AuthModule {}
+export class ChronicleModule {}

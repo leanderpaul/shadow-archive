@@ -2,6 +2,7 @@
  * Importing npm packages
  */
 import { Field, GraphQLISODateTime, ID, Int, ObjectType } from '@nestjs/graphql';
+import { Types } from 'mongoose';
 
 /**
  * Importing user defined packages
@@ -39,7 +40,7 @@ export class Session {
 @ObjectType()
 export class Viewer {
   @Field(() => ID, { description: 'User ID' })
-  uid: string;
+  uid: Types.ObjectId;
 
   @Field({ description: 'User email address' })
   email: string;

@@ -7,10 +7,12 @@ import { Module } from '@nestjs/common';
  * Importing user defined packages
  */
 import { GraphQLService } from '@app/graphql/common';
-import { DatabaseModule } from '@app/modules/database';
+import { ChronicleModule } from '@app/modules/chronicle';
 
+import { ActivityResolver } from './activity.resolver';
+import { ExerciseResolver } from './exercise.resolver';
+import { FoodResolver } from './food.resolver';
 import { MemoirResolver } from './memoir.resolver';
-import { MemoirService } from './memoir.service';
 
 /**
  * Defining types
@@ -21,7 +23,7 @@ import { MemoirService } from './memoir.service';
  */
 
 @Module({
-  imports: [DatabaseModule],
-  providers: [MemoirResolver, MemoirService, GraphQLService],
+  imports: [ChronicleModule],
+  providers: [MemoirResolver, ActivityResolver, FoodResolver, ExerciseResolver, GraphQLService],
 })
 export class MemoirModule {}

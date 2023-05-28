@@ -2,17 +2,18 @@
  * Importing npm packages
  */
 
-import { Args, Info, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Info, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { type GraphQLResolveInfo } from 'graphql';
 
 /**
  * Importing user defined packages
  */
 import { GraphQLService } from '@app/graphql/common';
+import { UserService } from '@app/modules/user';
+import { AuthType, UseAuth } from '@app/shared/decorators';
 
-import { UserQuery } from './admin.dto';
-import { User, UserConnection } from './admin.entity';
-import { AdminService } from './admin.service';
+import { UserIdentifier } from './admin.dto';
+import { User } from './admin.entity';
 
 /**
  * Defining types
@@ -23,24 +24,24 @@ import { AdminService } from './admin.service';
  */
 
 @Resolver()
+@UseAuth(AuthType.ADMIN)
 export class AdminResolver {
-  constructor(private readonly adminService: AdminService, private readonly graphqlService: GraphQLService) {}
+  constructor(private readonly graphqlService: GraphQLService, private readonly userService: UserService) {}
 
   @Query(() => User, { name: 'user', nullable: true })
-  async getUser(@Args('identifier', { description: 'Email address or UID' }) identifier: string): Promise<User | null> {
-    return await this.adminService.getUser(identifier);
+  async getUser(@Info() info: GraphQLResolveInfo, @Args() args: UserIdentifier): Promise<User | null> {
+    const projection = this.graphqlService.getProjection(info);
+    return await this.userService.getUser(args.identifier, projection);
   }
 
-  @Query(() => UserConnection, { name: 'users' })
-  getUserConnection(@Info() info: GraphQLResolveInfo, @Args() args: UserQuery): Promise<UserConnection> {
-    return this.graphqlService.getPaginationResult(info, args.page, {
-      getItems: projection => this.adminService.findUsers(projection, args.sort, args.page, args.email),
-      getCount: () => this.adminService.getTotalUsers(args.email),
-    });
+  @Query(() => Int, { name: 'totalUserCount' })
+  getTotalUserCount(): Promise<number> {
+    return this.userService.getTotalUserCount();
   }
 
-  @Mutation(() => Boolean, { name: 'verifyUser' })
-  verifyUser(@Args('identifier', { description: 'Email address or UID' }) identifier: string): Promise<boolean> {
-    return this.adminService.verifyUser(identifier);
+  @Mutation(() => Boolean)
+  async verifyEmail(@Args('email') email: string): Promise<boolean> {
+    await this.userService.verifyUserEmail(email);
+    return true;
   }
 }

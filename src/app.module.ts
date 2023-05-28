@@ -31,6 +31,6 @@ const RateLimiterModule = ThrottlerModule.forRoot({ limit: 10, ttl: 30 });
 })
 export class AppModule implements OnModuleInit {
   onModuleInit(): void {
-    Middleware.add({ handler: (req, res, app) => app.get(AuthService).getCurrentUserContext(req, res) });
+    Middleware.add({ handler: (_req, _res, app) => app.get(AuthService).authenticate() });
   }
 }

@@ -7,10 +7,9 @@ import { Module } from '@nestjs/common';
  * Importing user defined packages
  */
 import { GraphQLModule, GraphQLService } from '@app/graphql/common';
-import { DatabaseModule } from '@app/modules/database';
+import { UserModule } from '@app/modules/user';
 
 import { AdminResolver } from './admin.resolver';
-import { AdminService } from './admin.service';
 
 /**
  * Defining types
@@ -23,8 +22,8 @@ import { AdminService } from './admin.service';
 export const adminResolvers = [AdminResolver];
 
 @Module({
-  imports: [DatabaseModule],
-  providers: [AdminResolver, AdminService, GraphQLService],
+  imports: [UserModule],
+  providers: [AdminResolver, GraphQLService],
 })
 export class AdminModule {}
 

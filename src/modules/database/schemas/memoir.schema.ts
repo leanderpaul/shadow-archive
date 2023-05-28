@@ -2,8 +2,7 @@
  * Importing npm packages
  */
 import { MongooseModule, Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { type ObjectId } from 'mongodb';
-import { type Model } from 'mongoose';
+import { type Model, type Types } from 'mongoose';
 
 /**
  * Importing user defined packages
@@ -173,7 +172,7 @@ export class Activity {
     type: ['string'],
     default: undefined,
   })
-  description?: [string];
+  desc?: string[];
 }
 
 @Schema({ versionKey: false })
@@ -183,7 +182,7 @@ export class Memoir {
     type: 'ObjectID',
     required: true,
   })
-  uid: ObjectId;
+  uid: Types.ObjectId;
 
   /** The date on which this entry is for */
   @Prop({
@@ -245,7 +244,7 @@ MemoirSchema.plugin(defaultOptionsPlugin);
 /**
  * Setting up the indexes
  */
-MemoirSchema.index({ uid: 1, date: 1 }, { name: 'UNIQUE_UID_AND_DATE', unique: true, background: true });
+MemoirSchema.index({ uid: 1, date: 1 }, { name: 'UNIQUE_UID_DATE', unique: true, background: true });
 
 /**
  * Creating the mongoose module

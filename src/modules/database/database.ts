@@ -3,7 +3,7 @@
  */
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import mongoose, { type Connection } from 'mongoose';
+import mongoose, { type Collection, type Connection, type Types } from 'mongoose';
 
 /**
  * Importing user defined packages
@@ -18,10 +18,18 @@ import { ExpenseMongooseModule, MemoirMongooseModule, UserMongooseModule } from 
  * Defining types
  */
 
+export type ID = string | Types.ObjectId;
+
 /**
  * Declaring the constants
  */
-const logger = Logger.getLogger('MongooseModule');
+const logger = Logger.getLogger('MongoDBModule');
+
+function mongooseDebugLogger(this: Collection, collectionName: string, methodName: string, ...methodArgs: any[]) {
+  const args: string[] = [];
+  for (const value of methodArgs) args.push(this.$format(value));
+  logger.debug(`db.${collectionName}.${methodName}(${args.join(', ')})`);
+}
 
 const MongoDBModule = MongooseModule.forRoot(Config.get('db.uri'), {
   appName: Config.get('app.name'),
@@ -30,8 +38,9 @@ const MongoDBModule = MongooseModule.forRoot(Config.get('db.uri'), {
     mongoose.set('id', false);
     mongoose.set('runValidators', true);
     mongoose.set('returnOriginal', false);
+    mongoose.set('translateAliases', true);
     mongoose.set('toObject', { virtuals: true });
-    mongoose.set('debug', Config.get('log.level') === 'debug');
+    if (Config.get('log.level') === 'debug') mongoose.set('debug', mongooseDebugLogger);
 
     /** Handling mongoose connection errors */
     connection.on('error', (err: Error) => logger.error(err));

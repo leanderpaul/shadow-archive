@@ -15,7 +15,7 @@ import { type JSONData, type NonNullJSONData } from '@app/shared/interfaces';
 /**
  * Defining types
  */
-export type CurrentUser = Pick<User, '_id' | 'uid' | 'email' | 'admin' | 'verified'>;
+export type CurrentUser = Pick<User, 'uid' | 'email' | 'admin' | 'verified' | 'type'>;
 
 type Middleware = (req: FastifyRequest, res: FastifyReply, next: () => void) => void;
 
