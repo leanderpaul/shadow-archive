@@ -9,6 +9,7 @@ import { mongooseLeanVirtuals } from 'mongoose-lean-virtuals';
  * Importing user defined packages
  */
 import { AppError, ErrorCode } from '@app/shared/errors';
+import { Config } from '@app/shared/services';
 
 /**
  * Defining types
@@ -30,6 +31,13 @@ function defaultLean(this: Query<unknown, unknown>): void {
   if (this._mongooseOptions.lean === true) this.lean({ virtuals: true });
 }
 
+function formatProjection(this: Query<unknown, unknown>): void {
+  if (this.projection() && Object.keys(this.projection()).length > 0) {
+    const projection = DBUtils.toDotNotation({}, this.projection());
+    this.projection(projection);
+  }
+}
+
 export function handleDuplicateKeyError(throwError: AppError | Record<string, AppError>): (error: Error, _result: unknown, next: (error?: Error) => void) => void {
   return function (error, _result, next) {
     if (error instanceof MongoServerError && error.code === 11000) {
@@ -49,6 +57,13 @@ export function defaultOptionsPlugin(schema: Schema): void {
   schema.pre('findOne', defaultLean);
   schema.pre('findOneAndUpdate', defaultLean);
   schema.pre('findOneAndDelete', defaultLean);
+
+  if (Config.get('db.name') === 'CosmosDB') {
+    schema.pre('find', formatProjection);
+    schema.pre('findOne', formatProjection);
+    schema.pre('findOneAndUpdate', formatProjection);
+    schema.pre('findOneAndDelete', formatProjection);
+  }
 }
 
 export class DBUtils {
@@ -61,5 +76,16 @@ export class DBUtils {
       if (throwError) throw new AppError(ErrorCode.R001);
       return null;
     }
+  }
+
+  static toDotNotation(output: Record<string, any>, input: object, prefix: string[] = []): Record<string, number | string | boolean> {
+    for (const [key, value] of Object.entries(input)) {
+      if (typeof value === 'object' && !Array.isArray(value)) this.toDotNotation(output, value, [...prefix, key]);
+      else {
+        const newKey = [...prefix, key].join('.');
+        output[newKey] = value;
+      }
+    }
+    return output;
   }
 }

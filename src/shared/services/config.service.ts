@@ -14,6 +14,8 @@ type NodeEnv = 'development' | 'production' | 'test';
 
 type LogLevel = 'silly' | 'debug' | 'http' | 'info' | 'warn' | 'error';
 
+type DBName = 'MongoDB' | 'CosmosDB';
+
 type Nullable<T> = T | null;
 
 export interface ConfigRecords {
@@ -31,6 +33,7 @@ export interface ConfigRecords {
 
   /** Database configs */
   'db.uri': string;
+  'db.name': DBName;
 
   /** Mail service configs */
   'mail.sendgrid.apikey': Nullable<string>;
@@ -48,6 +51,7 @@ export interface ConfigRecords {
 const isProd = process.env.NODE_ENV === 'production';
 const validNodeEnvs = ['development', 'production', 'test'];
 const validLogLevels = ['silly', 'debug', 'http', 'info', 'warn', 'error'];
+const validDbNames = ['MongoDB', 'CosmosDB'];
 
 class ConfigService {
   private readonly cache;
@@ -110,6 +114,8 @@ class ConfigService {
 
     const dburi = ConfigService.get('DB_URI', 'mongodb://localhost/shadow', true);
     cache.set('db.uri', dburi);
+    const dbName = ConfigService.get('DB_NAME', 'MongoDB', false, value => validDbNames.includes(value));
+    cache.set('db.name', dbName);
 
     const sendgridApikey = ConfigService.get('SENDGRID_API_KEY', null, true);
     cache.set('mail.sendgrid.apikey', sendgridApikey);
