@@ -1,13 +1,12 @@
 /**
  * Importing npm packages
  */
-
 import { Module } from '@nestjs/common';
 
 /**
  * Importing user defined packages
  */
-import { AuthModule } from '@app/shared/modules';
+import { AuthModule } from '@app/modules/auth';
 
 import { DevToolsController } from './dev-tools.controller';
 

@@ -8,9 +8,6 @@ import { TerminusModule } from '@nestjs/terminus';
 /**
  * Importing user defined packages
  */
-import { ContextService } from '@app/providers/context';
-import { NestLogger } from '@app/providers/logger';
-
 import { HealthController } from './health.controller';
 
 /**
@@ -22,8 +19,7 @@ import { HealthController } from './health.controller';
  */
 
 @Module({
-  imports: [TerminusModule.forRoot({ logger: NestLogger }), HttpModule],
+  imports: [TerminusModule.forRoot({ logger: false }), HttpModule],
   controllers: [HealthController],
-  providers: [ContextService],
 })
 export class HealthModule {}

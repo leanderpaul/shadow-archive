@@ -9,7 +9,7 @@ import { type FastifyReply } from 'fastify';
  * Importing user defined packages
  */
 
-import { ContextService } from '@app/providers/context';
+import { Context } from '@app/shared/services';
 
 /**
  * Defining types
@@ -21,17 +21,12 @@ import { ContextService } from '@app/providers/context';
 
 @Controller('health')
 export class HealthController {
-  constructor(
-    private readonly health: HealthCheckService,
-    private readonly memory: MemoryHealthIndicator,
-    private readonly mongoose: MongooseHealthIndicator,
-    private readonly contextService: ContextService,
-  ) {}
+  constructor(private readonly health: HealthCheckService, private readonly memory: MemoryHealthIndicator, private readonly mongoose: MongooseHealthIndicator) {}
 
   @Get()
   @HealthCheck()
-  async check(@Res() res: FastifyReply) {
-    this.contextService.set('DISABLE_REQUEST_LOGGING', true);
+  async check(@Res() res: FastifyReply): Promise<FastifyReply> {
+    Context.set('DISABLE_REQUEST_LOGGING', true);
     try {
       const result = await this.health.check([
         () => this.memory.checkRSS('memory_rss', 150 * 1024 * 1024),

@@ -6,11 +6,9 @@ import { Module } from '@nestjs/common';
 /**
  * Importing user defined packages
  */
-import { ContextService } from '@app/providers/context';
-import { DatabaseModule } from '@app/providers/database';
+import { UserModule } from '@app/modules/user';
 
 import { ChronicleMetadataResolver } from './chronicle-metadata.resolver';
-import { ChronicleMetadataService } from './chronicle-metadata.service';
 
 /**
  * Defining types
@@ -21,7 +19,7 @@ import { ChronicleMetadataService } from './chronicle-metadata.service';
  */
 
 @Module({
-  imports: [DatabaseModule],
-  providers: [ChronicleMetadataResolver, ChronicleMetadataService, ContextService],
+  imports: [UserModule],
+  providers: [ChronicleMetadataResolver],
 })
 export class ChronicleMetadataModule {}

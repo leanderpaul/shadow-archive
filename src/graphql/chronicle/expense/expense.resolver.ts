@@ -7,11 +7,12 @@ import { type GraphQLResolveInfo } from 'graphql';
 /**
  * Importing user defined packages
  */
-import { GraphQLUtils } from '@app/shared/utils';
+import { GraphQLService } from '@app/graphql/common';
+import { ExpenseService } from '@app/modules/chronicle';
+import { AuthType, UseAuth } from '@app/shared/decorators';
 
-import { AddExpenseInput, GetExpensesArgs, UpdateExpenseInput } from './expense.dto';
+import { AddExpenseInput, GetExpenseArgs, SearchExpensesArgs, UpdateExpenseArgs } from './expense.dto';
 import { Expense, ExpenseConnection } from './expense.entity';
-import { ExpenseService } from './expense.service';
 
 /**
  * Defining types
@@ -22,35 +23,36 @@ import { ExpenseService } from './expense.service';
  */
 
 @Resolver()
+@UseAuth(AuthType.VERIFIED)
 export class ExpenseResolver {
-  constructor(private readonly expenseService: ExpenseService) {}
+  constructor(private readonly expenseService: ExpenseService, private readonly graphqlService: GraphQLService) {}
 
-  @Query(() => Expense, { name: 'expense' })
-  getExpense(@Info() info: GraphQLResolveInfo, @Args('eid') eid: string) {
-    const projection = GraphQLUtils.getProjection<Expense>(info);
-    return this.expenseService.getExpense(eid, projection);
+  @Query(() => Expense, { name: 'expense', nullable: true })
+  getExpense(@Info() info: GraphQLResolveInfo, @Args() args: GetExpenseArgs): Promise<Expense | null> {
+    const projection = this.graphqlService.getProjection<Expense>(info);
+    return this.expenseService.getExpense(args.eid, projection);
   }
 
   @Query(() => ExpenseConnection, { name: 'expenses' })
-  async getExpenseConnection(@Info() info: GraphQLResolveInfo, @Args() args: GetExpensesArgs) {
-    return GraphQLUtils.getPaginationResult(info, args.page, {
-      getCount: () => this.expenseService.getTotalExpenses(args.query),
-      getItems: projection => this.expenseService.findExpenses(projection, args.sort, args.page, args.query),
+  getExpenseConnection(@Info() info: GraphQLResolveInfo, @Args() args: SearchExpensesArgs): Promise<ExpenseConnection> {
+    return this.graphqlService.getPaginationResult<Expense, ExpenseConnection>(info, args.page, {
+      getCount: () => this.expenseService.getExpensesCount(args.filter),
+      getItems: projection => this.expenseService.getExpenseList(args, projection),
     });
   }
 
   @Mutation(() => Expense)
-  async addExpense(@Args('input') input: AddExpenseInput) {
-    return await this.expenseService.addExpense(input);
+  addExpense(@Args('input') input: AddExpenseInput): Promise<Expense> {
+    return this.expenseService.addExpense(input);
   }
 
   @Mutation(() => Expense)
-  async updateExpense(@Args('eid') eid: string, @Args('update') update: UpdateExpenseInput) {
-    return await this.expenseService.updateExpense(eid, update);
+  updateExpense(@Args() args: UpdateExpenseArgs): Promise<Expense> {
+    return this.expenseService.updateExpense(args.eid, args.update);
   }
 
   @Mutation(() => Expense)
-  async removeExpense(@Args('eid') eid: string) {
-    return await this.expenseService.removeExpense(eid);
+  removeExpense(@Args() args: GetExpenseArgs): Promise<Expense> {
+    return this.expenseService.removeExpense(args.eid);
   }
 }

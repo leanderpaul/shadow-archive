@@ -6,7 +6,7 @@ import { Field, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
 /**
  * Importing user defined packages
  */
-import { ActivityType } from '@app/providers/database';
+import { ActivityType } from '@app/modules/database';
 
 /**
  * Defining types
@@ -59,8 +59,8 @@ export class Exercise {
 
 @ObjectType()
 export class Food {
-  @Field({ description: 'Start time of eating in 24 hr format HHMM' })
-  time: string;
+  @Field(() => Int, { description: 'Start time of eating in 24 hr format HHMM' })
+  time: number;
 
   @Field(() => [String], { description: 'Items in the menu' })
   items: string[];
@@ -90,17 +90,17 @@ export class Memoir {
   sleep?: Sleep;
 
   @Field(() => [Exercise], { description: 'Excercises done on this day', defaultValue: [] })
-  excercises: Exercise[];
+  exercises?: Exercise[];
 
   @Field(() => [Activity], { description: 'Activities done on this day', defaultValue: [] })
-  activities: Activity[];
+  activities?: Activity[];
 
   @Field(() => [Food], { description: 'Food ate this day', defaultValue: [] })
-  foods: Food[];
+  foods?: Food[];
 
   @Field(() => [String], { description: 'Diary reords of this day', defaultValue: [] })
-  diary: string[];
+  diary?: string[];
 
   @Field(() => [String], { description: 'Events to be noted such as laundry, bedsheet change, etc', defaultValue: [] })
-  events: string[];
+  events?: string[];
 }

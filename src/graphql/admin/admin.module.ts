@@ -6,12 +6,10 @@ import { Module } from '@nestjs/common';
 /**
  * Importing user defined packages
  */
-import { GraphQLModule } from '@app/graphql/common';
-import { DatabaseModule } from '@app/providers/database';
-import { AuthType } from '@app/shared/guards';
+import { GraphQLModule, GraphQLService } from '@app/graphql/common';
+import { UserModule } from '@app/modules/user';
 
 import { AdminResolver } from './admin.resolver';
-import { AdminService } from './admin.service';
 
 /**
  * Defining types
@@ -24,12 +22,12 @@ import { AdminService } from './admin.service';
 export const adminResolvers = [AdminResolver];
 
 @Module({
-  imports: [DatabaseModule],
-  providers: [AdminResolver, AdminService],
+  imports: [UserModule],
+  providers: [AdminResolver, GraphQLService],
 })
 export class AdminModule {}
 
 @Module({
-  imports: [GraphQLModule.forRoot({ name: 'admin', include: [AdminModule], requiredAuth: AuthType.ADMIN }), AdminModule],
+  imports: [GraphQLModule.forRoot({ name: 'admin', include: [AdminModule] }), AdminModule],
 })
 export class AdminGraphQLModule {}

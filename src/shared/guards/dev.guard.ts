@@ -1,15 +1,13 @@
 /**
  * Importing npm packages
  */
-import { type CanActivate, Injectable, type Type, mixin } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { type CanActivate, type Type, mixin } from '@nestjs/common';
 
 /**
  * Importing user defined packages
  */
-import { type ConfigRecord } from '@app/config';
-import { ContextService } from '@app/providers/context';
 import { AppError, ErrorCode } from '@app/shared/errors';
+import { Config, Context } from '@app/shared/services';
 
 /**
  * Defining types
@@ -21,15 +19,12 @@ import { AppError, ErrorCode } from '@app/shared/errors';
 const cache: Partial<Record<'true' | 'false', Type<CanActivate>>> = {};
 
 function createDevGuard(allowAdmin: boolean): Type<CanActivate> {
-  @Injectable()
   class MixinDevGuard implements CanActivate {
-    constructor(private readonly contextService: ContextService, private readonly configService: ConfigService<ConfigRecord>) {}
-
     canActivate() {
-      const isDev = this.configService.get('IS_DEV_SERVER');
+      const isDev = Config.get('app.env') === 'development';
       if (isDev) return true;
 
-      const user = this.contextService.getCurrentUser();
+      const user = Context.getCurrentUser();
       if (!allowAdmin || !user?.admin) throw new AppError(ErrorCode.R001);
 
       return true;
@@ -39,7 +34,7 @@ function createDevGuard(allowAdmin: boolean): Type<CanActivate> {
   return mixin(MixinDevGuard);
 }
 
-export function DevGuard(allowAdmin = false) {
+export function DevGuard(allowAdmin = false): Type<CanActivate> {
   const key = allowAdmin ? 'true' : 'false';
   const cachedResult = cache[key];
   if (cachedResult) return cachedResult;

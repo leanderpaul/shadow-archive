@@ -6,11 +6,10 @@ import { Module } from '@nestjs/common';
 /**
  * Importing user defined packages
  */
-import { ContextService } from '@app/providers/context';
-import { DatabaseModule } from '@app/providers/database';
+import { GraphQLService } from '@app/graphql/common';
+import { ChronicleModule } from '@app/modules/chronicle';
 
 import { ExpenseResolver } from './expense.resolver';
-import { ExpenseService } from './expense.service';
 
 /**
  * Defining types
@@ -21,7 +20,7 @@ import { ExpenseService } from './expense.service';
  */
 
 @Module({
-  imports: [DatabaseModule],
-  providers: [ExpenseResolver, ExpenseService, ContextService],
+  imports: [ChronicleModule],
+  providers: [ExpenseResolver, GraphQLService],
 })
 export class ExpenseModule {}
