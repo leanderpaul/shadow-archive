@@ -5,16 +5,17 @@ import { fastifyCookie } from '@fastify/cookie';
 import { expect } from '@jest/globals';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
 import { Test } from '@nestjs/testing';
-import { default as request } from 'supertest';
 import { default as sagus } from 'sagus';
+import { default as request } from 'supertest';
 
 /**
  * Importing user defined packages
  */
 import { AppModule } from '@app/app.module';
-import { Config, Middleware } from '@app/shared/services';
-import { UserService } from '@app/modules/user';
+import { AuthService } from '@app/modules/auth';
 import { DatabaseService, NativeUser, OAuthUser, type User } from '@app/modules/database';
+import { UserService } from '@app/modules/user';
+import { Middleware } from '@app/shared/services';
 
 import { ShadowArchiveRequest } from './shadow-archive-request';
 import { ShadowArchiveResponse } from './shadow-archive-response';
@@ -26,6 +27,7 @@ import { ShadowArchiveResponse } from './shadow-archive-response';
 declare module 'expect' {
   export interface AsymmetricMatchers {
     nullableAny(sample: unknown): void;
+    toBeID(): void;
   }
 }
 
@@ -73,8 +75,14 @@ expect.extend({
     }
     if (actual === null) pass = true;
 
-    const message = pass ? () => `expected ${actual} not to be Any<${type}> or Null` : () => `expected ${actual} to be Any<${type}> or Null`;
+    const message = pass ? () => `expected '${actual}' not to be Any<${type}> or Null` : () => `expected '${actual}' to be Any<${type}> or Null`;
 
+    return { message, pass };
+  },
+
+  toBeID(actual: unknown) {
+    const pass = typeof actual === 'string' && /^[a-f0-9]{24}$/.test(actual);
+    const message = pass ? () => `expected '${actual}' not to be ID` : () => `expected '${actual}' to be ID`;
     return { message, pass };
   },
 });
@@ -97,6 +105,13 @@ export class ShadowArchive {
 
     await this.app.init();
     await instance.ready();
+
+    const authService = this.app.get(AuthService);
+    authService.verifyCSRFToken = async () => true;
+  }
+
+  getDatabaseService(): DatabaseService {
+    return this.app.get(DatabaseService);
   }
 
   async createUser(email: string, name: string, verified?: boolean): Promise<User> {

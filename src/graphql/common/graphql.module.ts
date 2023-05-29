@@ -12,7 +12,7 @@ import { allow, rule, shield } from 'graphql-shield';
  * Importing user defined packages
  */
 import { AuthModule, AuthService } from '@app/modules/auth';
-import { AppError, ErrorCode } from '@app/shared/errors';
+import { AppError, ErrorCode, ErrorFilter } from '@app/shared/errors';
 import { Config, Context, Storage } from '@app/shared/services';
 
 /**
@@ -42,7 +42,8 @@ export class GraphQLModule {
       inject: [AuthService],
       useFactory(authService: AuthService) {
         Storage.insert('graphql', options.name);
-        const csrfShield = rule('CSRF_SHIELD')(() => authService.verifyCSRFToken());
+        const errorFilter = new ErrorFilter();
+        const csrfShield = rule('CSRF_SHIELD')(() => authService.verifyCSRFToken().catch(err => errorFilter.toGraphQLError(err)));
         const ruleTree = { Mutation: options.disableCSRFProtection === true ? allow : csrfShield };
         const permissions = shield(ruleTree, { allowExternalErrors: true, fallbackRule: allow });
 

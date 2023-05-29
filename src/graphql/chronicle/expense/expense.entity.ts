@@ -79,7 +79,7 @@ export class Expense {
   @Field({ description: 'Payment mode or method', nullable: true })
   paymentMethod?: string;
 
-  @Field({ description: 'Description for this expense' })
+  @Field({ description: 'Description for this expense', nullable: true })
   desc?: string;
 
   @Field(() => [ExpenseItem], { description: 'Array containing the items in the expense or bill' })

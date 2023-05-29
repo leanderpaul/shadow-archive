@@ -1,8 +1,8 @@
 /**
  * Importing npm packages
  */
-import { type Request } from 'supertest';
 import { type NestFastifyApplication } from '@nestjs/platform-fastify';
+import { type Request } from 'supertest';
 
 /**
  * Importing user defined packages
@@ -53,6 +53,11 @@ export class ShadowArchiveRequest {
     const cookieName = Config.get('cookie.name');
     const value = cookie.startsWith(cookieName) ? cookie : cookieName + '=' + cookie;
     this.request.set('Cookie', value);
+    return this;
+  }
+
+  header(key: string, value: string): ShadowArchiveRequest {
+    this.request.set(key, value);
     return this;
   }
 

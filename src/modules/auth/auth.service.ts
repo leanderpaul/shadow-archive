@@ -80,7 +80,7 @@ export class AuthService {
     const token = headers['x-csrf-token'] as string | undefined;
     if (!token) throw new AppError(ErrorCode.IAM005);
     const user = Context.getCurrentUser();
-    if (!user) throw new AppError(ErrorCode.IAM004);
+    if (!user) throw new AppError(ErrorCode.IAM002);
 
     const [expireAt] = token.split('|');
     const expiryDate = moment(expireAt, 'X');

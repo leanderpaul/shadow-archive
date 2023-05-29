@@ -7,7 +7,7 @@ import { expect } from '@jest/globals';
  * Importing user defined packages
  */
 import { MailType } from '@app/providers/mail';
-import { GraphQLModule, ShadowArchive, ShadowArchiveResponse } from '@tests/utils';
+import { GraphQLModule, ShadowArchive } from '@tests/utils';
 
 /**
  * Defining types
@@ -53,19 +53,24 @@ describe('[GraphQL][accounts]', function () {
     });
 
     it('creates user with valid input', async () => {
-      const variables = { ...USER };
-      const response = await archive.graphql(query, variables);
+      const response = await archive.graphql(query, { ...USER });
 
       response.expectCookies();
       response.expectGraphQLData({
         register: {
-          uid: expect.stringMatching(/^[a-f0-9]{24}$/),
-          email: variables.email,
-          name: variables.name,
+          uid: expect.toBeID(),
+          email: USER.email,
+          name: USER.name,
           imageUrl: null,
           verified: false,
         },
       });
+    });
+
+    it('throws duplicate email address error for already registered email', async () => {
+      const response = await archive.graphql(query, { ...USER });
+
+      response.expectGraphQLError('R003');
     });
   });
 
@@ -101,7 +106,7 @@ describe('[GraphQL][accounts]', function () {
       response.expectCookies(USER.email);
       response.expectGraphQLData({
         login: {
-          uid: expect.stringMatching(/^[a-f0-9]{24}$/),
+          uid: expect.toBeID(),
           email: USER.email,
           name: USER.name,
           imageUrl: null,
@@ -290,18 +295,11 @@ describe('[GraphQL][accounts]', function () {
   });
 
   describe('logout user session', function () {
-    let oldSession: string;
     const query = /* GraphQL */ `
       mutation ($sessionId: Int) {
         logout(sessionId: $sessionId)
       }
     `;
-
-    beforeAll(() => {
-      const session = ShadowArchiveResponse.cookies.get(USER.email);
-      if (!session) throw new Error(`user session for '${USER.email}' not present`);
-      oldSession = session;
-    });
 
     it('should logout only the last session', async () => {
       const response = await archive.graphql(query).session(USER.email);
@@ -312,13 +310,9 @@ describe('[GraphQL][accounts]', function () {
     });
 
     it('should logout every session', async () => {
-      // console.log(ShadowArchiveResponse.cookies);
       await archive.createUserSession(USER.email);
-      // console.log(ShadowArchiveResponse.cookies);
-      // console.log({ sessions: user.sessions });
       const response = await archive.graphql(query, { sessionId: -1 }).session(USER.email);
 
-      // console.log(response.getBody().errors[0]);
       response.expectGraphQLData({ logout: true });
       const user = await archive.getUser(USER.email);
       expect(user.sessions).toHaveLength(0);

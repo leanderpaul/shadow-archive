@@ -66,6 +66,11 @@ export class ErrorFilter implements ExceptionFilter {
     return [statusCode, { rid, code, message, type }];
   }
 
+  toGraphQLError(error: Error): GraphQLError {
+    const { message, ...extensions } = this.constructErrorPayload(error)[1];
+    return new GraphQLError(message, { extensions });
+  }
+
   catch(error: Error, host: ArgumentsHost): GraphQLError | FastifyReply {
     this.logger.error(error);
     const [statusCode, payload] = this.constructErrorPayload(error);

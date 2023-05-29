@@ -50,7 +50,8 @@ export class ExpenseService {
   }
 
   private calculateTotal(items: ExpenseItem[]): number {
-    return items.reduce((acc, item) => acc + Math.round(item.price * (item.qty ?? 1)), 0);
+    const total = items.reduce((acc, item) => acc + parseFloat((item.price * (item.qty ?? 1)).toFixed(2)), 0);
+    return parseFloat(total.toFixed(2));
   }
 
   private getExpensesQuery<T extends keyof Omit<Expense, 'uid' | 'eid'>>(query?: ExpenseFilter, projection?: T[]): QueryWithHelpers<Expense[], Expense>;
@@ -71,7 +72,11 @@ export class ExpenseService {
   async getExpense(eid: ID, projection?: Projection<Expense>): Promise<Expense | null>;
   async getExpense<T>(eid: ID, projection?: Projection<Expense> | T[]): Promise<Expense | null> {
     const { uid } = Context.getCurrentUser(true);
-    if (typeof eid === 'string' && !DBUtils.toObjectID(eid)) return null;
+    if (typeof eid === 'string') {
+      const id = DBUtils.toObjectID(eid);
+      if (!id) return null;
+      eid = id;
+    }
     return await this.expenseModel.findOne({ uid, eid }, projection).lean();
   }
 

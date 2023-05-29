@@ -40,8 +40,8 @@ export class ExpenseItem {
   /** Name of the expense or bill item */
   @Prop({
     type: 'string',
-    required: [true, 'Item name is required'],
-    validate: [nameRegex, `Item name {VALUE} is invalid, ${nameRegex}`],
+    required: [true, 'required'],
+    validate: [nameRegex, nameRegexMsg],
   })
   name: string;
 
@@ -49,14 +49,14 @@ export class ExpenseItem {
   @Prop({
     type: 'number',
     required: [true, 'Price is required'],
-    validate: [greaterThanZero, `Price '{VALUE}' is invalid, ${greaterThanZeroMsg}`],
+    validate: [greaterThanZero, greaterThanZeroMsg],
   })
   price: number;
 
   /** The quantity of the otem purchased, if this value is empty it means the quantity is one */
   @Prop({
     type: 'number',
-    validate: [greaterThanZero, `Quantity '{VALUE}' is invalid, ${greaterThanZeroMsg}`],
+    validate: [greaterThanZero, greaterThanZeroMsg],
     set: (val: number | null) => (val === 1 || val === null ? undefined : val),
   })
   qty?: number;
@@ -93,14 +93,14 @@ export class Expense {
   @Prop({
     type: 'string',
     required: [true, 'Store is required'],
-    validate: [nameRegex, `Store '{VALUE}' is invalid, ${nameRegexMsg}`],
+    validate: [nameRegex, nameRegexMsg],
   })
   store: string;
 
   /** Store Location */
   @Prop({
     type: 'string',
-    validate: [nameRegex, `Store Location '{VALUE}' is invalid, ${nameRegexMsg}`],
+    validate: [nameRegex, nameRegexMsg],
   })
   storeLoc?: string;
 
@@ -127,7 +127,7 @@ export class Expense {
     required: [true, 'Currency is requried'],
     enum: {
       values: ['GBP', 'INR'],
-      message: `Currency '{VALUE}' is invalid or not supported`,
+      message: `unsupported value provided`,
     },
   })
   currency: Currency;

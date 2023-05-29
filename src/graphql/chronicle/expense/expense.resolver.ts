@@ -11,7 +11,7 @@ import { GraphQLService } from '@app/graphql/common';
 import { ExpenseService } from '@app/modules/chronicle';
 import { AuthType, UseAuth } from '@app/shared/decorators';
 
-import { AddExpenseInput, GetExpensesArgs, UpdateExpenseInput } from './expense.dto';
+import { AddExpenseInput, GetExpenseArgs, SearchExpensesArgs, UpdateExpenseArgs } from './expense.dto';
 import { Expense, ExpenseConnection } from './expense.entity';
 
 /**
@@ -28,13 +28,13 @@ export class ExpenseResolver {
   constructor(private readonly expenseService: ExpenseService, private readonly graphqlService: GraphQLService) {}
 
   @Query(() => Expense, { name: 'expense', nullable: true })
-  getExpense(@Info() info: GraphQLResolveInfo, @Args('eid') eid: string): Promise<Expense | null> {
+  getExpense(@Info() info: GraphQLResolveInfo, @Args() args: GetExpenseArgs): Promise<Expense | null> {
     const projection = this.graphqlService.getProjection<Expense>(info);
-    return this.expenseService.getExpense(eid, projection);
+    return this.expenseService.getExpense(args.eid, projection);
   }
 
   @Query(() => ExpenseConnection, { name: 'expenses' })
-  getExpenseConnection(@Info() info: GraphQLResolveInfo, @Args() args: GetExpensesArgs): Promise<ExpenseConnection> {
+  getExpenseConnection(@Info() info: GraphQLResolveInfo, @Args() args: SearchExpensesArgs): Promise<ExpenseConnection> {
     return this.graphqlService.getPaginationResult<Expense, ExpenseConnection>(info, args.page, {
       getCount: () => this.expenseService.getExpensesCount(args.filter),
       getItems: projection => this.expenseService.getExpenseList(args, projection),
@@ -47,12 +47,12 @@ export class ExpenseResolver {
   }
 
   @Mutation(() => Expense)
-  updateExpense(@Args('eid') eid: string, @Args('update') update: UpdateExpenseInput): Promise<Expense> {
-    return this.expenseService.updateExpense(eid, update);
+  updateExpense(@Args() args: UpdateExpenseArgs): Promise<Expense> {
+    return this.expenseService.updateExpense(args.eid, args.update);
   }
 
   @Mutation(() => Expense)
-  removeExpense(@Args('eid') eid: string): Promise<Expense> {
-    return this.expenseService.removeExpense(eid);
+  removeExpense(@Args() args: GetExpenseArgs): Promise<Expense> {
+    return this.expenseService.removeExpense(args.eid);
   }
 }

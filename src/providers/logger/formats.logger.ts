@@ -38,7 +38,9 @@ export const consoleFormat = format.printf(info => {
   const op = query.trim().startsWith('query') ? 'Query' : 'Mutation';
   let opName = body.operationName;
   if (!opName) {
-    const queryArr = query.substring(0, query.indexOf('{')).trim().split(' ');
+    let index = query.indexOf('{');
+    if (query.indexOf('(') != -1 && query.indexOf('(') < index) index = query.indexOf('(');
+    const queryArr = query.substring(0, index).trim().split(' ');
     opName = queryArr.find(w => w && !/(query|mutation)/.test(w.toLowerCase()));
   }
   return cyan(`HTTP  [GraphQL] ${op} ${opName} - ${info.timeTaken}ms`);

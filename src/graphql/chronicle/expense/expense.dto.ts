@@ -1,7 +1,7 @@
 /**
  * Importing npm packages
  */
-import { ArgsType, Field, Float, InputType, Int, PartialType } from '@nestjs/graphql';
+import { ArgsType, Field, Float, ID, InputType, Int, PartialType } from '@nestjs/graphql';
 
 /**
  * Importing user defined packages
@@ -56,7 +56,7 @@ export class AddExpenseInput {
   @Field({ description: 'Bill ID', nullable: true })
   bid?: string;
 
-  @Field(() => VisibilityLevel, { nullable: true })
+  @Field(() => VisibilityLevel, { description: 'Visibilty level of this expense', nullable: true })
   level: VisibilityLevel;
 
   @Field(() => Int, { description: 'Bill date in format YYMMDD' })
@@ -88,7 +88,7 @@ export class AddExpenseInput {
 export class UpdateExpenseInput extends PartialType(AddExpenseInput) {}
 
 @ArgsType()
-export class GetExpensesArgs {
+export class SearchExpensesArgs {
   @Field(() => ExpenseFilter, { nullable: true })
   filter?: ExpenseFilter;
 
@@ -97,4 +97,16 @@ export class GetExpensesArgs {
 
   @Field(() => SortOrder, { nullable: true })
   sortOrder: SortOrder = SortOrder.ASC;
+}
+
+@ArgsType()
+export class GetExpenseArgs {
+  @Field(() => ID)
+  eid: string;
+}
+
+@ArgsType()
+export class UpdateExpenseArgs extends GetExpenseArgs {
+  @Field(() => UpdateExpenseInput)
+  update: UpdateExpenseInput;
 }
