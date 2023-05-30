@@ -98,7 +98,7 @@ export class MailService {
   sendMail(mailType: MailType.EMAIL_VERIFICATION | MailType.RESET_PASSWORD, to: string, data: ICodeMailPayload): void;
   sendMail(mailType: MailType, to: string, data: object): void {
     const template = this.getTemplate(mailType);
-    const html = mustache.render(template.html, data);
-    this._sendMail({ ...this.defaultData, ...template, html, to }).then();
+    const html = mustache.render(template.html, { ...this.defaultData, ...data });
+    this._sendMail({ ...template, html, to }).then();
   }
 }
