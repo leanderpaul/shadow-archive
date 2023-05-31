@@ -18,8 +18,6 @@ export type ExpenseModel = Model<Expense>;
 /**
  * Declaring the constants
  */
-const nameRegex = /^[a-zA-Z0-9\-_ ]{1,32}$/;
-const nameRegexMsg = 'should only contain alphanumberic, underscore and space characters';
 const greaterThanZero = (num: number) => num > 0;
 const greaterThanZeroMsg = 'should be greater than 0';
 
@@ -41,7 +39,7 @@ export class ExpenseItem {
   @Prop({
     type: 'string',
     required: [true, 'required'],
-    validate: [nameRegex, nameRegexMsg],
+    maxlength: 120,
   })
   name: string;
 
@@ -93,14 +91,14 @@ export class Expense {
   @Prop({
     type: 'string',
     required: [true, 'Store is required'],
-    validate: [nameRegex, nameRegexMsg],
+    maxlength: 48,
   })
   store: string;
 
   /** Store Location */
   @Prop({
     type: 'string',
-    validate: [nameRegex, nameRegexMsg],
+    maxlength: 48,
   })
   storeLoc?: string;
 
@@ -108,7 +106,7 @@ export class Expense {
   @Prop({
     type: 'number',
     required: [true, 'Date is required'],
-    min: [230101, `should be greater than 230101 (2023-01-01)`],
+    min: [220101, `should be greater than 220101 (2022-01-01)`],
     max: [991231, `should be less than 991231 (2099-12-31)`],
   })
   date: number;

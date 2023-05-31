@@ -8,9 +8,9 @@ import moment from 'moment';
  * Importing user defined packages
  */
 import { AuthService } from '@app/modules/auth';
+import { AppError, ErrorCode } from '@app/shared/errors';
 import { DevGuard } from '@app/shared/guards';
 import { Context, Storage } from '@app/shared/services';
-import { AppError, ErrorCode } from '@app/shared/errors';
 
 /**
  * Defining types
