@@ -11,6 +11,7 @@ import moment from 'moment';
  */
 import { DatabaseService } from '@app/modules/database';
 import { CookieService, type UserCookie } from '@app/modules/user';
+import { Logger } from '@app/providers/logger';
 import { AppError, ErrorCode } from '@app/shared/errors';
 import { Config, Context } from '@app/shared/services';
 
@@ -33,6 +34,7 @@ const AUTH_INITED = 'AUTH_INITED';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = Logger.getLogger(AuthService.name);
   private readonly userModel;
 
   constructor(databaseService: DatabaseService, private readonly cookieService: CookieService) {
@@ -42,17 +44,18 @@ export class AuthService {
   private async authenticateUser(cookieData: UserCookie): Promise<void> {
     /** Verifying the cookie data */
     const maxAge = Config.get('cookie.max-age');
-    const promise = this.userModel.findOne({ uid: cookieData.uid });
+    const promise = this.userModel.findOneAndUpdate({ uid: cookieData.uid }, {}, { runValidators: false });
     promise.setUpdate({ $pull: { sessions: { accessedAt: { $lt: moment().subtract(maxAge, 'seconds').toDate() } } } });
     promise.projection('uid email admin verified sessions');
-    promise.setOptions({ runValidators: false });
     const user = await promise.lean();
     if (!user) return this.cookieService.clearCookies();
     const session = user.sessions.find(s => s.token === cookieData.token);
     if (!session) return this.cookieService.clearCookies();
 
     /** Updating the last accessed time in user seesion */
-    this.userModel.updateOne({ uid: cookieData.uid, 'sessions.id': session.id }, { $set: { 'sessions.$.accessedAt': new Date() } }).then();
+    this.userModel
+      .updateOne({ uid: cookieData.uid, 'sessions.id': session.id }, { $set: { 'sessions.$.accessedAt': new Date() } })
+      .catch(err => this.logger.error(err, { message: 'Failed updating last accessed time in user session' }));
 
     /** Setting up the request context values */
     Context.setCurrentUser(user);

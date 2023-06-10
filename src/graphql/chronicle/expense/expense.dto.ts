@@ -7,8 +7,7 @@ import { ArgsType, Field, Float, ID, InputType, Int, PartialType } from '@nestjs
  * Importing user defined packages
  */
 import { PageInput, SortOrder } from '@app/graphql/common';
-
-import { Currency, VisibilityLevel } from './expense.entity';
+import { Currency, ExpenseCategory, ExpenseVisibiltyLevel } from '@app/modules/database';
 
 /**
  * Defining types
@@ -29,8 +28,11 @@ export class ExpenseFilter {
   @Field(() => Int, { nullable: true })
   toDate?: number;
 
-  @Field(() => [VisibilityLevel], { nullable: true })
-  levels?: VisibilityLevel[];
+  @Field(() => [ExpenseVisibiltyLevel], { nullable: true })
+  levels?: ExpenseVisibiltyLevel[];
+
+  @Field(() => ExpenseCategory, { nullable: true })
+  category?: ExpenseCategory;
 
   @Field(() => Currency, { nullable: true })
   currency?: Currency;
@@ -56,14 +58,17 @@ export class AddExpenseInput {
   @Field({ description: 'Bill ID', nullable: true })
   bid?: string;
 
-  @Field(() => VisibilityLevel, { description: 'Visibilty level of this expense', nullable: true })
-  level: VisibilityLevel;
+  @Field(() => ExpenseVisibiltyLevel, { description: 'Visibilty level of this expense', nullable: true })
+  level: ExpenseVisibiltyLevel;
 
   @Field(() => Int, { description: 'Bill date in format YYMMDD' })
   date: number;
 
   @Field(() => Int, { description: 'Bill time in 24hr format HHMM', nullable: true })
   time?: number;
+
+  @Field(() => ExpenseCategory, { description: 'Category to which this bill belongs to', nullable: true, defaultValue: ExpenseCategory.UNKNOWN })
+  category: ExpenseCategory;
 
   @Field({ description: 'Store from which the expense is made' })
   store: string;

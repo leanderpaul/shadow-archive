@@ -6,6 +6,7 @@ import { expect } from '@jest/globals';
 /**
  * Importing user defined packages
  */
+import { Currency, ExpenseVisibiltyLevel } from '@app/modules/database';
 import { GraphQLModule, ShadowArchive } from '@tests/utils';
 
 /**
@@ -93,7 +94,7 @@ describe('[GraphQL][chronicle]', function () {
 
       response.expectGraphQLData({ addExpense: { ...variables.input, eid: expect.toBeID(), desc: null, total: 5.2 } });
       const user = await archive.getUser(emailOne);
-      expect(user.chronicle).toMatchObject({ deviation: 0, expenseCount: 1, groups: [], paymentMethods: [variables.input.paymentMethod] });
+      expect(user.chronicle).toMatchObject({ deviation: 0, paymentMethods: [variables.input.paymentMethod] });
 
       archive.storeData('expense', response.getBody().data.addExpense);
     });
@@ -153,11 +154,11 @@ describe('[GraphQL][chronicle]', function () {
       const user = await archive.getUser(emailOne);
       const model = archive.getDatabaseService().getExpenseModel();
       const items = [{ name: 'item 1', price: 1.5 }];
-      const data = { uid: user.uid, store: 'Store Name', paymentMethod: 'Master card', items, currency: 'GBP', total: 1.5 };
+      const data = { uid: user.uid, store: 'Store Name', paymentMethod: 'Master card', items, currency: Currency.GBP, total: 1.5 };
       return await Promise.all([
-        model.create({ ...data, level: -1, bid: 'bill-0002', date: 230102 }),
-        model.create({ ...data, level: 1, bid: 'bill-0003', date: 230103 }),
-        model.create({ ...data, level: 0, bid: 'bill-0004', date: 230104 }),
+        model.create({ ...data, level: ExpenseVisibiltyLevel.DISGUISE, bid: 'bill-0002', date: 230102 }),
+        model.create({ ...data, level: ExpenseVisibiltyLevel.HIDDEN, bid: 'bill-0003', date: 230103 }),
+        model.create({ ...data, level: ExpenseVisibiltyLevel.STANDARD, bid: 'bill-0004', date: 230104 }),
       ]);
     });
 

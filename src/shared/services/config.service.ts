@@ -108,7 +108,7 @@ class ConfigService {
     const logtailApikey = ConfigService.get('LOGTAIL_SOURCE_TOKEN', null, true);
     cache.set('log.logtail.apikey', logtailApikey);
 
-    const dburi = ConfigService.get('DB_URI', 'mongodb://localhost/shadow', true);
+    const dburi = ConfigService.get('DB_URI', 'mongodb://localhost/shadow-database', true);
     cache.set('db.uri', dburi);
 
     const sendgridApikey = ConfigService.get('SENDGRID_API_KEY', null, true);

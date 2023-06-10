@@ -8,6 +8,7 @@ import { type Types } from 'mongoose';
  * Importing user defined packages
  */
 import { Paginated } from '@app/graphql/common';
+import { Currency, ExpenseCategory, ExpenseVisibiltyLevel } from '@app/modules/database';
 
 /**
  * Defining types
@@ -17,28 +18,22 @@ import { Paginated } from '@app/graphql/common';
  * Declaring the constants
  */
 
-export enum Currency {
-  GBP = 'GBP',
-  INR = 'INR',
-}
-
-export enum VisibilityLevel {
-  STANDARD = 0,
-  HIDDEN = 1,
-  DISGUISE = -1,
-}
-
 registerEnumType(Currency, {
   name: 'Currency',
   description: 'Supported currencies',
 });
 
-registerEnumType(VisibilityLevel, {
-  name: 'VisibilityLevel',
+registerEnumType(ExpenseVisibiltyLevel, {
+  name: 'ExpenseVisibiltyLevel',
   description: 'The different visibility levels',
 });
 
-@ObjectType({})
+registerEnumType(ExpenseCategory, {
+  name: 'ExpenseCategory',
+  description: 'Supported expense categories',
+});
+
+@ObjectType()
 export class ExpenseItem {
   @Field({ description: 'Name of the item' })
   name: string;
@@ -50,7 +45,7 @@ export class ExpenseItem {
   qty?: number;
 }
 
-@ObjectType({})
+@ObjectType()
 export class Expense {
   @Field(() => ID, { description: 'Expense ID' })
   eid: Types.ObjectId;
@@ -61,8 +56,11 @@ export class Expense {
   @Field(() => Int, { description: 'Date of the expense in the format YYMMDD' })
   date: number;
 
-  @Field(() => VisibilityLevel, { description: 'Visibility level' })
-  level: VisibilityLevel;
+  @Field(() => ExpenseVisibiltyLevel, { description: 'Visibility level' })
+  level: ExpenseVisibiltyLevel;
+
+  @Field(() => ExpenseCategory, { description: 'Expense category' })
+  category: ExpenseCategory;
 
   @Field(() => Int, { description: 'Time of the bill in the 24 hour format HHMM', nullable: true })
   time?: number;

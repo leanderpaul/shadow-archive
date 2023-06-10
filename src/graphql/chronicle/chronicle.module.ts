@@ -10,6 +10,7 @@ import { GraphQLModule } from '@app/graphql/common';
 
 import { ChronicleMetadataModule, ChronicleMetadataResolver } from './chronicle-metadata';
 import { ExpenseModule, ExpenseResolver } from './expense';
+import { InsightModule, InsightResolver } from './insight';
 import { MemoirModule, MemoirResolver } from './memoir';
 
 /**
@@ -20,10 +21,10 @@ import { MemoirModule, MemoirResolver } from './memoir';
  * Declaring the constants
  */
 
-export const chronicleResolvers = [ChronicleMetadataResolver, ExpenseResolver, MemoirResolver];
+export const chronicleResolvers = [ChronicleMetadataResolver, ExpenseResolver, MemoirResolver, InsightResolver];
 
 @Module({
-  imports: [ChronicleMetadataModule, ExpenseModule, MemoirModule],
+  imports: [ChronicleMetadataModule, ExpenseModule, MemoirModule, InsightModule],
 })
 class ChronicleModule {}
 
