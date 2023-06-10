@@ -139,15 +139,6 @@ export class ExpenseGroup {
  */
 @Schema({ _id: false })
 export class ChronicleMetadata {
-  /** The total count of the expenses or bills that the user has added */
-  @Prop({
-    type: 'number',
-    required: true,
-    default: 0,
-    min: 0,
-  })
-  expenseCount: number;
-
   /** Difference between the expense security level 1 and -1  */
   @Prop({
     type: 'number',
@@ -162,13 +153,6 @@ export class ChronicleMetadata {
     required: true,
   })
   paymentMethods: string[];
-
-  /** Array containg the expense groups associated with the user */
-  @Prop({
-    type: [SchemaFactory.createForClass(ExpenseGroup)],
-    requried: true,
-  })
-  groups: ExpenseGroup[];
 }
 
 /**

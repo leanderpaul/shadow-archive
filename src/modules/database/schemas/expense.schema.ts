@@ -22,8 +22,30 @@ const greaterThanZero = (num: number) => num > 0;
 const greaterThanZeroMsg = 'should be greater than 0';
 
 export enum Currency {
-  GBP = 'GBP',
-  INR = 'INR',
+  INR = 1,
+  GBP = 2,
+}
+
+export enum ExpenseCategory {
+  UNKNOWN = 0,
+  BILLS = 1,
+  CHARITY = 2,
+  EATING_OUT = 3,
+  ENTERTAINMENT = 4,
+  FAMILY = 5,
+  GENERAL = 6,
+  GROCERIES = 7,
+  GIFTS = 8,
+  HOLIDAYS = 9,
+  PERSONAL_CARE = 10,
+  SHOPPING = 11,
+  TRANSPORT = 12,
+}
+
+export enum ExpenseVisibiltyLevel {
+  STANDARD = 0,
+  HIDDEN = 1,
+  DISGUISE = -1,
 }
 
 /**
@@ -82,10 +104,24 @@ export class Expense {
   @Prop({
     type: 'number',
     required: true,
-    default: 0,
-    enum: [-1, 0, 1],
+    default: ExpenseVisibiltyLevel.STANDARD,
+    enum: {
+      values: Object.values(ExpenseVisibiltyLevel),
+      message: 'unsupported visibilty level',
+    },
   })
-  level: number;
+  level: ExpenseVisibiltyLevel;
+
+  @Prop({
+    type: 'number',
+    required: true,
+    default: ExpenseCategory.UNKNOWN,
+    enum: {
+      values: Object.values(ExpenseCategory),
+      message: 'unsupported category',
+    },
+  })
+  category: ExpenseCategory;
 
   /** Name of the store from which this bill or invoice is issued */
   @Prop({
@@ -121,10 +157,10 @@ export class Expense {
 
   /** The currency used to pay the bill */
   @Prop({
-    type: 'string',
+    type: 'number',
     required: [true, 'Currency is requried'],
     enum: {
-      values: ['GBP', 'INR'],
+      values: Object.values(Currency),
       message: `unsupported value provided`,
     },
   })
@@ -173,7 +209,7 @@ ExpenseSchema.plugin(defaultOptionsPlugin);
 /**
  * Setting up the indexes
  */
-ExpenseSchema.index({ uid: 1, date: 1, level: 1 }, { name: 'UID_DATE_LEVEL', background: true });
+ExpenseSchema.index({ uid: 1, date: 1, currency: 1, level: 1 }, { name: 'UID_DATE_CURRENCY_LEVEL', background: true });
 
 /**
  * Creating the mongoose module

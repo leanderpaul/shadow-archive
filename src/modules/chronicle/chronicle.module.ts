@@ -9,6 +9,7 @@ import { Module } from '@nestjs/common';
  */
 import { DatabaseModule } from '@app/modules/database';
 
+import { ExpenseInsightService } from './expense-insight.service';
 import { ExpenseService } from './expense.service';
 import { MemoirService } from './memoir.service';
 
@@ -22,7 +23,7 @@ import { MemoirService } from './memoir.service';
 
 @Module({
   imports: [DatabaseModule],
-  providers: [ExpenseService, MemoirService],
-  exports: [ExpenseService, MemoirService],
+  providers: [ExpenseService, MemoirService, ExpenseInsightService],
+  exports: [ExpenseService, MemoirService, ExpenseInsightService],
 })
 export class ChronicleModule {}
