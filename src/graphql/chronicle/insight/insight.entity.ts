@@ -31,7 +31,7 @@ export class ExpenseInsight {
 @ObjectType()
 export class ExpenseCategoryInsight {
   @Field(() => ExpenseCategory)
-  category: ExpenseCategory;
+  name: ExpenseCategory;
 
   @Field(() => Float)
   total: number;

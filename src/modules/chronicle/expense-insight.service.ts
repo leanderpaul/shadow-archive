@@ -30,7 +30,7 @@ export interface TotalExpenseAggregationResult {
 }
 
 export interface CategoryWiseTotalExpenseAggregationResult {
-  category: ExpenseCategory;
+  name: ExpenseCategory;
   total: number;
   billCount: number;
 }
@@ -73,6 +73,6 @@ export class ExpenseInsightService {
 
   async getTotalExpensesGroupedByCategory(filter: ExpenseInsightFilter): Promise<CategoryWiseTotalExpenseAggregationResult[]> {
     const result = await this.getMatchPipeline<RawCategoryWiseAggregationResult>(filter).group({ _id: '$category', total: { $sum: '$total' }, billCount: { $sum: 1 } });
-    return result.map(item => ({ ...item, category: item._id ?? 0 }));
+    return result.map(item => ({ ...item, name: item._id ?? 0 }));
   }
 }
