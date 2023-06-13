@@ -46,7 +46,7 @@ export class ExpenseItemInput {
   @Field({ description: 'Name of the item' })
   name: string;
 
-  @Field(() => Float, { description: 'Price of a single unit item' })
+  @Field(() => Int, { description: 'Price of a single unit item in 1/100 of the basic monetary unit' })
   price: number;
 
   @Field(() => Float, { description: 'Quantity of the item', nullable: true, defaultValue: 1 })

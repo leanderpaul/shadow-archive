@@ -144,6 +144,7 @@ export class ChronicleMetadata {
     type: 'number',
     required: true,
     default: 0,
+    set: (val: number) => Math.round(val),
   })
   deviation: number;
 

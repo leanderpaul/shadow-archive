@@ -65,10 +65,10 @@ describe('[GraphQL][chronicle]', function () {
         storeLoc: 'Location',
         paymentMethod: 'Master card',
         items: [
-          { name: 'item 1', price: 1.5 },
-          { name: 'item 2', price: 2.35 },
-          { name: 'item 3', price: 0.45 },
-          { name: 'item 4', price: 1, qty: 0.9 },
+          { name: 'item 1', price: 150 },
+          { name: 'item 2', price: 235 },
+          { name: 'item 3', price: 45 },
+          { name: 'item 4', price: 100, qty: 0.9 },
         ],
         currency: 'GBP',
       },
@@ -92,7 +92,7 @@ describe('[GraphQL][chronicle]', function () {
     it('return created expense for valid input', async () => {
       const response = await archive.graphql(query, variables).session(emailOne);
 
-      response.expectGraphQLData({ addExpense: { ...variables.input, eid: expect.toBeID(), desc: null, total: 5.2 } });
+      response.expectGraphQLData({ addExpense: { ...variables.input, eid: expect.toBeID(), desc: null, total: 520 } });
       const user = await archive.getUser(emailOne);
       expect(user.chronicle).toMatchObject({ deviation: 0, paymentMethods: [variables.input.paymentMethod] });
 
@@ -153,8 +153,8 @@ describe('[GraphQL][chronicle]', function () {
     beforeAll(async () => {
       const user = await archive.getUser(emailOne);
       const model = archive.getDatabaseService().getExpenseModel();
-      const items = [{ name: 'item 1', price: 1.5 }];
-      const data = { uid: user.uid, store: 'Store Name', paymentMethod: 'Master card', items, currency: Currency.GBP, total: 1.5 };
+      const items = [{ name: 'item 1', price: 150 }];
+      const data = { uid: user.uid, store: 'Store Name', paymentMethod: 'Master card', items, currency: Currency.GBP, total: 150 };
       return await Promise.all([
         model.create({ ...data, level: ExpenseVisibiltyLevel.DISGUISE, bid: 'bill-0002', date: 230102 }),
         model.create({ ...data, level: ExpenseVisibiltyLevel.HIDDEN, bid: 'bill-0003', date: 230103 }),
@@ -223,10 +223,10 @@ describe('[GraphQL][chronicle]', function () {
 
     it('returns updated expense for valid input', async () => {
       const expense = archive.getStoredData('expense');
-      const update = { bid: 'bill-0009', items: [{ name: 'Item updated', price: 5, qty: 2 }] };
+      const update = { bid: 'bill-0009', items: [{ name: 'Item updated', price: 500, qty: 2 }] };
       const response = await archive.graphql(query, { eid: expense.eid, update }).session(emailOne);
 
-      response.expectGraphQLData({ updateExpense: { eid: expense.eid, bid: update.bid, date: expense.date, total: 10 } });
+      response.expectGraphQLData({ updateExpense: { eid: expense.eid, bid: update.bid, date: expense.date, total: 1000 } });
     });
   });
 

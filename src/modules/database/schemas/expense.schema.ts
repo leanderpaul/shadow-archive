@@ -70,6 +70,7 @@ export class ExpenseItem {
     type: 'number',
     required: [true, 'Price is required'],
     validate: [greaterThanZero, greaterThanZeroMsg],
+    set: (val: number) => Math.round(val),
   })
   price: number;
 
@@ -191,6 +192,7 @@ export class Expense {
   @Prop({
     type: 'number',
     required: true,
+    set: (val: number) => Math.round(val),
   })
   total: number;
 }

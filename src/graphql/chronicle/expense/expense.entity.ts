@@ -38,7 +38,7 @@ export class ExpenseItem {
   @Field({ description: 'Name of the item' })
   name: string;
 
-  @Field(() => Float, { description: 'Price of a unit item' })
+  @Field(() => Int, { description: 'Price of a unit item in 1/100 of the basic monetary unit, Eg: $ 1.50  = 150' })
   price: number;
 
   @Field(() => Float, { description: 'Quantity of the item', defaultValue: 1 })
@@ -83,7 +83,7 @@ export class Expense {
   @Field(() => [ExpenseItem], { description: 'Array containing the items in the expense or bill' })
   items: ExpenseItem[];
 
-  @Field(() => Float, { description: 'Total amount' })
+  @Field(() => Int, { description: 'Total amount in 1/100 of the basic monetary unit' })
   total: number;
 }
 
