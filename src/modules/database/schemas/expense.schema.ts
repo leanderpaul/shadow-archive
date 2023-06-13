@@ -18,8 +18,7 @@ export type ExpenseModel = Model<Expense>;
 /**
  * Declaring the constants
  */
-const greaterThanZero = (num: number) => num > 0;
-const greaterThanZeroMsg = 'should be greater than 0';
+const validateInteger = [(value: number) => value % 1 === 0 && value > 0, 'should be an integer greater than 0'];
 
 export enum Currency {
   INR = 1,
@@ -69,15 +68,14 @@ export class ExpenseItem {
   @Prop({
     type: 'number',
     required: [true, 'Price is required'],
-    validate: [greaterThanZero, greaterThanZeroMsg],
-    set: (val: number) => Math.round(val),
+    validate: validateInteger,
   })
   price: number;
 
   /** The quantity of the otem purchased, if this value is empty it means the quantity is one */
   @Prop({
     type: 'number',
-    validate: [greaterThanZero, greaterThanZeroMsg],
+    validate: [(value: number) => value > 0, 'should be greater than 0'],
     set: (val: number | null) => (val === 1 || val === null ? undefined : val),
   })
   qty?: number;
@@ -191,8 +189,8 @@ export class Expense {
   /** Total amount of the expense sent. It is the sum of the price of all the items in the bill */
   @Prop({
     type: 'number',
-    required: true,
-    set: (val: number) => Math.round(val),
+    required: [true, 'required'],
+    validate: validateInteger,
   })
   total: number;
 }

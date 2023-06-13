@@ -67,7 +67,7 @@ export class AddExpenseInput {
   @Field(() => Int, { description: 'Bill time in 24hr format HHMM', nullable: true })
   time?: number;
 
-  @Field(() => ExpenseCategory, { description: 'Category to which this bill belongs to', nullable: true, defaultValue: ExpenseCategory.UNKNOWN })
+  @Field(() => ExpenseCategory, { description: 'Category to which this bill belongs to', nullable: true })
   category: ExpenseCategory;
 
   @Field({ description: 'Store from which the expense is made' })

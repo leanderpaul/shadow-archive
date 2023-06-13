@@ -44,6 +44,7 @@ describe('[GraphQL][chronicle]', function () {
           store
           storeLoc
           currency
+          category
           paymentMethod
           desc
           items {
@@ -59,6 +60,7 @@ describe('[GraphQL][chronicle]', function () {
       input: {
         bid: 'bill-0001',
         level: 'STANDARD',
+        category: 'GROCERIES',
         date: 230101,
         time: 1000,
         store: 'Store Name',
@@ -202,6 +204,8 @@ describe('[GraphQL][chronicle]', function () {
         updateExpense(eid: $eid, update: $update) {
           eid
           bid
+          level
+          category
           date
           total
         }
@@ -223,10 +227,19 @@ describe('[GraphQL][chronicle]', function () {
 
     it('returns updated expense for valid input', async () => {
       const expense = archive.getStoredData('expense');
-      const update = { bid: 'bill-0009', items: [{ name: 'Item updated', price: 500, qty: 2 }] };
+      const update = { bid: 'bill-0009', items: [{ name: 'Item updated', price: 500, qty: 2 }], level: 'DISGUISE' };
       const response = await archive.graphql(query, { eid: expense.eid, update }).session(emailOne);
 
-      response.expectGraphQLData({ updateExpense: { eid: expense.eid, bid: update.bid, date: expense.date, total: 1000 } });
+      response.expectGraphQLData({
+        updateExpense: {
+          eid: expense.eid,
+          bid: update.bid,
+          level: 'DISGUISE',
+          category: expense.category,
+          date: expense.date,
+          total: 1000,
+        },
+      });
     });
   });
 

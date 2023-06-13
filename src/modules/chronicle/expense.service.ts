@@ -53,8 +53,7 @@ export class ExpenseService {
   }
 
   private calculateTotal(items: ExpenseItem[]): number {
-    const total = items.reduce((acc, item) => acc + Math.round(item.price * (item.qty ?? 1)), 0);
-    return Math.round(total);
+    return items.reduce((acc, item) => acc + Math.round(item.price * (item.qty ?? 1)), 0);
   }
 
   private getExpensesQuery<T extends keyof Omit<Expense, 'uid' | 'eid'>>(query?: ExpenseFilter, projection?: T[]): QueryWithHelpers<Expense[], Expense>;
