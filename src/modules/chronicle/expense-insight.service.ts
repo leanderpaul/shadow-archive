@@ -20,7 +20,7 @@ export interface ExpenseInsightFilter {
   year: number;
   week?: number;
   month?: number;
-  level?: ExpenseVisibiltyLevel;
+  levels?: ExpenseVisibiltyLevel[];
 }
 
 export interface TotalExpenseAggregationResult {
@@ -54,7 +54,7 @@ export class ExpenseInsightService {
 
     const { uid } = Context.getCurrentUser(true);
     const match: Record<string, any> = { uid, currency: filter.currency };
-    if (typeof filter.level === 'number') match.level = filter.level;
+    if (filter.levels && filter.levels.length > 0) match.level = { $in: filter.levels };
     if (filter.month) {
       const startDate = (filter.year * 100 + filter.month) * 100;
       match.date = { $gte: startDate, $lte: startDate + 31 };

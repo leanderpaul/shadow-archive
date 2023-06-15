@@ -43,6 +43,6 @@ export class ExpenseInsightFilter {
   @Field(() => Currency)
   currency: Currency;
 
-  @Field(() => ExpenseVisibiltyLevel, { nullable: true })
-  level?: number;
+  @Field(() => [ExpenseVisibiltyLevel], { nullable: true })
+  levels?: number[];
 }
