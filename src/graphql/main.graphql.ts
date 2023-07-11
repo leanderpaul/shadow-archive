@@ -9,6 +9,7 @@ import { Module } from '@nestjs/common';
 import { AccountsGraphQLModule } from './accounts';
 import { AdminGraphQLModule } from './admin';
 import { ChronicleGraphQLModule } from './chronicle';
+import { FictionGraphQLModule } from './fiction';
 
 /**
  * Defining types
@@ -19,6 +20,6 @@ import { ChronicleGraphQLModule } from './chronicle';
  */
 
 @Module({
-  imports: [AccountsGraphQLModule, ChronicleGraphQLModule, AdminGraphQLModule],
+  imports: [AccountsGraphQLModule, ChronicleGraphQLModule, AdminGraphQLModule, FictionGraphQLModule],
 })
 export class GraphQLModule {}

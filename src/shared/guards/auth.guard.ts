@@ -28,8 +28,8 @@ function createAuthGuard(requiredAuth: AuthType): Type<CanActivate> {
   class MixinAuthGuard implements CanActivate {
     canActivate(): boolean {
       const user = Context.getCurrentUser();
-      if (requiredAuth === AuthType.ADMIN && !user?.admin) throw new AppError(ErrorCode.R001);
       if (!user) throw new AppError(ErrorCode.IAM002);
+      if (requiredAuth === AuthType.ADMIN && !user.admin) throw new AppError(ErrorCode.IAM004);
       if (requiredAuth === AuthType.VERIFIED && !user.verified) throw new AppError(ErrorCode.IAM003);
       return true;
     }

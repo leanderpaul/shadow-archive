@@ -55,18 +55,24 @@ export class ShadowArchiveResponse {
   }
 
   getBody(): Record<string, any> {
-    return this.response.body;
+    return structuredClone(this.response.body);
+  }
+
+  getGraphQLData<T = any>(key?: string): T {
+    let value = this.getBody().data;
+    const keys = key?.split('.') ?? [];
+    for (const k of keys) value = value[k];
+    return value;
   }
 
   expectRESTData(obj: Record<string, unknown>): void {
-    expect(this.getBody()).toMatchObject(obj);
+    expect(this.response.body).toMatchObject(obj);
   }
 
   expectRESTError(code: string, type?: string): void {
-    const error = this.getBody();
-    expect(error.code).toBe(code);
-    expect(error.type).toBe(type || ((ErrorCode as any)[code] as ErrorCode).getType());
-    expect(error.rid).toEqual(expectRID);
+    expect(this.response.body.code).toBe(code);
+    expect(this.response.body.type).toBe(type || ((ErrorCode as any)[code] as ErrorCode).getType());
+    expect(this.response.body.rid).toEqual(expectRID);
   }
 
   expectStatusCode(statusCode: number): void {

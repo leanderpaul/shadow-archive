@@ -93,6 +93,17 @@ export class ErrorCode {
   /** Email address is already taken */
   static readonly R003 = new ErrorCode('R003', ErrorType.HTTP_ERROR, 'Email address is already taken');
 
+  /**
+   * List of fiction related errors
+   */
+
+  /** Fiction not found */
+  static readonly F001 = new ErrorCode('F001', ErrorType.NOT_FOUND, 'Fiction not found');
+  /** Fiction Chapter not found */
+  static readonly F002 = new ErrorCode('F002', ErrorType.NOT_FOUND, 'Fiction Chapter not found');
+  /** Fiction chapter already exists */
+  static readonly F003 = new ErrorCode('F003', ErrorType.HTTP_ERROR, 'Fiction chapter already exists');
+
   /*!
    * List of all server related errrors
    */
