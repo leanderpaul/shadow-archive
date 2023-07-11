@@ -9,6 +9,8 @@ import { Connection } from 'mongoose';
  * Importing user defined packages
  */
 import { Expense, type ExpenseModel } from './schemas/expense.schema';
+import { FictionChapter, type FictionChapterModel } from './schemas/fiction-chapter.schema';
+import { Fiction, type FictionModel } from './schemas/fiction.schema';
 import { Memoir, type MemoirModel } from './schemas/memoir.schema';
 import { NativeUser, type NativeUserModel, OAuthUser, type OAuthUserModel, User, type UserModel } from './schemas/user.schema';
 
@@ -43,6 +45,8 @@ export class DatabaseService implements OnApplicationShutdown, OnModuleInit {
     @InjectModel(OAuthUser.name) private readonly oauthUserModel: OAuthUserModel,
     @InjectModel(Expense.name) private readonly expenseModel: ExpenseModel,
     @InjectModel(Memoir.name) private readonly memoirModel: MemoirModel,
+    @InjectModel(Fiction.name) private readonly fictionModel: FictionModel,
+    @InjectModel(FictionChapter.name) private readonly fictionChapterModel: FictionChapterModel,
   ) {}
 
   async onModuleInit(): Promise<void> {
@@ -69,5 +73,13 @@ export class DatabaseService implements OnApplicationShutdown, OnModuleInit {
 
   getMemoirModel(): MemoirModel {
     return this.memoirModel;
+  }
+
+  getFictionModel(): FictionModel {
+    return this.fictionModel;
+  }
+
+  getFictionChapterModel(): FictionChapterModel {
+    return this.fictionChapterModel;
   }
 }

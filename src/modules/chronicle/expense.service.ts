@@ -10,7 +10,7 @@ import { type QueryWithHelpers, type SortOrder } from 'mongoose';
 import { type Currency, DBUtils, DatabaseService, Expense, type ExpenseCategory, type ExpenseItem, type ExpenseVisibiltyLevel, type ID } from '@app/modules/database';
 import { Logger } from '@app/providers/logger';
 import { AppError, ErrorCode, NeverError } from '@app/shared/errors';
-import { type Projection } from '@app/shared/interfaces';
+import { type PageCursor, type Projection } from '@app/shared/interfaces';
 import { Context } from '@app/shared/services';
 
 /**
@@ -30,10 +30,7 @@ export interface ExpenseFilter {
 export interface ExpenseQuery {
   filter?: ExpenseFilter;
   sortOrder: SortOrder;
-  page: {
-    limit: number;
-    offset: number;
-  };
+  page: PageCursor;
 }
 
 /**
@@ -56,8 +53,6 @@ export class ExpenseService {
     return items.reduce((acc, item) => acc + Math.round(item.price * (item.qty ?? 1)), 0);
   }
 
-  private getExpensesQuery<T extends keyof Omit<Expense, 'uid' | 'eid'>>(query?: ExpenseFilter, projection?: T[]): QueryWithHelpers<Expense[], Expense>;
-  private getExpensesQuery(query?: ExpenseFilter, projection?: Projection<Expense>): QueryWithHelpers<Expense[], Expense>;
   private getExpensesQuery<T>(query?: ExpenseFilter, projection?: Projection<Expense> | T[]): QueryWithHelpers<Expense[], Expense> {
     const { uid } = Context.getCurrentUser(true);
     const expenseQuery = this.expenseModel.find({ uid }, projection);
@@ -86,11 +81,7 @@ export class ExpenseService {
   async getExpenseList<T extends keyof Omit<Expense, 'uid' | 'eid'>>(query: ExpenseQuery, projection?: T[]): Promise<Pick<Expense, 'uid' | 'eid' | T>[]>;
   async getExpenseList(query: ExpenseQuery, projection?: Projection<Expense>): Promise<Expense[]>;
   async getExpenseList<T>(query: ExpenseQuery, projection?: Projection<Expense> | T[]): Promise<Expense[]> {
-    return await this.getExpensesQuery(query.filter, projection as any)
-      .sort({ date: query.sortOrder })
-      .skip(query.page.offset)
-      .limit(query.page.limit)
-      .lean();
+    return await this.getExpensesQuery(query.filter, projection).sort({ date: query.sortOrder, time: query.sortOrder }).skip(query.page.offset).limit(query.page.limit).lean();
   }
 
   async getExpensesCount(filter?: ExpenseFilter): Promise<number> {

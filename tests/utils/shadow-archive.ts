@@ -5,35 +5,38 @@ import { fastifyCookie } from '@fastify/cookie';
 import { expect } from '@jest/globals';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
 import { Test } from '@nestjs/testing';
-import { default as sagus } from 'sagus';
-import { default as request } from 'supertest';
+import request from 'supertest';
 
 /**
  * Importing user defined packages
  */
 import { AppModule } from '@app/app.module';
 import { AuthService } from '@app/modules/auth';
-import { DatabaseService, NativeUser, OAuthUser, type User } from '@app/modules/database';
-import { UserService } from '@app/modules/user';
+import { DatabaseService } from '@app/modules/database';
 import { Middleware } from '@app/shared/services';
 
 import { ShadowArchiveRequest } from './shadow-archive-request';
-import { ShadowArchiveResponse } from './shadow-archive-response';
+import { TestSeeder } from './test-seeder';
 
 /**
  * Defining types
  */
+import 'expect-more-jest';
+import 'jest-extended';
 
-declare module 'expect' {
-  export interface AsymmetricMatchers {
-    nullableAny(sample: unknown): void;
-    toBeID(): void;
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace jest {
+    interface Expect {
+      toBeID(): JestMatchers<string>;
+    }
   }
 }
 
 export enum GraphQLModule {
   ACCOUNTS = 'accounts',
   CHRONICLE = 'chronicle',
+  FICTION = 'fiction',
 }
 
 export type RestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
@@ -43,43 +46,6 @@ export type RestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
  */
 
 expect.extend({
-  nullableAny(actual: unknown, sample: unknown) {
-    if (typeof sample === 'undefined') throw new TypeError('optionalAny() expects to be passed a constructor function.');
-
-    let pass: boolean;
-    let type: string;
-    if (sample == String) {
-      type = 'string';
-      pass = typeof actual == 'string' || actual instanceof String;
-    } else if (sample == Number) {
-      type = 'number';
-      pass = typeof actual == 'number' || actual instanceof Number;
-    } else if (sample == Function) {
-      type = 'function';
-      pass = typeof actual == 'function' || actual instanceof Function;
-    } else if (sample == Boolean) {
-      type = 'boolean';
-      pass = typeof actual == 'boolean' || actual instanceof Boolean;
-    } else if (sample == BigInt) {
-      type = 'BigInt';
-      pass = typeof actual == 'bigint' || actual instanceof BigInt;
-    } else if (sample == Symbol) {
-      type = 'symbol';
-      pass = typeof actual == 'symbol' || actual instanceof Symbol;
-    } else if (sample == Object) {
-      type = 'object';
-      pass = typeof actual == 'object';
-    } else {
-      type = (sample as any).name;
-      pass = actual instanceof (sample as any);
-    }
-    if (actual === null) pass = true;
-
-    const message = pass ? () => `expected '${actual}' not to be Any<${type}> or Null` : () => `expected '${actual}' to be Any<${type}> or Null`;
-
-    return { message, pass };
-  },
-
   toBeID(actual: unknown) {
     const pass = typeof actual === 'string' && /^[a-f0-9]{24}$/.test(actual);
     const message = pass ? () => `expected '${actual}' not to be ID` : () => `expected '${actual}' to be ID`;
@@ -89,7 +55,9 @@ expect.extend({
 
 export class ShadowArchive {
   private readonly store = new Map<string, any>();
+  private seeder?: TestSeeder;
   private app: NestFastifyApplication;
+  private inited = false;
 
   constructor(private graphqlModule: GraphQLModule = GraphQLModule.ACCOUNTS) {}
 
@@ -105,42 +73,20 @@ export class ShadowArchive {
 
     await this.app.init();
     await instance.ready();
+    if (this.seeder) {
+      const databaseService = this.app.get(DatabaseService);
+      await this.seeder.init(databaseService);
+    }
 
     const authService = this.app.get(AuthService);
     authService.verifyCSRFToken = async () => true;
+    this.inited = true;
   }
 
-  getDatabaseService(): DatabaseService {
-    return this.app.get(DatabaseService);
-  }
-
-  async createUser(email: string, name: string, verified?: boolean): Promise<User> {
-    const userService = this.app.get(UserService);
-    const user = await userService.createUser({ email, name, password: 'Password@123', verified }, { id: 1 });
-    const cookie = user.uid.toString() + '|' + user.sessions[0]?.token;
-    ShadowArchiveResponse.cookies.set(user.email, cookie);
-    return user;
-  }
-
-  async createUserSession(email: string): Promise<User> {
-    const databaseService = this.app.get(DatabaseService);
-    const userModel = databaseService.getUserModel();
-    const user = await userModel.findOne({ email }).lean();
-    if (!user) throw new Error(`User '${email}' not present`);
-    const id = (user.sessions[user.sessions.length - 1]?.id ?? 0) + 1;
-    const token = sagus.genRandom(32, 'base64');
-    await userModel.updateOne({ email }, { $push: { sessions: { id, token } } });
-    const cookie = user.uid.toString() + '|' + token;
-    ShadowArchiveResponse.cookies.set(user.email, cookie);
-    return user;
-  }
-
-  async getUser(email: string): Promise<NativeUser & OAuthUser> {
-    const databaseService = this.app.get(DatabaseService);
-    const userModel = databaseService.getUserModel();
-    const user = await userModel.findOne({ email }).lean();
-    if (!user) throw new Error(`User '${email}' not present`);
-    return user as any;
+  getSeeder(): TestSeeder {
+    if (this.inited) throw new Error('Cannot get seeder after app has been initialized');
+    if (!this.seeder) this.seeder = new TestSeeder();
+    return this.seeder;
   }
 
   storeData<T>(id: string, value: T): ShadowArchive {
@@ -167,7 +113,7 @@ export class ShadowArchive {
   rest(method: RestMethod, url: string): ShadowArchiveRequest {
     const mtd = method.toLowerCase() as Lowercase<RestMethod>;
     const apiRequest = request(this.app.getHttpServer())[mtd](url);
-    return new ShadowArchiveRequest(apiRequest, this.app);
+    return new ShadowArchiveRequest(apiRequest, this.app, this.seeder);
   }
 
   graphql(query: string, variables: object = {}, module?: GraphQLModule): ShadowArchiveRequest {

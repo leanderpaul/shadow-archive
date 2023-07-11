@@ -12,7 +12,7 @@ import { Logger } from '@app/providers/logger';
 import { Config } from '@app/shared/services';
 
 import { DatabaseService } from './database.service';
-import { ExpenseMongooseModule, MemoirMongooseModule, UserMongooseModule } from './schemas';
+import { ExpenseMongooseModule, FictionChapterMongooseModule, FictionMongooseModule, MemoirMongooseModule, UserMongooseModule } from './schemas';
 
 /**
  * Defining types
@@ -51,7 +51,7 @@ const MongoDBModule = MongooseModule.forRoot(Config.get('db.uri'), {
 });
 
 @Module({
-  imports: [MongoDBModule, UserMongooseModule, ExpenseMongooseModule, MemoirMongooseModule],
+  imports: [MongoDBModule, UserMongooseModule, ExpenseMongooseModule, MemoirMongooseModule, FictionMongooseModule, FictionChapterMongooseModule],
   providers: [DatabaseService],
   exports: [DatabaseService],
 })

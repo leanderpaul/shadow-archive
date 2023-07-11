@@ -1,7 +1,6 @@
 /**
  * Importing npm packages
  */
-import { expect } from '@jest/globals';
 
 /**
  * Importing user defined packages
@@ -19,6 +18,9 @@ import { GraphQLModule, ShadowArchive } from '@tests/utils';
 const USER = { email: 'test-user@mail.com', name: 'Test User', password: 'Password@123' } as const;
 
 const archive = new ShadowArchive(GraphQLModule.ACCOUNTS);
+const seeder = archive.getSeeder();
+
+seeder.addUser('verified-user', { email: 'verified-user-one@shadow-apps.com', name: 'Verified User One' });
 
 beforeAll(() => archive.setup(), archive.getTimeout());
 
@@ -183,8 +185,7 @@ describe('[GraphQL][accounts]', function () {
 
     it('should throw error for verified user', async () => {
       const mockFn = jest.fn();
-      const user = await archive.createUser('verified-user-one@shadow-apps.com', 'Verified User One', true);
-      const response = await archive.graphql(query).session(user.email).setMailMock(mockFn);
+      const response = await archive.graphql(query).session('verified-user').setMailMock(mockFn);
 
       expect(mockFn).toBeCalledTimes(0);
       response.expectGraphQLError('IAM012');
@@ -209,7 +210,7 @@ describe('[GraphQL][accounts]', function () {
       const response = await archive.graphql(query, { code });
 
       response.expectGraphQLData({ verifyEmail: true });
-      const user = await archive.getUser(USER.email);
+      const user = await seeder.getUser(USER.email);
       expect(user.verified).toBe(true);
     });
   });
@@ -305,16 +306,16 @@ describe('[GraphQL][accounts]', function () {
       const response = await archive.graphql(query).session(USER.email);
 
       response.expectGraphQLData({ logout: true });
-      const user = await archive.getUser(USER.email);
+      const user = await seeder.getUser(USER.email);
       expect(user.sessions).toHaveLength(1);
     });
 
     it('should logout every session', async () => {
-      await archive.createUserSession(USER.email);
+      await seeder.createUserSession(USER.email);
       const response = await archive.graphql(query, { sessionId: -1 }).session(USER.email);
 
       response.expectGraphQLData({ logout: true });
-      const user = await archive.getUser(USER.email);
+      const user = await seeder.getUser(USER.email);
       expect(user.sessions).toHaveLength(0);
     });
   });
@@ -331,7 +332,7 @@ describe('[GraphQL][accounts]', function () {
       }
     `;
 
-    beforeAll(() => archive.createUserSession(USER.email));
+    beforeAll(() => seeder.createUserSession(USER.email));
 
     it('should throw error for invalid name and image url', async () => {
       const response = await archive.graphql(query, { name: 'invalid name 1', imageUrl: 'invalid url' }).session(USER.email);

@@ -1,7 +1,6 @@
 /**
  * Importing npm packages
  */
-import { expect } from '@jest/globals';
 
 /**
  * Importing user defined packages
@@ -20,18 +19,21 @@ const emailOne = 'expense-tester-one@shadow-apps.com';
 const emailTwo = 'expense-tester-two@shadow-apps.com';
 const emailThree = 'expense-tester-three@shadow-apps.com';
 const archive = new ShadowArchive(GraphQLModule.CHRONICLE);
+const seeder = archive.getSeeder();
+
+seeder.addUser({ email: emailOne, name: 'Expense Tester One' });
+seeder.addUser({ email: emailTwo, name: 'Expense Tester Two' });
+seeder.addUser({ email: emailThree, name: 'Expense Tester Three', verified: false });
+
+const items = [{ name: 'item 1', price: 150 }];
+const baseExpense = { store: 'Store Name', paymentMethod: 'Master card', items, currency: Currency.GBP, total: 150 };
+seeder.addExpense(emailOne, { ...baseExpense, bid: 'bill-0004', date: 230104 });
+seeder.addExpense(emailOne, { ...baseExpense, level: ExpenseVisibiltyLevel.HIDDEN, bid: 'bill-0003', date: 230103 });
+seeder.addExpense(emailOne, { ...baseExpense, level: ExpenseVisibiltyLevel.DISGUISE, bid: 'bill-0002', date: 230102 });
 
 beforeAll(() => archive.setup(), archive.getTimeout());
 
 describe('[GraphQL][chronicle]', function () {
-  beforeAll(() =>
-    Promise.all([
-      archive.createUser(emailOne, 'Expense Tester One', true),
-      archive.createUser(emailTwo, 'Expense Tester Two', true),
-      archive.createUser(emailThree, 'Expense Tester Three'),
-    ]),
-  );
-
   describe('create new expense', function () {
     const query = /* GraphQL */ `
       mutation AddExpense($input: AddExpenseInput!) {
@@ -95,7 +97,7 @@ describe('[GraphQL][chronicle]', function () {
       const response = await archive.graphql(query, variables).session(emailOne);
 
       response.expectGraphQLData({ addExpense: { ...variables.input, eid: expect.toBeID(), desc: null, total: 520 } });
-      const user = await archive.getUser(emailOne);
+      const user = await seeder.getUser(emailOne);
       expect(user.chronicle).toMatchObject({ deviation: 0, paymentMethods: [variables.input.paymentMethod] });
 
       archive.storeData('expense', response.getBody().data.addExpense);
@@ -151,18 +153,6 @@ describe('[GraphQL][chronicle]', function () {
         }
       }
     `;
-
-    beforeAll(async () => {
-      const user = await archive.getUser(emailOne);
-      const model = archive.getDatabaseService().getExpenseModel();
-      const items = [{ name: 'item 1', price: 150 }];
-      const data = { uid: user.uid, store: 'Store Name', paymentMethod: 'Master card', items, currency: Currency.GBP, total: 150 };
-      return await Promise.all([
-        model.create({ ...data, level: ExpenseVisibiltyLevel.DISGUISE, bid: 'bill-0002', date: 230102 }),
-        model.create({ ...data, level: ExpenseVisibiltyLevel.HIDDEN, bid: 'bill-0003', date: 230103 }),
-        model.create({ ...data, level: ExpenseVisibiltyLevel.STANDARD, bid: 'bill-0004', date: 230104 }),
-      ]);
-    });
 
     it('return empty for invalid search', async () => {
       const response = await archive.graphql(query, { filter: { fromDate: 230101, currency: 'INR' } }).session(emailOne);

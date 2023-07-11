@@ -15,11 +15,12 @@ import mongoose from 'mongoose';
  * Declaring the constants
  */
 
-process.env.DB_URI = process.env.DB_URI || 'mongodb://localhost/shadow-test';
+const uri = process.env.DB_URI ?? 'mongodb://localhost/shadow-test-database';
+process.env.DB_URI = uri;
 
 module.exports = async function () {
   /** Deleting old test data */
-  await mongoose.connect(process.env.DB_URI as string);
+  await mongoose.connect(uri);
   await mongoose.connection.db.dropDatabase();
   await mongoose.connection.close();
 };

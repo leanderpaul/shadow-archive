@@ -11,6 +11,7 @@ import { MailService } from '@app/providers/mail';
 import { Config } from '@app/shared/services';
 
 import { ShadowArchiveResponse } from './shadow-archive-response';
+import { TestSeeder } from './test-seeder';
 
 /**
  * Defining types
@@ -21,7 +22,7 @@ import { ShadowArchiveResponse } from './shadow-archive-response';
  */
 
 export class ShadowArchiveRequest {
-  constructor(private readonly request: Request, private readonly app: NestFastifyApplication) {}
+  constructor(private readonly request: Request, private readonly app: NestFastifyApplication, private readonly seeder?: TestSeeder) {}
 
   private async execute(): Promise<ShadowArchiveResponse> {
     const response = await this.request;
@@ -62,7 +63,11 @@ export class ShadowArchiveRequest {
   }
 
   session(key: string): ShadowArchiveRequest {
-    const cookie = ShadowArchiveResponse.cookies.get(key);
+    let cookie = ShadowArchiveResponse.cookies.get(key);
+    if (!cookie) {
+      const user = this.seeder?.getSeedUser(key);
+      if (user) cookie = ShadowArchiveResponse.cookies.get(user.email);
+    }
     if (!cookie) throw new Error(`Cookie '${key}' not present in cookie store`);
     this.cookie(cookie);
     return this;
