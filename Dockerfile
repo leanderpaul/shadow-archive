@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends dumb-init
 
 # Setting up the environment variables
 ENV NODE_ENV production
-ENV PORT 8080
+ENV DOMAIN shadow-apps.com
 
 # Setting the working directory and user
 USER node
@@ -32,4 +32,5 @@ RUN npm ci --omit=dev
 
 
 # Running the application
+EXPOSE 8080
 CMD ["dumb-init", "node", "main.js"]
