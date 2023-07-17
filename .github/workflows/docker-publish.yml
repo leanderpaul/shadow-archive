@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       deploy:
-        description: Deploy build to azure app service
+        description: Deploy build to AWS
         default: false
         required: false
         type: boolean
@@ -79,11 +79,16 @@ jobs:
     runs-on: ubuntu-latest
     needs: publish
     if: inputs.deploy
+    permissions:
+      id-token: write
 
     steps:
-      - name: Deploy to azure app service
-        uses: azure/webapps-deploy@v2
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
         with:
-          app-name: shadow-archive
-          images: ${{ env.IMAGE_NAME }}@${{ needs.publish.outputs.digest }}
-          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
+          role-to-assume: arn:aws:iam::904819361155:role/GithubActionRole
+          aws-region: ap-south-1
+
+      - name: Send update deployment event to AWS
+        run: aws sqs send-message --queue-url shadow-events.fifo --message-body ${{ needs.publish.outputs.digest }} --message-group-id shadow-deploy
+        uses: azure/webapps-deploy@v2
