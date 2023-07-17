@@ -91,4 +91,3 @@ jobs:
 
       - name: Send update deployment event to AWS
         run: aws sqs send-message --queue-url shadow-events.fifo --message-body ${{ needs.publish.outputs.digest }} --message-group-id shadow-deploy
-        uses: azure/webapps-deploy@v2
