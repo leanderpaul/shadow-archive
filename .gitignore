@@ -6,6 +6,9 @@ generated
 # dependencies
 node_modules
 
+# misc
+*.env.*
+
 # Logs
 logs
 *.log

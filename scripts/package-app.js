@@ -11,7 +11,7 @@ const { execSync } = require('child_process');
 function copyPackageJson() {
   /** Removing unneccessary scripts from package.json and copying */
   const packageJson = JSON.parse(readFileSync(`package.json`).toString());
-  const distPackageJson = { ...packageJson, scripts: {} };
+  const distPackageJson = { ...packageJson, scripts: { postinstall: 'patch-package' } };
   writeFileSync(`dist/package.json`, JSON.stringify(distPackageJson, null, 2));
 }
 
@@ -26,6 +26,7 @@ function packageApp() {
   /** Copying the required files */
   copyPackageJson();
   execSync(`cp package-lock.json dist/package-lock.json`);
+  execSync(`cp -r patches dist/patches`);
 
   /** Deleting the unneccesary files */
   rmSync(`dist/tsconfig.build.tsbuildinfo`);

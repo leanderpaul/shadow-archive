@@ -17,6 +17,7 @@ FROM node:18.16-bullseye-slim
 RUN apt-get update && apt-get install -y --no-install-recommends dumb-init
 
 # Setting up the environment variables
+ENV PORT 8080
 ENV NODE_ENV production
 ENV DOMAIN shadow-apps.com
 
