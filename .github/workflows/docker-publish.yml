@@ -90,4 +90,4 @@ jobs:
           aws-region: ap-south-1
 
       - name: Send update deployment event to AWS
-        run: aws sqs send-message --queue-url shadow-events.fifo --message-body ${{ needs.publish.outputs.digest }} --message-group-id shadow-deploy
+        run: aws sqs send-message --queue-url shadow-events.fifo --message-body '{"name":"update-deployment","image":{"tag":"${{ needs.publish.outputs.digest }}"}}' --message-group-id shadow-deploy
