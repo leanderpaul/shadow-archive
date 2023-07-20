@@ -104,6 +104,15 @@ export class ErrorCode {
   /** Fiction chapter already exists */
   static readonly F003 = new ErrorCode('F003', ErrorType.HTTP_ERROR, 'Fiction chapter already exists');
 
+  /**
+   * List of migration related errors
+   */
+
+  /** Migration not enabled */
+  static readonly MIG001 = new ErrorCode('MIG001', ErrorType.HTTP_ERROR, 'Migration not enabled');
+  /** Migration is already running */
+  static readonly MIG002 = new ErrorCode('MIG002', ErrorType.HTTP_ERROR, 'Migration is already running');
+
   /*!
    * List of all server related errrors
    */

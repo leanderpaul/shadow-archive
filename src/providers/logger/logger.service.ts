@@ -12,7 +12,7 @@ import { type Logger as WinstonLogger, createLogger as createWinstonLogger, form
 /**
  * Importing user defined packages
  */
-import { Config, Context } from '@app/shared/services';
+import { Config, Context } from '@app/shared/services/internal';
 
 import { consoleFormat, contextFormat } from './formats.logger';
 

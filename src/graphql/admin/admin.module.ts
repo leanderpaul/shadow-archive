@@ -8,6 +8,7 @@ import { Module } from '@nestjs/common';
  */
 import { GraphQLModule, GraphQLService } from '@app/graphql/common';
 import { UserModule } from '@app/modules/user';
+import { MigrationService } from '@app/shared/services';
 
 import { AdminResolver } from './admin.resolver';
 
@@ -23,7 +24,7 @@ export const adminResolvers = [AdminResolver];
 
 @Module({
   imports: [UserModule],
-  providers: [AdminResolver, GraphQLService],
+  providers: [AdminResolver, GraphQLService, MigrationService],
 })
 export class AdminModule {}
 

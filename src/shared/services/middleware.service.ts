@@ -11,6 +11,7 @@ import { type FastifyInstance, type FastifyReply, type FastifyRequest } from 'fa
 import { Logger } from '@app/providers/logger';
 
 import { Context } from './context.service';
+import { Storage } from './storage.service';
 
 /**
  * Defining types
@@ -45,6 +46,7 @@ class MiddlewareService {
   }
 
   init(app: NestFastifyApplication, instance: FastifyInstance): void {
+    Storage.set('app', app);
     instance.addHook('onRequest', Logger.getRequestStartHandler());
     instance.addHook('preHandler', Context.init());
     instance.addHook('preHandler', this.executeMiddlewares(app));
