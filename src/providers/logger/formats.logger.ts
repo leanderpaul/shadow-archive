@@ -8,7 +8,7 @@ import { format } from 'winston';
 /**
  * Importing user defined packages
  */
-import { Context, Storage } from '@app/shared/services';
+import { Context, Storage } from '@app/shared/services/internal';
 
 /**
  * Defining types

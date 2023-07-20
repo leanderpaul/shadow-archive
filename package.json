@@ -7,6 +7,8 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "node scripts/package-app.js",
+    "clean": "rm -rf dist logs",
+    "dpdm": "npx dpdm --no-warning --no-tree -T src/main.js",
     "dev": "nest start --watch",
     "gen:schemas": "ts-node -r tsconfig-paths/register src/graphql/generate-schema.ts",
     "lint": "eslint \"{src,tests}/**/*.ts\"",

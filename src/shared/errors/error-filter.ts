@@ -10,7 +10,7 @@ import { Error as MongooseError } from 'mongoose';
  * Importing user defined packages
  */
 import { Logger } from '@app/providers/logger';
-import { Context } from '@app/shared/services';
+import { Context } from '@app/shared/services/internal';
 
 import { AppError } from './app.error';
 import { ErrorCode } from './error-code.error';

@@ -6,6 +6,7 @@ import { ArgsType, Field } from '@nestjs/graphql';
 /**
  * Importing user defined packages
  */
+import { MigrationMode } from '@app/shared/services';
 
 /**
  * Defining types
@@ -19,4 +20,10 @@ import { ArgsType, Field } from '@nestjs/graphql';
 export class UserIdentifier {
   @Field({ description: 'Email address or UID' })
   identifier: string;
+}
+
+@ArgsType()
+export class MigrationArgs {
+  @Field(() => MigrationMode, { nullable: true, defaultValue: MigrationMode.DRY })
+  mode: MigrationMode;
 }
