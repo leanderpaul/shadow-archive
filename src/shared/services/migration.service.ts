@@ -37,7 +37,7 @@ export enum MigrationMode {
 export class MigrationService {
   private readonly logger = Logger.getLogger(MigrationService.name);
   /** Add name to enable migration */
-  private readonly name = 'Timeout';
+  private readonly name = '';
 
   private mode?: MigrationMode;
   private status = MigrationStatus.DISABLED;
