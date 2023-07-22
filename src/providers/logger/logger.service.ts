@@ -82,7 +82,7 @@ export class Logger implements LoggerService, OnApplicationShutdown {
   /** Creates the winston logger object */
   private static initLogger(): WinstonLogger {
     const nodeEnv = Config.get('app.env');
-    const logFormat = format.combine(contextFormat(), format.errors({ stack: true }), format.json({}));
+    const logFormat = format.combine(contextFormat(), format.errors({ stack: true }), format.json());
     const logger = createWinstonLogger({ level: Config.get('log.level') });
 
     /** Logger setup for development mode */
@@ -94,7 +94,7 @@ export class Logger implements LoggerService, OnApplicationShutdown {
     }
 
     if (nodeEnv === 'production') {
-      this.cloudwatch = new CloudWatchLogger();
+      this.cloudwatch = new CloudWatchLogger({ format: logFormat });
       logger.add(this.cloudwatch.getTransport());
     } else {
       const logDir = Config.get('log.dir');
