@@ -5,6 +5,7 @@ import os from 'os';
 
 import { CloudWatchLogs } from '@aws-sdk/client-cloudwatch-logs';
 import WinstonCloudWatch from 'winston-cloudwatch';
+import { type TransportStreamOptions } from 'winston-transport';
 
 /**
  * Importing user defined packages
@@ -22,17 +23,17 @@ import { Config } from '@app/shared/services/internal';
 export class CloudWatchLogger {
   private readonly transport;
 
-  constructor() {
+  constructor(opts: TransportStreamOptions = {}) {
     const networkInterfaceInfo = os.networkInterfaces().eth0?.find(info => info.family === 'IPv4');
     this.transport = new WinstonCloudWatch({
+      ...opts,
+      errorHandler: this.handleError,
       cloudWatchLogs: new CloudWatchLogs({ region: Config.get('aws.region') }),
-      level: Config.get('log.level'),
+      jsonMessage: true,
       logGroupName: Config.get('aws.cloudwatch.log-group'),
       logStreamName: networkInterfaceInfo?.address || 'unknown',
-      jsonMessage: true,
       name: Config.get('app.name'),
       retentionInDays: 7,
-      errorHandler: this.handleError,
     });
   }
 
