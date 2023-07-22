@@ -1,13 +1,7 @@
-name: Publish docker image
+name: Deploy to production
 
 on:
   workflow_dispatch:
-    inputs:
-      deploy:
-        description: Deploy build to AWS
-        default: false
-        required: false
-        type: boolean
 
 env:
   REGISTRY: ghcr.io
@@ -78,7 +72,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: publish
-    if: inputs.deploy
     permissions:
       id-token: write
 

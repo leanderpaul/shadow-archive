@@ -60,6 +60,10 @@ export class DatabaseService implements OnApplicationShutdown, OnModuleInit {
     return this.connection.close();
   }
 
+  getConnection(): Connection {
+    return this.connection;
+  }
+
   getUserModel(): UserModel;
   getUserModel(variant: UserVariant.NATIVE): NativeUserModel;
   getUserModel(variant: UserVariant.OAUTH): OAuthUserModel;
