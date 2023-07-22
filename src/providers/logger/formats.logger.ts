@@ -2,6 +2,7 @@
  * Importing npm packages
  */
 import { cyan, gray, yellow } from '@colors/colors/safe';
+import { type TransformableInfo } from 'logform';
 import { LEVEL } from 'triple-beam';
 import { format } from 'winston';
 
@@ -20,6 +21,12 @@ import { Context, Storage } from '@app/shared/services/internal';
 
 let timestamp: number;
 
+function padLevel(info: TransformableInfo) {
+  const level = info[LEVEL];
+  const padding = '   '.substring(0, 5 - (level?.length ?? 0));
+  return info.level + padding;
+}
+
 /** Formats and print the logs to the console */
 export const consoleFormat = format.printf(info => {
   const level = info[LEVEL];
@@ -29,7 +36,7 @@ export const consoleFormat = format.printf(info => {
   const stack = info.stack ? '\n' + (Array.isArray(info.stack) ? info.stack.join('\n') : info.stack) : '';
   const isGraphQL = info.method === 'POST' && Storage.get<string[]>('graphql', []).includes(info.url.substring(9));
 
-  if (level != 'http') return `${(info.level + '  ').substring(0, 15)} ${yellow(`[${info.label || '-'}]`)} ${info.message} ${timeTaken} ${stack}`;
+  if (level != 'http') return `${padLevel(info)} ${yellow(`[${info.label || '-'}]`)} ${info.message} ${timeTaken} ${stack}`;
   if (!isGraphQL) return cyan(`HTTP  [REST] ${info.method} ${info.url} - ${info.timeTaken}ms`);
 
   /** Parsing GraphQL Request */
@@ -50,6 +57,5 @@ export const consoleFormat = format.printf(info => {
 export const contextFormat = format(info => {
   const rid = Context.getOptional('RID');
   if (rid) info.rid = rid;
-  info.dt = new Date();
   return info;
 });

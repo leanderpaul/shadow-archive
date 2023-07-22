@@ -27,13 +27,16 @@ export interface ConfigRecords {
   /** Log configs */
   'log.level': LogLevel;
   'log.dir': string;
-  'log.logtail.apikey': Nullable<string>;
 
   /** Database configs */
   'db.uri': string;
 
   /** Mail service configs */
   'mail.sendgrid.apikey': Nullable<string>;
+
+  /** AWS configs */
+  'aws.region': string;
+  'aws.cloudwatch.log-group': string;
 
   /** Authentication configs */
   'cookie.name': string;
@@ -105,14 +108,17 @@ class ConfigService {
     cache.set('log.level', logLevel);
     const logDir = ConfigService.get('LOG_DIR', 'logs');
     cache.set('log.dir', logDir);
-    const logtailApikey = ConfigService.get('LOGTAIL_SOURCE_TOKEN', null, true);
-    cache.set('log.logtail.apikey', logtailApikey);
 
     const dburi = ConfigService.get('DB_URI', 'mongodb://localhost/shadow-database', true);
     cache.set('db.uri', dburi);
 
     const sendgridApikey = ConfigService.get('SENDGRID_API_KEY', null, true);
     cache.set('mail.sendgrid.apikey', sendgridApikey);
+
+    const awsRegion = ConfigService.get('AWS_REGION', 'ap-south-1');
+    cache.set('aws.region', awsRegion);
+    const cloudwatchLogGroup = ConfigService.get('AWS_CLOUDWATCH_LOG_GROUP', 'shadow-archive');
+    cache.set('aws.cloudwatch.log-group', cloudwatchLogGroup);
 
     const cookieName = ConfigService.get('COOKIE_NAME', 'sasid');
     cache.set('cookie.name', cookieName);
@@ -128,6 +134,12 @@ class ConfigService {
 
   get<T extends keyof ConfigRecords>(key: T): ConfigRecords[T] {
     return this.cache.get(key);
+  }
+
+  getOrThrow<T extends keyof ConfigRecords>(key: T): Exclude<ConfigRecords[T], null> {
+    const value = this.cache.get(key);
+    if (value === null) throw new Error(`Expected config value for '${key}' to be set`);
+    return value;
   }
 }
 
