@@ -1,8 +1,8 @@
 diff --git a/node_modules/mongoose/types/query.d.ts b/node_modules/mongoose/types/query.d.ts
-index 6815e14..f2acc2c 100644
+index e60846e..1103bd4 100644
 --- a/node_modules/mongoose/types/query.d.ts
 +++ b/node_modules/mongoose/types/query.d.ts
-@@ -647,6 +647,11 @@ declare module 'mongoose' {
+@@ -671,6 +671,11 @@ declare module 'mongoose' {
       */
      set(path: string | Record<string, unknown>, value?: any): this;
  

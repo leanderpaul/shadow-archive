@@ -3,8 +3,6 @@
  */
 import fs from 'fs';
 
-import { Logtail } from '@logtail/node';
-import { LogtailTransport } from '@logtail/winston';
 import { type LoggerService, type OnApplicationShutdown } from '@nestjs/common';
 import { type FastifyReply, type FastifyRequest } from 'fastify';
 import { type Logger as WinstonLogger, createLogger as createWinstonLogger, format, transports } from 'winston';
@@ -14,6 +12,7 @@ import { type Logger as WinstonLogger, createLogger as createWinstonLogger, form
  */
 import { Config, Context } from '@app/shared/services/internal';
 
+import { CloudWatchLogger } from './cloudwatch.logger';
 import { consoleFormat, contextFormat } from './formats.logger';
 
 /**
@@ -62,7 +61,7 @@ function getFileIndex(filename: string): number {
 
 export class Logger implements LoggerService, OnApplicationShutdown {
   private static instance: WinstonLogger;
-  private static logtail: Logtail;
+  private static cloudwatch?: CloudWatchLogger;
 
   private readonly instance;
 
@@ -94,10 +93,9 @@ export class Logger implements LoggerService, OnApplicationShutdown {
       logger.add(new transports.Console({ format: consoleLogFormat }));
     }
 
-    const logtailApikey = Config.get('log.logtail.apikey');
-    if (nodeEnv === 'production' && logtailApikey) {
-      this.logtail = new Logtail(logtailApikey);
-      logger.add(new LogtailTransport(this.logtail, { format: logFormat }));
+    if (nodeEnv === 'production') {
+      this.cloudwatch = new CloudWatchLogger();
+      logger.add(this.cloudwatch.getTransport());
     } else {
       const logDir = Config.get('log.dir');
       try {
@@ -163,7 +161,7 @@ export class Logger implements LoggerService, OnApplicationShutdown {
   }
 
   static close(): void {
-    this.logtail?.flush();
+    this.cloudwatch?.close();
     this.instance.close();
   }
 
