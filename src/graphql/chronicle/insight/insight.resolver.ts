@@ -10,7 +10,7 @@ import { type GraphQLResolveInfo } from 'graphql';
 
 import { GraphQLService } from '@app/graphql/common';
 import { ExpenseInsightService } from '@app/modules/chronicle';
-import { AuthType, UseAuth } from '@app/shared/decorators';
+import { UseAuthGuard } from '@app/shared/decorators';
 
 import { ExpenseInsightFilter, InsightFilter } from './insight.dto';
 import { ExpenseInsight, Insight } from './insight.entity';
@@ -24,7 +24,7 @@ import { ExpenseInsight, Insight } from './insight.entity';
  */
 
 @Resolver(() => Insight)
-@UseAuth(AuthType.VERIFIED)
+@UseAuthGuard()
 export class InsightResolver {
   constructor(private readonly expenseInsightService: ExpenseInsightService, private readonly graphqlService: GraphQLService) {}
 

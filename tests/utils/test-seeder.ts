@@ -14,7 +14,7 @@ import { ShadowArchiveResponse } from './shadow-archive-response';
  * Defining types
  */
 
-type UserInput = Pick<User, 'email' | 'name' | 'admin'> & { verified?: false };
+type UserInput = Pick<User, 'email' | 'name'> & { verified?: false };
 
 type ExpenseInput = Omit<Expense, 'eid' | 'uid' | 'level' | 'category'> & Partial<Pick<Expense, 'level' | 'category'>>;
 

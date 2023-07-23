@@ -10,8 +10,9 @@ import { default as useragent } from 'useragent';
 /**
  * Importing user defined packages
  */
-import { DatabaseService, type NativeUser, type User, UserActivityType, type UserSession, UserVariant } from '@app/modules/database';
+import { DatabaseService, type NativeUser, type User, type UserSession, UserVariant } from '@app/modules/database';
 import { MailService, MailType } from '@app/providers/mail';
+import { UserActivityType } from '@app/shared/constants';
 import { AppError, ErrorCode, NeverError } from '@app/shared/errors';
 import { Config, Context } from '@app/shared/services';
 
@@ -64,7 +65,8 @@ export class UserAuthService {
   }
 
   async loginUser(email: string, password: string): Promise<Pick<NativeUser, 'uid' | 'type' | 'email' | 'name' | 'password' | 'verified' | 'sessions'>> {
-    const user = await this.userService.getNativeUser(email, ['email', 'name', 'password', 'verified', 'sessions']);
+    const roleProjection = { iam: { role: 1 }, fiction: { role: 1 }, chronicle: { role: 1 }, archive: { role: 1 } } as const;
+    const user = await this.userService.getNativeUser(email, { email: 1, name: 1, password: 1, verified: 1, sessions: 1, ...roleProjection });
     if (!user) throw new AppError(ErrorCode.IAM001);
     const isValidPassword = await sagus.compareHash(password, user.password);
     if (!isValidPassword) throw new AppError(ErrorCode.IAM006);

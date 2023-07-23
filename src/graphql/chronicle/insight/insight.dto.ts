@@ -6,7 +6,7 @@ import { ArgsType, Field, Int } from '@nestjs/graphql';
 /**
  * Importing user defined packages
  */
-import { Currency, ExpenseVisibiltyLevel } from '@app/modules/database';
+import { Currency, ExpenseVisibiltyLevel } from '@app/shared/constants';
 import { ValidationError } from '@app/shared/errors';
 
 /**

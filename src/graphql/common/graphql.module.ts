@@ -13,6 +13,7 @@ import { allow, rule, shield } from 'graphql-shield';
  */
 import { AuthModule, AuthService } from '@app/modules/auth';
 import { AppError, ErrorCode, ErrorFilter } from '@app/shared/errors';
+import { type Role, type Service } from '@app/shared/guards';
 import { Config, Context, Storage } from '@app/shared/services';
 
 /**
@@ -22,6 +23,9 @@ import { Config, Context, Storage } from '@app/shared/services';
 export interface GraphQLModuleOptions {
   /** Name of the GraphQL API. The value will result in the path being `/graphql/<name>` */
   name: string;
+
+  /** Role required to allow introspection query in production */
+  inspectionRole: [Service, Role];
 
   /** An array of modules to scan when searching for resolvers */
   include: Type[];
@@ -54,7 +58,8 @@ export class GraphQLModule {
 
             const isProd = Config.get('app.env') === 'production';
             const user = Context.getCurrentUser();
-            if (isProd && !user?.admin) {
+            const [service, role] = options.inspectionRole;
+            if (isProd && (user ? (user.role[service] & role) === 0 : true)) {
               const appError = new AppError(ErrorCode.S003);
               const graphqlError = new GraphQLError(appError.getMessage(), { originalError: appError });
               context.reportError(graphqlError);

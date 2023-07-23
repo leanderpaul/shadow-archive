@@ -16,6 +16,6 @@ import { AuthGuard, AuthType } from '@app/shared/guards';
  * Declaring the constants
  */
 
-export const UseAuth = (authType: AuthType): MethodDecorator & ClassDecorator => UseGuards(AuthGuard(authType));
+export const UseAuthGuard = (authType?: AuthType): MethodDecorator & ClassDecorator => UseGuards(AuthGuard(authType));
 
 export { AuthType };

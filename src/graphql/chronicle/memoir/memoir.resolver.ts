@@ -9,7 +9,7 @@ import { type GraphQLResolveInfo } from 'graphql';
  */
 import { GraphQLService } from '@app/graphql/common';
 import { MemoirService } from '@app/modules/chronicle';
-import { AuthType, UseAuth } from '@app/shared/decorators';
+import { UseAuthGuard } from '@app/shared/decorators';
 
 import { AddStringArgs, DeleteArgs, GetMemoirArgs, SleepArgs, UpdateStringArgs } from './dto';
 import { Memoir, Sleep } from './memoir.entity';
@@ -23,7 +23,7 @@ import { Memoir, Sleep } from './memoir.entity';
  */
 
 @Resolver()
-@UseAuth(AuthType.VERIFIED)
+@UseAuthGuard()
 export class MemoirResolver {
   constructor(private readonly memoirService: MemoirService, private readonly graphqlService: GraphQLService) {}
 

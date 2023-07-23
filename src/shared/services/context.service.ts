@@ -10,12 +10,27 @@ import { default as sagus } from 'sagus';
  * Importing user defined packages
  */
 import { type User, type UserSession } from '@app/modules/database';
+import { type ArchiveRole, type ChronicleRole, type FictionRole, type IAMRole } from '@app/shared/constants';
 import { type JSONData, type NonNullJSONData } from '@app/shared/interfaces';
 
 /**
  * Defining types
  */
-export type CurrentUser = Pick<User, 'uid' | 'email' | 'admin' | 'verified' | 'type'>;
+export interface CurrentUser extends Pick<User, 'uid' | 'email' | 'verified' | 'type'> {
+  role: {
+    iam: IAMRole;
+    fiction: FictionRole;
+    chronicle: ChronicleRole;
+    archive: ArchiveRole;
+  };
+}
+
+export interface CurrentUserDoc extends Pick<User, 'uid' | 'email' | 'verified' | 'type'> {
+  iam: { role: IAMRole };
+  fiction: { role: FictionRole };
+  chronicle: { role: ChronicleRole };
+  archive: { role: ArchiveRole };
+}
 
 type Middleware = (req: FastifyRequest, res: FastifyReply, next: () => void) => void;
 
@@ -107,8 +122,12 @@ class ContextService {
     return required ? this.get('CURRENT_USER', true) : this.get('CURRENT_USER');
   }
 
-  setCurrentUser(user: CurrentUser): ContextService {
-    return this.set('CURRENT_USER', user);
+  setCurrentUser(user: CurrentUserDoc): ContextService;
+  setCurrentUser(user: CurrentUser): ContextService;
+  setCurrentUser(user: CurrentUserDoc | CurrentUser): ContextService {
+    const role = 'role' in user ? user.role : { iam: user.iam.role, fiction: user.fiction.role, chronicle: user.chronicle.role, archive: user.archive.role };
+    const userObj = { uid: user.uid, email: user.email, verified: user.verified, type: user.type, role: role };
+    return this.set('CURRENT_USER', userObj);
   }
 
   getCurrentSession(): UserSession | undefined;

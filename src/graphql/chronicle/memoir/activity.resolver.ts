@@ -7,7 +7,7 @@ import { Args, Mutation, Resolver } from '@nestjs/graphql';
  * Importing user defined packages
  */
 import { MemoirService } from '@app/modules/chronicle';
-import { AuthType, UseAuth } from '@app/shared/decorators';
+import { UseAuthGuard } from '@app/shared/decorators';
 
 import { AddActivityArgs, DeleteArgs, UpdateActivityArgs } from './dto';
 import { Activity } from './memoir.entity';
@@ -21,7 +21,7 @@ import { Activity } from './memoir.entity';
  */
 
 @Resolver()
-@UseAuth(AuthType.VERIFIED)
+@UseAuthGuard()
 export class ActivityResolver {
   constructor(private readonly memoirService: MemoirService) {}
 

@@ -8,7 +8,8 @@ import { Aggregate } from 'mongoose';
 /**
  * Importing user defined packages
  */
-import { Currency, DatabaseService, ExpenseCategory, type ExpenseVisibiltyLevel } from '@app/modules/database';
+import { DatabaseService } from '@app/modules/database';
+import { type Currency, type ExpenseCategory, type ExpenseVisibiltyLevel } from '@app/shared/constants';
 import { Context } from '@app/shared/services';
 
 /**

@@ -6,7 +6,7 @@ import { Field, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
 /**
  * Importing user defined packages
  */
-import { ActivityType } from '@app/modules/database';
+import { ActivityType } from '@app/shared/constants';
 
 /**
  * Defining types

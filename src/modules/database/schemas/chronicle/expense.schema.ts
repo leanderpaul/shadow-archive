@@ -7,7 +7,10 @@ import { type Model, type Types } from 'mongoose';
 /**
  * Importing user defined packages
  */
-import { defaultOptionsPlugin } from '../database.utils';
+import { Currency, ExpenseCategory, ExpenseVisibiltyLevel } from '@app/shared/constants';
+
+import { ExpenseItem, ExpenseItemSchema } from './expense-item.schema';
+import { defaultOptionsPlugin } from '../schema.utils';
 
 /**
  * Defining types
@@ -18,68 +21,10 @@ export type ExpenseModel = Model<Expense>;
 /**
  * Declaring the constants
  */
-const validateInteger = [(value: number) => value % 1 === 0 && value > 0, 'should be an integer greater than 0'];
-
-export enum Currency {
-  INR = 1,
-  GBP = 2,
-}
-
-export enum ExpenseCategory {
-  UNKNOWN = 0,
-  BILLS = 1,
-  CHARITY = 2,
-  EATING_OUT = 3,
-  ENTERTAINMENT = 4,
-  FAMILY = 5,
-  GENERAL = 6,
-  GROCERIES = 7,
-  GIFTS = 8,
-  HOLIDAYS = 9,
-  PERSONAL_CARE = 10,
-  SHOPPING = 11,
-  TRANSPORT = 12,
-}
-
-export enum ExpenseVisibiltyLevel {
-  STANDARD = 0,
-  HIDDEN = 1,
-  DISGUISE = -1,
-}
 
 /**
  * Defining the schemas
  */
-
-@Schema({
-  _id: false,
-  versionKey: false,
-})
-export class ExpenseItem {
-  /** Name of the expense or bill item */
-  @Prop({
-    type: 'string',
-    required: [true, 'required'],
-    maxlength: 120,
-  })
-  name: string;
-
-  /** The price for which the item is sold for */
-  @Prop({
-    type: 'number',
-    required: [true, 'Price is required'],
-    validate: validateInteger,
-  })
-  price: number;
-
-  /** The quantity of the otem purchased, if this value is empty it means the quantity is one */
-  @Prop({
-    type: 'number',
-    validate: [(value: number) => value > 0, 'should be greater than 0'],
-    set: (val: number | null) => (val === 1 || val === null ? undefined : val),
-  })
-  qty?: number;
-}
 
 @Schema({ versionKey: false })
 export class Expense {
@@ -104,10 +49,7 @@ export class Expense {
     type: 'number',
     required: true,
     default: ExpenseVisibiltyLevel.STANDARD,
-    enum: {
-      values: Object.values(ExpenseVisibiltyLevel),
-      message: 'unsupported visibilty level',
-    },
+    enum: Object.values(ExpenseVisibiltyLevel).filter(v => typeof v === 'number'),
   })
   level: ExpenseVisibiltyLevel;
 
@@ -115,10 +57,7 @@ export class Expense {
     type: 'number',
     required: true,
     default: ExpenseCategory.UNKNOWN,
-    enum: {
-      values: Object.values(ExpenseCategory),
-      message: 'unsupported category',
-    },
+    enum: Object.values(ExpenseCategory).filter(v => typeof v === 'number'),
   })
   category: ExpenseCategory;
 
@@ -158,10 +97,7 @@ export class Expense {
   @Prop({
     type: 'number',
     required: [true, 'Currency is requried'],
-    enum: {
-      values: Object.values(Currency),
-      message: `unsupported value provided`,
-    },
+    enum: Object.values(Currency).filter(v => typeof v === 'number'),
   })
   currency: Currency;
 
@@ -181,7 +117,7 @@ export class Expense {
 
   /** Array containing the items that are in the bill */
   @Prop({
-    type: [SchemaFactory.createForClass(ExpenseItem)],
+    type: [ExpenseItemSchema],
     required: true,
   })
   items: ExpenseItem[];
@@ -190,7 +126,7 @@ export class Expense {
   @Prop({
     type: 'number',
     required: [true, 'required'],
-    validate: validateInteger,
+    validate: [(value: number) => value % 1 === 0 && value > 0, 'should be an integer greater than 0'],
   })
   total: number;
 }

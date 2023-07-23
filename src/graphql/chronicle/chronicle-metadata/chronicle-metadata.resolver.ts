@@ -7,7 +7,7 @@ import { Query, Resolver } from '@nestjs/graphql';
  * Importing user defined packages
  */
 import { UserService } from '@app/modules/user';
-import { AuthType, UseAuth } from '@app/shared/decorators';
+import { UseAuthGuard } from '@app/shared/decorators';
 import { NeverError } from '@app/shared/errors';
 import { Context } from '@app/shared/services';
 
@@ -22,7 +22,7 @@ import { Metadata } from './chronicle-metadata.entity';
  */
 
 @Resolver()
-@UseAuth(AuthType.VERIFIED)
+@UseAuthGuard()
 export class ChronicleMetadataResolver {
   constructor(private readonly userService: UserService) {}
 

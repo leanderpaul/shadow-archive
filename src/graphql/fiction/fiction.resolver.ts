@@ -9,7 +9,8 @@ import { type GraphQLResolveInfo } from 'graphql';
  */
 import { GraphQLService, type PaginatedType } from '@app/graphql/common';
 import { FictionChapterService, FictionService } from '@app/modules/fiction';
-import { AuthType, UseAuth } from '@app/shared/decorators';
+import { FictionRole } from '@app/shared/constants';
+import { UseRoleGuard } from '@app/shared/decorators';
 
 import { FictionChapter, FictionChapterQueryArgs } from './fiction-chapter';
 import { FictionInput, FictionQueryArgs, GetFictionArgs, UpdateFictionArgs } from './fiction.dto';
@@ -28,7 +29,7 @@ type ResolvedFictionConnection = PaginatedType<ResolvedFiction>;
  */
 
 @Resolver(() => Fiction)
-@UseAuth(AuthType.VERIFIED)
+@UseRoleGuard('fiction', FictionRole.READER)
 export class FictionResolver {
   constructor(private readonly fictionService: FictionService, private readonly fictionChapterService: FictionChapterService, private readonly graphqlService: GraphQLService) {}
 
@@ -58,19 +59,19 @@ export class FictionResolver {
     return this.fictionChapterService.listChapter(parent.fid, args, projection);
   }
 
-  @UseAuth(AuthType.ADMIN)
+  @UseRoleGuard('fiction', FictionRole.SCRAPER)
   @Mutation(() => Fiction)
   createFiction(@Args('input') input: FictionInput): Promise<ResolvedFiction> {
     return this.fictionService.createFiction(input);
   }
 
-  @UseAuth(AuthType.ADMIN)
+  @UseRoleGuard('fiction', FictionRole.SCRAPER)
   @Mutation(() => Fiction)
   updateFiction(@Args() args: UpdateFictionArgs): Promise<ResolvedFiction> {
     return this.fictionService.updateFiction(args.fid, args.update);
   }
 
-  @UseAuth(AuthType.ADMIN)
+  @UseRoleGuard('fiction', FictionRole.SCRAPER)
   @Mutation(() => Boolean)
   async deleteFiction(@Args() args: GetFictionArgs): Promise<boolean> {
     await this.fictionService.deleteFiction(args.fid);

@@ -9,7 +9,7 @@ import { type GraphQLResolveInfo } from 'graphql';
  */
 import { GraphQLService } from '@app/graphql/common';
 import { ExpenseService } from '@app/modules/chronicle';
-import { AuthType, UseAuth } from '@app/shared/decorators';
+import { UseAuthGuard } from '@app/shared/decorators';
 
 import { AddExpenseInput, GetExpenseArgs, SearchExpensesArgs, UpdateExpenseArgs } from './expense.dto';
 import { Expense, ExpenseConnection } from './expense.entity';
@@ -23,7 +23,7 @@ import { Expense, ExpenseConnection } from './expense.entity';
  */
 
 @Resolver()
-@UseAuth(AuthType.VERIFIED)
+@UseAuthGuard()
 export class ExpenseResolver {
   constructor(private readonly expenseService: ExpenseService, private readonly graphqlService: GraphQLService) {}
 

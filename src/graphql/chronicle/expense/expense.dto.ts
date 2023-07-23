@@ -7,7 +7,7 @@ import { ArgsType, Field, Float, ID, InputType, Int, PartialType } from '@nestjs
  * Importing user defined packages
  */
 import { PageInput, SortOrder } from '@app/graphql/common';
-import { Currency, ExpenseCategory, ExpenseVisibiltyLevel } from '@app/modules/database';
+import { Currency, ExpenseCategory, ExpenseVisibiltyLevel } from '@app/shared/constants';
 
 /**
  * Defining types

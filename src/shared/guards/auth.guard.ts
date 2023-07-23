@@ -1,12 +1,13 @@
 /**
  * Importing npm packages
  */
-import { type CanActivate, type Type, mixin } from '@nestjs/common';
+import { mixin } from '@nestjs/common';
 
 /**
  * Importing user defined packages
  */
 import { AppError, ErrorCode } from '@app/shared/errors';
+import { type CanActivate, type Guard } from '@app/shared/interfaces/guard.interface';
 import { Context } from '@app/shared/services';
 
 /**
@@ -16,20 +17,18 @@ import { Context } from '@app/shared/services';
 export enum AuthType {
   VERIFIED,
   AUTHENTICATED,
-  ADMIN,
 }
 
 /**
  * Declaring the constants
  */
-const cache: Partial<Record<AuthType, Type<CanActivate>>> = {};
+const cache: Partial<Record<AuthType, Guard>> = {};
 
-function createAuthGuard(requiredAuth: AuthType): Type<CanActivate> {
+function createAuthGuard(requiredAuth: AuthType): Guard {
   class MixinAuthGuard implements CanActivate {
     canActivate(): boolean {
       const user = Context.getCurrentUser();
       if (!user) throw new AppError(ErrorCode.IAM002);
-      if (requiredAuth === AuthType.ADMIN && !user.admin) throw new AppError(ErrorCode.IAM004);
       if (requiredAuth === AuthType.VERIFIED && !user.verified) throw new AppError(ErrorCode.IAM003);
       return true;
     }
@@ -38,7 +37,7 @@ function createAuthGuard(requiredAuth: AuthType): Type<CanActivate> {
   return mixin(MixinAuthGuard);
 }
 
-export function AuthGuard(requiredAuth: AuthType = AuthType.VERIFIED): Type<CanActivate> {
+export function AuthGuard(requiredAuth: AuthType = AuthType.VERIFIED): Guard {
   const cachedResult = cache[requiredAuth];
   if (cachedResult) return cachedResult;
   const result = createAuthGuard(requiredAuth);

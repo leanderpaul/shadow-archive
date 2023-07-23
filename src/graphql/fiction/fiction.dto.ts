@@ -7,7 +7,7 @@ import { ArgsType, Field, ID, InputType, Int, PartialType, registerEnumType } fr
  * Importing user defined packages
  */
 import { PageInput, SortOrder } from '@app/graphql/common';
-import { FictionGenre, FictionStatus, FictionTier, FictionType } from '@app/modules/database';
+import { FictionGenre, FictionStatus, FictionTier, FictionType } from '@app/shared/constants';
 
 /**
  * Defining types

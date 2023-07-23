@@ -8,8 +8,7 @@ import { Types } from 'mongoose';
 /**
  * Importing user defined packages
  */
-import { DBUtils } from '@app/modules/database';
-import { Config, Context } from '@app/shared/services';
+import { Config, Context, Parser } from '@app/shared/services';
 
 /**
  * Defining types
@@ -40,7 +39,7 @@ export class CookieService {
 
   private decodeCookie(cookie: string): UserCookie | null {
     const data = cookie.split('|') as [string, string];
-    const uid = DBUtils.toObjectID(data[0]);
+    const uid = Parser.toObjectID(data[0]);
     if (!uid || !data[1]) return null;
     return { uid, token: data[1] };
   }

@@ -7,11 +7,12 @@ import { type QueryWithHelpers, type SortOrder } from 'mongoose';
 /**
  * Importing user defined packages
  */
-import { type Currency, DBUtils, DatabaseService, Expense, type ExpenseCategory, type ExpenseItem, type ExpenseVisibiltyLevel, type ID } from '@app/modules/database';
+import { DatabaseService, Expense, type ExpenseItem, type ID } from '@app/modules/database';
 import { Logger } from '@app/providers/logger';
+import { type Currency, type ExpenseCategory, type ExpenseVisibiltyLevel } from '@app/shared/constants';
 import { AppError, ErrorCode, NeverError } from '@app/shared/errors';
 import { type PageCursor, type Projection } from '@app/shared/interfaces';
-import { Context } from '@app/shared/services';
+import { Context, Parser } from '@app/shared/services';
 
 /**
  * Defining types
@@ -71,7 +72,7 @@ export class ExpenseService {
   async getExpense<T>(eid: ID, projection?: Projection<Expense> | T[]): Promise<Expense | null> {
     const { uid } = Context.getCurrentUser(true);
     if (typeof eid === 'string') {
-      const id = DBUtils.toObjectID(eid);
+      const id = Parser.toObjectID(eid);
       if (!id) return null;
       eid = id;
     }
@@ -92,14 +93,14 @@ export class ExpenseService {
     const { uid } = Context.getCurrentUser(true);
     const total = this.calculateTotal(input.items);
     const expense = await this.expenseModel.create({ uid, ...input, total });
-    this.userModel
+    await this.userModel
       .updateOne({ uid }, { $inc: { 'chronicle.deviation': input.level * total }, $addToSet: { 'chronicle.paymentMethods': input.paymentMethod } })
       .catch(err => this.logger.error(err, { message: 'Failed to update user chronicle metadata', uid }));
     return expense;
   }
 
   async updateExpense(eid: ID, update: Partial<Omit<Expense, 'eid' | 'uid' | 'total'>>): Promise<Expense> {
-    if (typeof eid === 'string') eid = DBUtils.toObjectID(eid, true);
+    if (typeof eid === 'string') eid = Parser.toObjectID(eid, true);
     const { uid } = Context.getCurrentUser(true);
     const expense = await this.expenseModel.findOne({ uid, eid }).lean();
     if (!expense) throw new AppError(ErrorCode.R001);
@@ -119,7 +120,7 @@ export class ExpenseService {
     if (!updatedExpense) throw new NeverError('Expense not found when updating');
     if (expense.total !== updatedExpense.total || expense.paymentMethod != updatedExpense.paymentMethod || expense.level != updatedExpense.level) {
       const difference = updatedExpense.level * updatedExpense.total - expense.level * expense.total;
-      this.userModel
+      await this.userModel
         .updateOne({ uid }, { $inc: { 'chronicle.deviation': difference }, $addToSet: { 'chronicle.paymentMethods': updatedExpense.paymentMethod } })
         .catch(err => this.logger.error(err, { message: 'Failed to update user chronicle metadata', uid, difference }));
     }
@@ -127,11 +128,11 @@ export class ExpenseService {
   }
 
   async removeExpense(eid: ID): Promise<Expense> {
-    if (typeof eid === 'string') eid = DBUtils.toObjectID(eid, true);
+    if (typeof eid === 'string') eid = Parser.toObjectID(eid, true);
     const { uid } = Context.getCurrentUser(true);
     const expense = await this.expenseModel.findOneAndDelete({ uid, eid }).lean();
     if (!expense) throw new AppError(ErrorCode.R001);
-    this.userModel
+    await this.userModel
       .updateOne({ uid }, { $inc: { 'chronicle.deviation': expense.level * expense.total * -1 } })
       .catch(err => this.logger.error(err, { message: 'Failed to update user chronicle metadata', uid, expense: { level: expense.level, total: expense.total } }));
     return expense;

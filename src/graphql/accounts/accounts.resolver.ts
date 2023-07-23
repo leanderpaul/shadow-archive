@@ -11,7 +11,7 @@ import { GraphQLService } from '@app/graphql/common';
 import { AuthService } from '@app/modules/auth';
 import { type User } from '@app/modules/database';
 import { UserAuthService, UserService } from '@app/modules/user';
-import { AuthType, UseAuth } from '@app/shared/decorators';
+import { AuthType, UseAuthGuard } from '@app/shared/decorators';
 import { NeverError } from '@app/shared/errors';
 import { Context } from '@app/shared/services';
 
@@ -37,7 +37,7 @@ export class AccountsResolver {
     private readonly authService: AuthService,
   ) {}
 
-  @UseAuth(AuthType.AUTHENTICATED)
+  @UseAuthGuard(AuthType.AUTHENTICATED)
   @Query(() => Viewer, { name: 'viewer' })
   async getCurrentUser(@Info() info: GraphQLResolveInfo): Promise<ResolvedViewer> {
     const { uid } = Context.getCurrentUser(true);
@@ -85,21 +85,21 @@ export class AccountsResolver {
     return await this.userAuthService.resetPassword(args.code, args.newPassword);
   }
 
-  @UseAuth(AuthType.AUTHENTICATED)
+  @UseAuthGuard(AuthType.AUTHENTICATED)
   @Mutation(() => Boolean)
   async updatePassword(@Args() args: UpdatePasswordArgs): Promise<boolean> {
     await this.userService.updatePassword(args.oldPassword, args.newPassword);
     return true;
   }
 
-  @UseAuth(AuthType.AUTHENTICATED)
+  @UseAuthGuard(AuthType.AUTHENTICATED)
   @Mutation(() => Boolean)
   async resendEmailVerificationMail(): Promise<boolean> {
     await this.userAuthService.sendEmailVerificationMail();
     return true;
   }
 
-  @UseAuth(AuthType.AUTHENTICATED)
+  @UseAuthGuard(AuthType.AUTHENTICATED)
   @Mutation(() => Boolean, { name: 'logout' })
   async logout(@Args({ name: 'sessionId', nullable: true, description: 'pass -1 to clear all sessions', type: () => Int }) sessionId?: number): Promise<boolean> {
     const { uid } = Context.getCurrentUser(true);
@@ -108,7 +108,7 @@ export class AccountsResolver {
     return true;
   }
 
-  @UseAuth(AuthType.AUTHENTICATED)
+  @UseAuthGuard(AuthType.AUTHENTICATED)
   @Mutation(() => Viewer)
   updateUserProfile(@Args() update: UpdateUserArgs): Promise<ResolvedViewer> {
     const { uid } = Context.getCurrentUser(true);

@@ -6,7 +6,7 @@ import { ArgsType, Field, InputType, Int, PartialType } from '@nestjs/graphql';
 /**
  * Importing user defined packages
  */
-import { ActivityType } from '@app/modules/database';
+import { ActivityType } from '@app/shared/constants';
 
 import { addField, updateField } from './common.args';
 

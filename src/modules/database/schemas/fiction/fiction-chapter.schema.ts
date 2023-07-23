@@ -10,7 +10,7 @@ import sanitizeHtml from 'sanitize-html';
  */
 import { AppError, ErrorCode } from '@app/shared/errors';
 
-import { defaultOptionsPlugin, handleDuplicateKeyError } from '../database.utils';
+import { defaultOptionsPlugin, handleDuplicateKeyError } from '../schema.utils';
 
 /**
  * Defining types

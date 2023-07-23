@@ -2,13 +2,13 @@
  * Importing npm packages
  */
 import { MongoServerError } from 'mongodb';
-import { Query, type Schema, Types } from 'mongoose';
+import { Query, type Schema } from 'mongoose';
 import { mongooseLeanVirtuals } from 'mongoose-lean-virtuals';
 
 /**
  * Importing user defined packages
  */
-import { AppError, ErrorCode } from '@app/shared/errors';
+import { AppError } from '@app/shared/errors';
 
 /**
  * Defining types
@@ -49,17 +49,4 @@ export function defaultOptionsPlugin(schema: Schema): void {
   schema.pre('findOne', defaultLean);
   schema.pre('findOneAndUpdate', defaultLean);
   schema.pre('findOneAndDelete', defaultLean);
-}
-
-export class DBUtils {
-  static toObjectID(id: string, throwError: true): Types.ObjectId;
-  static toObjectID(id: string, throwError?: false): Types.ObjectId | null;
-  static toObjectID(id: string, throwError?: boolean): Types.ObjectId | null {
-    try {
-      return new Types.ObjectId(id);
-    } catch (err) {
-      if (throwError) throw new AppError(ErrorCode.R001);
-      return null;
-    }
-  }
 }

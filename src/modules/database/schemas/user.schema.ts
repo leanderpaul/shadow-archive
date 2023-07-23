@@ -10,16 +10,17 @@ import sagus from 'sagus';
  */
 import { AppError, ErrorCode } from '@app/shared/errors';
 
-import { defaultOptionsPlugin, handleDuplicateKeyError } from '../database.utils';
+import { ChronicleUser, ChronicleUserSchema } from './chronicle/chronicle-user.schema';
+import { FictionUser, FictionUserSchema } from './fiction/fiction-user.schema';
+import { ArchiveUser, ArchiveUserSchema } from './iam/archive-user.schema';
+import { IAMUser, IAMUserSchema } from './iam/iam-user.schema';
+import { UserActivity, UserActivitySchema } from './iam/user-activity.schema';
+import { UserSession, UserSessionSchema } from './iam/user-session.schema';
+import { defaultOptionsPlugin, handleDuplicateKeyError } from './schema.utils';
 
 /**
  * Defining types
  */
-
-export enum UserActivityType {
-  CHANGE_PASSWORD = 'CHANGE_PASSWORD',
-  RESET_PASSWORD = 'RESET_PASSWORD',
-}
 
 interface UserStaticMethods {
   isNativeUser(user: User): user is NativeUser;
@@ -36,130 +37,6 @@ export interface OAuthUserModel extends Model<OAuthUser>, UserStaticMethods {}
  * Declaring the constants
  */
 
-/**
- * @class
- * Contains user session related data
- */
-@Schema({ _id: false, versionKey: false })
-export class UserSession {
-  /** User session ID used to identify the session */
-  @Prop({
-    type: 'number',
-    required: true,
-  })
-  id: number;
-
-  /** User session token. This is the value stored in the user's cookie */
-  @Prop({
-    type: 'string',
-    required: true,
-    default: () => sagus.genRandom(32, 'base64'),
-  })
-  token: string;
-
-  /** The browser from which the session was created */
-  @Prop({
-    type: 'string',
-  })
-  browser?: string;
-
-  /** The device OS from which the session was created */
-  @Prop({
-    type: 'string',
-  })
-  os?: string;
-
-  /** The device from which the session was created */
-  @Prop({
-    type: 'string',
-  })
-  device?: string;
-
-  /** session last activity */
-  @Prop({
-    type: 'date',
-    required: true,
-    default: () => new Date(),
-  })
-  accessedAt: Date;
-}
-
-/**
- * @class
- * Contains user account activity
- */
-@Schema({ _id: false })
-export class UserActivity {
-  @Prop({
-    type: 'string',
-    required: true,
-    enum: Object.values(UserActivityType),
-  })
-  type: UserActivityType;
-
-  @Prop({
-    type: 'date',
-    default: () => new Date(),
-  })
-  time: Date;
-}
-
-/**
- * @class
- * Contains data on how to group items in the chronicle app
- */
-@Schema({ _id: false })
-export class ExpenseGroup {
-  /** Expense group ID */
-  @Prop({
-    type: 'number',
-    required: true,
-    min: 1,
-  })
-  id: number;
-
-  @Prop({
-    type: 'string',
-    required: [true, 'required'],
-  })
-  /** Name of the expense group */
-  name: string;
-
-  @Prop({
-    type: ['string'],
-    required: true,
-  })
-  /** Words to include in expense group */
-  words: string[];
-}
-
-/**
- * @class
- * Contains all the metadata related details related for the chronicle app
- */
-@Schema({ _id: false })
-export class ChronicleMetadata {
-  /** Difference between the expense security level 1 and -1  */
-  @Prop({
-    type: 'number',
-    required: true,
-    default: 0,
-    set: (val: number) => Math.round(val),
-  })
-  deviation: number;
-
-  /** Array containg payment methods associated with the user */
-  @Prop({
-    type: ['string'],
-    required: true,
-  })
-  paymentMethods: string[];
-}
-
-/**
- * @class
- * Contains all the data associated aith the user
- */
 @Schema({ versionKey: false, timestamps: { updatedAt: false }, discriminatorKey: 'type' })
 export class User {
   /** User ID, alias of _id */
@@ -193,12 +70,6 @@ export class User {
   })
   imageUrl?: string;
 
-  /** Determines whether the user is an admin or not */
-  @Prop({
-    type: 'boolean',
-  })
-  admin?: boolean;
-
   /** Denotes whether a user email address is verified or not */
   @Prop({
     type: 'boolean',
@@ -209,7 +80,7 @@ export class User {
 
   /** Array storing the session details of the user */
   @Prop({
-    type: [SchemaFactory.createForClass(UserSession)],
+    type: [UserSessionSchema],
     required: true,
   })
   sessions: UserSession[];
@@ -223,26 +94,47 @@ export class User {
 
   /** Last 30 user activity logs */
   @Prop({
-    type: [SchemaFactory.createForClass(UserActivity)],
+    type: [UserActivitySchema],
     required: true,
   })
   activities: UserActivity[];
 
-  /** chronicle app user metadata */
+  /** IAM user config */
   @Prop({
-    type: SchemaFactory.createForClass(ChronicleMetadata),
-    default: { expenseCount: 0, paymentMethods: [], groups: [] },
+    type: IAMUserSchema,
+    required: true,
+    default: {},
   })
-  chronicle: ChronicleMetadata;
+  iam: IAMUser;
+
+  /** chronicle user config */
+  @Prop({
+    type: ChronicleUserSchema,
+    required: true,
+    default: {},
+  })
+  chronicle: ChronicleUser;
+
+  /** fiction user config */
+  @Prop({
+    type: FictionUserSchema,
+    required: true,
+    default: {},
+  })
+  fiction: FictionUser;
+
+  /** archive user config */
+  @Prop({
+    type: ArchiveUserSchema,
+    required: true,
+    default: {},
+  })
+  archive: ArchiveUser;
 
   /** Date the user account was created */
   createdAt: Date;
 }
 
-/**
- * @class
- * Contains extra fields that are only required in a native user
- */
 @Schema()
 export class NativeUser extends User {
   /** User's hashed password */
@@ -266,11 +158,6 @@ export class NativeUser extends User {
   })
   passwordResetCode?: string;
 }
-
-/**
- * @class
- * Contains extra fields that are only required in a oauth user
- */
 
 @Schema()
 export class OAuthUser extends User {

@@ -9,11 +9,11 @@ import moment from 'moment';
 /**
  * Importing user defined packages
  */
-import { DatabaseService } from '@app/modules/database';
+import { DatabaseService, type UserSession } from '@app/modules/database';
 import { CookieService, type UserCookie } from '@app/modules/user';
 import { Logger } from '@app/providers/logger';
 import { AppError, ErrorCode } from '@app/shared/errors';
-import { Config, Context } from '@app/shared/services';
+import { Config, Context, type CurrentUser } from '@app/shared/services';
 
 /**
  * Defining types
@@ -25,6 +25,10 @@ export interface ICreateUser {
   password: string;
   createSession?: boolean;
   verified?: boolean;
+}
+
+interface AuthUser extends CurrentUser {
+  sessions: UserSession[];
 }
 
 /**
@@ -46,8 +50,9 @@ export class AuthService {
     const maxAge = Config.get('cookie.max-age');
     const promise = this.userModel.findOneAndUpdate({ uid: cookieData.uid }, {}, { runValidators: false });
     promise.setUpdate({ $pull: { sessions: { accessedAt: { $lt: moment().subtract(maxAge, 'seconds').toDate() } } } });
-    promise.projection('uid email admin verified sessions');
-    const user = await promise.lean();
+    const roleProjection = { iam: '$iam.role', chronicle: '$chronicle.role', fiction: '$fiction.role', archive: '$archive.role' };
+    promise.projection({ uid: 1, email: 1, verified: 1, sessions: 1, role: roleProjection });
+    const user = await promise.lean<AuthUser>();
     if (!user) return this.cookieService.clearCookies();
     const session = user.sessions.find(s => s.token === cookieData.token);
     if (!session) return this.cookieService.clearCookies();

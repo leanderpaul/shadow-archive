@@ -1,7 +1,6 @@
 /**
  * Importing npm packages
  */
-
 import { Args, Info, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { type GraphQLResolveInfo } from 'graphql';
 
@@ -10,7 +9,8 @@ import { type GraphQLResolveInfo } from 'graphql';
  */
 import { GraphQLService } from '@app/graphql/common';
 import { UserService } from '@app/modules/user';
-import { AuthType, UseAuth } from '@app/shared/decorators';
+import { IAMRole } from '@app/shared/constants';
+import { UseRoleGuard } from '@app/shared/decorators';
 import { MigrationService } from '@app/shared/services';
 
 import { MigrationArgs, UserIdentifier } from './admin.dto';
@@ -25,7 +25,7 @@ import { Migration, User } from './admin.entity';
  */
 
 @Resolver()
-@UseAuth(AuthType.ADMIN)
+@UseRoleGuard('iam', IAMRole.ADMIN)
 export class AdminResolver {
   constructor(private readonly graphqlService: GraphQLService, private readonly userService: UserService, private readonly migrationService: MigrationService) {}
 
