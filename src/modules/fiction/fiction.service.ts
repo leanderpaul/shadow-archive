@@ -7,10 +7,12 @@ import { type QueryWithHelpers } from 'mongoose';
 /**
  * Importing user defined packages
  */
-import { DBUtils, DatabaseService, type Fiction, FictionGenre, FictionStatus, FictionType, type ID } from '@app/modules/database';
+import { DatabaseService, type Fiction, type ID } from '@app/modules/database';
 import { Logger } from '@app/providers/logger';
+import { type FictionGenre, type FictionStatus, type FictionType } from '@app/shared/constants';
 import { AppError, ErrorCode } from '@app/shared/errors';
 import { type PageCursor, type PageSort, type Projection } from '@app/shared/interfaces';
+import { Parser } from '@app/shared/services';
 
 /**
  * Defining types
@@ -64,7 +66,7 @@ export class FictionService {
   async getFiction(fid: ID, projection?: Projection<Fiction>): Promise<Fiction | null>;
   async getFiction<T>(fid: ID, projection?: Projection<Fiction> | T[]): Promise<Fiction | null> {
     if (typeof fid === 'string') {
-      const id = DBUtils.toObjectID(fid);
+      const id = Parser.toObjectID(fid);
       if (!id) return null;
       fid = id;
     }
@@ -100,7 +102,7 @@ export class FictionService {
   async deleteFiction(fid: ID): Promise<Fiction> {
     const fiction = await this.fictionModel.findOneAndDelete({ fid }).lean();
     if (!fiction) throw new AppError(ErrorCode.R001);
-    this.fictionChapterModel.deleteMany({ fid }).catch(err => this.logger.error(`Failed to delete all the chapters of novel '${fiction.name}' with ID '${fid}'`, err));
+    await this.fictionChapterModel.deleteMany({ fid }).catch(err => this.logger.error(`Failed to delete all the chapters of novel '${fiction.name}' with ID '${fid}'`, err));
     return fiction;
   }
 }

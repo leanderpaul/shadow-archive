@@ -7,123 +7,22 @@ import { type Model, type Types } from 'mongoose';
 /**
  * Importing user defined packages
  */
+import { FictionGenre, FictionStatus, FictionTier, FictionType } from '@app/shared/constants';
+
 import { formatContent } from './fiction-chapter.schema';
-import { defaultOptionsPlugin } from '../database.utils';
+import { FictionSource, FictionSourceSchema } from './fiction-source.schema';
+import { FictionVolume, FictionVolumeSchema } from './fiction-volume.schema';
+import { defaultOptionsPlugin } from '../schema.utils';
 
 /**
  * Defining types
  */
-
-export enum FictionType {
-  WEBNOVEL = 1,
-  FANFICTION = 2,
-  ORIGINAL = 3,
-}
-
-export enum FictionGenre {
-  ACTION = 1,
-  ADULT = 2,
-  ADVENTURE = 3,
-  COMEDY = 4,
-  DRAMA = 5,
-  ECCHI = 6,
-  FANTASY = 7,
-  GENDER_BENDER = 8,
-  HAREM = 9,
-  HISTORICAL = 10,
-  HORROR = 11,
-  JOSEI = 12,
-  MARTIAL_ARTS = 13,
-  MATURE = 14,
-  MECHA = 15,
-  MYSTERY = 16,
-  PSYCHOLOGICAL = 17,
-  ROMANCE = 18,
-  SCHOOL_LIFE = 19,
-  SCI_FI = 20,
-  SEINEN = 21,
-  SHOUJO = 22,
-  SHOUJO_AI = 23,
-  SHOUNEN = 24,
-  SHOUNEN_AI = 25,
-  SLICE_OF_LIFE = 26,
-  SMUT = 27,
-  SPORTS = 28,
-  SUPERNATURAL = 29,
-  TRAGEDY = 30,
-  WUXIA = 31,
-  XIANXIA = 32,
-  XUANHUAN = 33,
-  YAOI = 34,
-  YURI = 35,
-}
-
-export enum FictionStatus {
-  COMPLETED = 1,
-  ONGOING = 2,
-  HIATUS = 3,
-}
-
-export enum FictionWebsite {
-  WEBNOVEL = 0,
-  BOXNOVEL = 1,
-  NOVELFULL = 2,
-  PATREON = 3,
-}
-
-export enum FictionTier {
-  FREE = 1,
-  PREMIUM = 2,
-  PRIVATE = 3,
-}
 
 export type FictionModel = Model<Fiction>;
 
 /**
  * Declaring the constants
  */
-
-export class FictionVolume {
-  /** Volume name */
-  @Prop({
-    type: 'string',
-    required: true,
-  })
-  name: string;
-
-  /** Count of chapters in this volume. -1 denotes all the chapters */
-  @Prop({
-    type: 'number',
-    required: true,
-    min: -1,
-    max: 5000,
-  })
-  chapterCount: number;
-}
-
-export class FictionSource {
-  /** Source fiction ID */
-  @Prop({
-    type: 'string',
-    required: true,
-  })
-  sfid: string;
-
-  /** Source website */
-  @Prop({
-    type: 'number',
-    enum: Object.values(FictionWebsite).filter(v => typeof v === 'number'),
-    required: true,
-  })
-  website: FictionWebsite;
-
-  /** Queries required to access the source fiction */
-  @Prop({
-    type: 'string',
-    minlength: 3,
-  })
-  query?: string;
-}
 
 /**
  * @class contains details about the fiction
@@ -232,13 +131,13 @@ export class Fiction {
 
   /** Volumes in this fiction */
   @Prop({
-    type: [SchemaFactory.createForClass(FictionVolume)],
+    type: [FictionVolumeSchema],
     default: void 0,
   })
   volumes?: FictionVolume[];
 
   @Prop({
-    type: [SchemaFactory.createForClass(FictionSource)],
+    type: [FictionSourceSchema],
     default: void 0,
   })
   sources: FictionSource[];

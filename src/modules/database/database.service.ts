@@ -8,10 +8,12 @@ import { Connection } from 'mongoose';
 /**
  * Importing user defined packages
  */
-import { Expense, type ExpenseModel } from './schemas/expense.schema';
-import { FictionChapter, type FictionChapterModel } from './schemas/fiction-chapter.schema';
-import { Fiction, type FictionModel } from './schemas/fiction.schema';
-import { Memoir, type MemoirModel } from './schemas/memoir.schema';
+import { ArchiveRole, IAMRole } from '@app/shared/constants';
+
+import { Expense, type ExpenseModel } from './schemas/chronicle/expense.schema';
+import { Memoir, type MemoirModel } from './schemas/chronicle/memoir.schema';
+import { FictionChapter, type FictionChapterModel } from './schemas/fiction/fiction-chapter.schema';
+import { Fiction, type FictionModel } from './schemas/fiction/fiction.schema';
 import { NativeUser, type NativeUserModel, OAuthUser, type OAuthUserModel, User, type UserModel } from './schemas/user.schema';
 
 /**
@@ -32,7 +34,8 @@ const users = [
     name: 'Shadow Apps Administrator',
     password: 'Password@123',
     verified: true,
-    admin: true,
+    iam: { role: IAMRole.ADMIN },
+    archive: { role: ArchiveRole.ADMIN },
   },
 ];
 
@@ -51,7 +54,7 @@ export class DatabaseService implements OnApplicationShutdown, OnModuleInit {
 
   async onModuleInit(): Promise<void> {
     for (const user of users) {
-      const userDoc = await this.userModel.findOne({ email: user.email });
+      const userDoc = await this.userModel.exists({ email: user.email });
       if (!userDoc) await this.nativeUserModel.create(user);
     }
   }

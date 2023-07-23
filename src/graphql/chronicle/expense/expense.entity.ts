@@ -8,7 +8,7 @@ import { type Types } from 'mongoose';
  * Importing user defined packages
  */
 import { Paginated } from '@app/graphql/common';
-import { Currency, ExpenseCategory, ExpenseVisibiltyLevel } from '@app/modules/database';
+import { Currency, ExpenseCategory, ExpenseVisibiltyLevel } from '@app/shared/constants';
 
 /**
  * Defining types

@@ -8,6 +8,7 @@ import { Module } from '@nestjs/common';
  */
 import { GraphQLModule, GraphQLService } from '@app/graphql/common';
 import { UserModule } from '@app/modules/user';
+import { IAMRole } from '@app/shared/constants';
 import { MigrationService } from '@app/shared/services';
 
 import { AdminResolver } from './admin.resolver';
@@ -29,6 +30,13 @@ export const adminResolvers = [AdminResolver];
 export class AdminModule {}
 
 @Module({
-  imports: [GraphQLModule.forRoot({ name: 'admin', include: [AdminModule] }), AdminModule],
+  imports: [
+    GraphQLModule.forRoot({
+      name: 'admin',
+      include: [AdminModule],
+      inspectionRole: ['iam', IAMRole.ADMIN],
+    }),
+    AdminModule,
+  ],
 })
 export class AdminGraphQLModule {}

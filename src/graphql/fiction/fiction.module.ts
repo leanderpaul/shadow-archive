@@ -7,6 +7,7 @@ import { Module } from '@nestjs/common';
  * Importing user defined packages
  */
 import { FictionModule } from '@app/modules/fiction';
+import { FictionRole } from '@app/shared/constants';
 
 import { FictionChapterResolver } from './fiction-chapter';
 import { FictionResolver } from './fiction.resolver';
@@ -27,6 +28,13 @@ import { GraphQLModule, GraphQLService } from '../common';
 class FictionTempModule {}
 
 @Module({
-  imports: [GraphQLModule.forRoot({ name: 'fiction', include: [FictionTempModule] }), FictionTempModule],
+  imports: [
+    GraphQLModule.forRoot({
+      name: 'fiction',
+      include: [FictionTempModule],
+      inspectionRole: ['fiction', FictionRole.ADMIN],
+    }),
+    FictionTempModule,
+  ],
 })
 export class FictionGraphQLModule {}

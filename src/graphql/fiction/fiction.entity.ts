@@ -8,7 +8,7 @@ import { Types } from 'mongoose';
  * Importing user defined packages
  */
 import { Paginated } from '@app/graphql/common';
-import { FictionGenre, FictionStatus, FictionType, FictionWebsite } from '@app/modules/database';
+import { FictionGenre, FictionStatus, FictionType, FictionWebsite } from '@app/shared/constants';
 
 import { FictionChapter } from './fiction-chapter';
 

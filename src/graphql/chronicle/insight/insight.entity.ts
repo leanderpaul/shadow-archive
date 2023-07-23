@@ -6,7 +6,7 @@ import { Field, Float, Int, ObjectType } from '@nestjs/graphql';
 /**
  * Importing user defined packages
  */
-import { ExpenseCategory } from '@app/modules/database';
+import { ExpenseCategory } from '@app/shared/constants';
 
 /**
  * Defining types

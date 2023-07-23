@@ -48,7 +48,7 @@ export class FictionChapterService {
     if (input.index) await this.fictionChapterModel.updateMany({ fid, index: { $gte: input.index } }, { $inc: { index: 1 } });
     const index = input.index ?? fiction.chapterCount + 1;
     const chapter = await this.fictionChapterModel.create({ ...input, fid, index });
-    this.fictionModel
+    await this.fictionModel
       .updateOne({ fid }, { $inc: { chapterCount: 1 }, $set: { updatedAt: new Date() } })
       .catch(err => this.logger.error(err, { msg: `Error while adding chapter '${index}' to novel '${fiction.name}'` }));
     return chapter;
@@ -81,7 +81,7 @@ export class FictionChapterService {
     const fiction = await this.fictionModel.findOneAndUpdate({ fid }, { $inc: { chapterCount: -1 } });
     if (!fiction) throw new NeverError('Fiction not found');
     if (fiction.chapterCount >= chapter.index) {
-      this.fictionChapterModel
+      await this.fictionChapterModel
         .updateMany({ fid, index: { $gte: chapter.index } }, { $inc: { index: -1 } })
         .catch(err => this.logger.error(err, { msg: `Error while deleting chapter '${index}' from novel '${fiction.name}'` }));
     }

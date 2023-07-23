@@ -5,7 +5,7 @@
 /**
  * Importing user defined packages
  */
-import { Currency, ExpenseVisibiltyLevel } from '@app/modules/database';
+import { Currency, ExpenseVisibiltyLevel } from '@app/shared/constants';
 import { GraphQLModule, ShadowArchive } from '@tests/utils';
 
 /**

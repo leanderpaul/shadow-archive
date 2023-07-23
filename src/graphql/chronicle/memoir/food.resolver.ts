@@ -7,7 +7,7 @@ import { Args, Mutation, Resolver } from '@nestjs/graphql';
  * Importing user defined packages
  */
 import { MemoirService } from '@app/modules/chronicle';
-import { AuthType, UseAuth } from '@app/shared/decorators';
+import { UseAuthGuard } from '@app/shared/decorators';
 
 import { AddFoodArgs, DeleteArgs, UpdateFoodArgs } from './dto';
 import { Food } from './memoir.entity';
@@ -21,7 +21,7 @@ import { Food } from './memoir.entity';
  */
 
 @Resolver()
-@UseAuth(AuthType.VERIFIED)
+@UseAuthGuard()
 export class FoodResolver {
   constructor(private readonly memoirService: MemoirService) {}
 

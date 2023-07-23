@@ -9,6 +9,7 @@ import { Module } from '@nestjs/common';
 import { GraphQLModule, GraphQLService } from '@app/graphql/common';
 import { AuthModule } from '@app/modules/auth';
 import { UserModule } from '@app/modules/user';
+import { IAMRole } from '@app/shared/constants';
 
 import { AccountsResolver } from './accounts.resolver';
 
@@ -29,6 +30,14 @@ export const accountsResolvers = [AccountsResolver];
 class AccountsModule {}
 
 @Module({
-  imports: [GraphQLModule.forRoot({ name: 'accounts', include: [AccountsModule], disableCSRFProtection: true }), AccountsModule],
+  imports: [
+    GraphQLModule.forRoot({
+      name: 'accounts',
+      include: [AccountsModule],
+      inspectionRole: ['iam', IAMRole.ADMIN],
+      disableCSRFProtection: true,
+    }),
+    AccountsModule,
+  ],
 })
 export class AccountsGraphQLModule {}

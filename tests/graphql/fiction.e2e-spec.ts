@@ -18,7 +18,7 @@ import { GraphQLModule, ShadowArchive } from '@tests/utils';
 const archive = new ShadowArchive(GraphQLModule.FICTION);
 const seeder = archive.getSeeder();
 
-seeder.addUser('user-1', { email: 'fiction-tester-one@shadow-apps.com', name: 'Expense Tester One', admin: true });
+seeder.addUser('user-1', { email: 'fiction-tester-one@shadow-apps.com', name: 'Expense Tester One' });
 
 beforeAll(() => archive.setup(), archive.getTimeout());
 

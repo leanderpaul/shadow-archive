@@ -7,8 +7,9 @@ import { default as sagus } from 'sagus';
 /**
  * Importing user defined packages
  */
-import { DatabaseService, type ID, type NativeUser, type OAuthUser, type User, UserActivityType, type UserSession, UserVariant } from '@app/modules/database';
+import { DatabaseService, type ID, type NativeUser, type OAuthUser, type User, type UserSession, UserVariant } from '@app/modules/database';
 import { MailService, MailType } from '@app/providers/mail';
+import { UserActivityType } from '@app/shared/constants';
 import { AppError, ErrorCode, NeverError } from '@app/shared/errors';
 import { type Projection } from '@app/shared/interfaces';
 import { Context } from '@app/shared/services';
@@ -17,18 +18,18 @@ import { Context } from '@app/shared/services';
  * Defining types
  */
 
-export type UserInfo = Pick<User, 'email' | 'name' | 'admin' | 'sessions' | 'uid' | 'verified' | 'type'>;
+export type UserInfo = Pick<User, 'email' | 'name' | 'sessions' | 'uid' | 'verified' | 'type'>;
 
-export type CreateNativeUser = Pick<NativeUser, 'email' | 'name' | 'password' | 'admin'> & { verified?: boolean };
+export type CreateNativeUser = Pick<NativeUser, 'email' | 'name' | 'password'> & { verified?: boolean };
 
-export type CreateOAuthUser = Pick<OAuthUser, 'email' | 'name' | 'spuid' | 'refreshToken' | 'admin'> & { verified?: boolean };
+export type CreateOAuthUser = Pick<OAuthUser, 'email' | 'name' | 'spuid' | 'refreshToken'> & { verified?: boolean };
 
 export type CreateUserSession = Pick<UserSession, 'id' | 'browser' | 'device' | 'os'>;
 
 /**
  * Declaring the constants
  */
-const defaultUserProjection: Projection<User> = { email: 1, name: 1, admin: 1, sessions: 1, verified: 1 };
+const defaultUserProjection: Projection<User> = { email: 1, name: 1, sessions: 1, verified: 1 };
 
 @Injectable()
 export class UserService {
