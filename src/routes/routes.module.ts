@@ -8,6 +8,7 @@ import { Module } from '@nestjs/common';
  */
 import { DevToolsModule } from './dev-tools';
 import { HealthModule } from './health';
+import { RESTAPIModule } from './rest-api';
 
 /**
  * Defining types
@@ -18,6 +19,6 @@ import { HealthModule } from './health';
  */
 
 @Module({
-  imports: [HealthModule, DevToolsModule],
+  imports: [HealthModule, DevToolsModule, RESTAPIModule],
 })
 export class RoutesModule {}
