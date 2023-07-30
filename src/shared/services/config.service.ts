@@ -1,6 +1,7 @@
 /**
  * Importing npm packages
  */
+import os from 'os';
 
 /**
  * Importing user defined packages
@@ -37,6 +38,8 @@ export interface ConfigRecords {
   /** AWS configs */
   'aws.region': string;
   'aws.cloudwatch.log-group': string;
+  'aws.cloudwatch.log-stream': string;
+  'aws.cloudwatch.upload-rate': number;
 
   /** Authentication configs */
   'cookie.name': string;
@@ -90,7 +93,7 @@ class ConfigService {
   }
 
   constructor() {
-    const cache = new Map<string, any>();
+    const cache = new Map<keyof ConfigRecords, any>();
     this.cache = cache;
 
     const nodeEnv = ConfigService.get('NODE_ENV', 'development', false, value => validNodeEnvs.includes(value));
@@ -119,6 +122,11 @@ class ConfigService {
     cache.set('aws.region', awsRegion);
     const cloudwatchLogGroup = ConfigService.get('AWS_CLOUDWATCH_LOG_GROUP', 'shadow-archive');
     cache.set('aws.cloudwatch.log-group', cloudwatchLogGroup);
+    const defaultLogStream = os.networkInterfaces().eth0?.find(info => info.family === 'IPv4')?.address ?? 'unknown-ip';
+    const cloudwatchLogStream = ConfigService.get('AWS_CLOUDWATCH_LOG_STREAM', defaultLogStream);
+    cache.set('aws.cloudwatch.log-stream', cloudwatchLogStream);
+    const cloudwatchUploadRate = ConfigService.getTyped('AWS_CLOUDWATCH_UPLOAD_RATE', 'number', 2000);
+    cache.set('aws.cloudwatch.upload-rate', cloudwatchUploadRate);
 
     const cookieName = ConfigService.get('COOKIE_NAME', 'sasid');
     cache.set('cookie.name', cookieName);

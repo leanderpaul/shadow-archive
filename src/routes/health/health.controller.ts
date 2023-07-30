@@ -9,8 +9,6 @@ import { type FastifyReply } from 'fastify';
  * Importing user defined packages
  */
 
-import { Context } from '@app/shared/services';
-
 /**
  * Defining types
  */
@@ -26,7 +24,6 @@ export class HealthController {
   @Get()
   @HealthCheck()
   async check(@Res() res: FastifyReply): Promise<FastifyReply> {
-    Context.set('DISABLE_REQUEST_LOGGING', true);
     try {
       const result = await this.health.check([
         () => this.memory.checkRSS('memory_rss', 150 * 1024 * 1024),
