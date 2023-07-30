@@ -3,7 +3,7 @@
  */
 import fs from 'fs';
 
-import { type LoggerService, type OnApplicationShutdown } from '@nestjs/common';
+import { type LoggerService } from '@nestjs/common';
 import { type FastifyReply, type FastifyRequest } from 'fastify';
 import { type Logger as WinstonLogger, createLogger as createWinstonLogger, format, transports } from 'winston';
 
@@ -12,7 +12,7 @@ import { type Logger as WinstonLogger, createLogger as createWinstonLogger, form
  */
 import { Config, Context } from '@app/shared/services/internal';
 
-import { CloudWatchLogger } from './cloudwatch.logger';
+import { CloudWatchTransport } from './cloudwatch.logger';
 import { consoleFormat, contextFormat } from './formats.logger';
 
 /**
@@ -59,9 +59,8 @@ function getFileIndex(filename: string): number {
   return parseInt(num);
 }
 
-export class Logger implements LoggerService, OnApplicationShutdown {
+export class Logger implements LoggerService {
   private static instance: WinstonLogger;
-  private static cloudwatch?: CloudWatchLogger;
 
   private readonly instance;
 
@@ -93,10 +92,8 @@ export class Logger implements LoggerService, OnApplicationShutdown {
       logger.add(new transports.Console({ format: consoleLogFormat }));
     }
 
-    if (nodeEnv === 'production') {
-      this.cloudwatch = new CloudWatchLogger({ format: logFormat });
-      logger.add(this.cloudwatch.getTransport());
-    } else {
+    if (nodeEnv === 'production') logger.add(new CloudWatchTransport({ format: logFormat }));
+    else {
       const logDir = Config.get('log.dir');
       try {
         fs.accessSync(logDir);
@@ -161,13 +158,7 @@ export class Logger implements LoggerService, OnApplicationShutdown {
   }
 
   static close(): void {
-    this.cloudwatch?.close();
     this.instance.close();
-  }
-
-  onApplicationShutdown(): void {
-    this.log(`Application shutting down`);
-    return Logger.close();
   }
 
   log(message: string, label?: string): void {

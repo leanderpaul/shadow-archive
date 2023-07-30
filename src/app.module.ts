@@ -1,7 +1,7 @@
 /**
  * Importing npm packages
  */
-import { Module, type OnModuleInit } from '@nestjs/common';
+import { Module, type OnApplicationShutdown, type OnModuleInit } from '@nestjs/common';
 import { APP_FILTER } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
 
@@ -11,6 +11,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 
 import { GraphQLModule } from './graphql';
 import { AuthService } from './modules/auth';
+import { Logger } from './providers/logger';
 import { RoutesModule } from './routes';
 import { ErrorFilter } from './shared/errors';
 import { Middleware } from './shared/services';
@@ -29,8 +30,12 @@ const RateLimiterModule = ThrottlerModule.forRoot({ limit: 10, ttl: 30 });
   imports: [RateLimiterModule, RoutesModule, GraphQLModule],
   providers: [GlobalErrorFilter],
 })
-export class AppModule implements OnModuleInit {
+export class AppModule implements OnModuleInit, OnApplicationShutdown {
   onModuleInit(): void {
     Middleware.add({ handler: (_req, _res, app) => app.get(AuthService).authenticate() });
+  }
+
+  onApplicationShutdown(): void {
+    Logger.close();
   }
 }

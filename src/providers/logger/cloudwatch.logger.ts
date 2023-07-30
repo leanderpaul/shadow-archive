@@ -1,11 +1,9 @@
 /**
  * Importing npm packages
  */
-import os from 'os';
-
 import { CloudWatchLogs } from '@aws-sdk/client-cloudwatch-logs';
-import WinstonCloudWatch from 'winston-cloudwatch';
-import { type TransportStreamOptions } from 'winston-transport';
+import stringify from 'fast-safe-stringify';
+import Transport from 'winston-transport';
 
 /**
  * Importing user defined packages
@@ -16,36 +14,60 @@ import { Config } from '@app/shared/services/internal';
  * Defining types
  */
 
+interface LogEvent {
+  timestamp: number;
+  message: string;
+}
+
 /**
  * Declaring the constants
  */
+export class CloudWatchTransport extends Transport {
+  private readonly cloudWatchLogs = new CloudWatchLogs({ region: Config.get('aws.region') });
+  private readonly logGroupName = Config.get('aws.cloudwatch.log-group');
+  private readonly logStreamName = Config.get('aws.cloudwatch.log-stream');
+  private readonly uploadRate = Config.get('aws.cloudwatch.upload-rate');
 
-export class CloudWatchLogger {
-  private readonly transport;
+  private timeout: NodeJS.Timeout | null = null;
+  private logEvents: LogEvent[] = [];
+  private isStreamPresent = false;
 
-  constructor(opts: TransportStreamOptions = {}) {
-    const networkInterfaceInfo = os.networkInterfaces().eth0?.find(info => info.family === 'IPv4');
-    this.transport = new WinstonCloudWatch({
-      ...opts,
-      errorHandler: this.handleError,
-      cloudWatchLogs: new CloudWatchLogs({ region: Config.get('aws.region') }),
-      jsonMessage: true,
-      logGroupName: Config.get('aws.cloudwatch.log-group'),
-      logStreamName: networkInterfaceInfo?.address || 'unknown',
-      name: Config.get('app.name'),
-      retentionInDays: 7,
-    });
+  private add(log: any): void {
+    this.logEvents.push({ timestamp: Date.now(), message: stringify(log) });
+    if (!this.timeout) this.timeout = setTimeout(() => this.flush(), this.uploadRate);
   }
 
-  private handleError(err: Error): void {
-    console.error('Error flushing cloudwatch logs', err); // eslint-disable-line no-console
+  private async checkStream(): Promise<void> {
+    try {
+      const streams = await this.cloudWatchLogs.describeLogStreams({ logGroupName: this.logGroupName });
+      const streamExists = streams.logStreams?.some(stream => stream.logStreamName === this.logStreamName) ?? false;
+      if (!streamExists) await this.cloudWatchLogs.createLogStream({ logGroupName: this.logGroupName, logStreamName: this.logStreamName });
+      this.isStreamPresent = true;
+    } catch (err) {
+      console.error('Error checking log stream', err); // eslint-disable-line no-console
+    }
   }
 
-  getTransport(): WinstonCloudWatch {
-    return this.transport;
+  private async flush(): Promise<void> {
+    if (this.logEvents.length === 0) return;
+    if (this.timeout) clearTimeout(this.timeout);
+    this.timeout = null;
+
+    const logEvents = this.logEvents;
+    this.logEvents = [];
+    if (!this.isStreamPresent) await this.checkStream();
+    await this.cloudWatchLogs
+      .putLogEvents({ logEvents, logGroupName: this.logGroupName, logStreamName: this.logStreamName })
+      .catch(err => console.error('Error flushing cloudwatch logs', err)); // eslint-disable-line no-console
   }
 
-  close(): void {
-    this.transport.kthxbye(this.handleError);
+  override log(info: object, next: () => void): void {
+    setImmediate(() => this.emit('logged', info));
+    this.add(info);
+    next();
+  }
+
+  override close(): Promise<void> {
+    return this.flush();
   }
 }
