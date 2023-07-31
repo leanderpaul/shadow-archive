@@ -8,6 +8,7 @@ import { type FastifyReply } from 'fastify';
 /**
  * Importing user defined packages
  */
+import { Logger } from '@app/providers/logger';
 
 /**
  * Defining types
@@ -19,6 +20,8 @@ import { type FastifyReply } from 'fastify';
 
 @Controller('health')
 export class HealthController {
+  private readonly logger = Logger.getLogger(HealthController.name);
+
   constructor(private readonly health: HealthCheckService, private readonly memory: MemoryHealthIndicator, private readonly mongoose: MongooseHealthIndicator) {}
 
   @Get()
@@ -32,7 +35,10 @@ export class HealthController {
       ]);
       return res.send(result);
     } catch (err: unknown) {
-      if (err instanceof ServiceUnavailableException) return res.status(err.getStatus()).send(err.getResponse());
+      if (err instanceof ServiceUnavailableException) {
+        this.logger.error('Server health degraded', { health: err.getResponse() });
+        return res.status(err.getStatus()).send(err.getResponse());
+      }
       throw err;
     }
   }
