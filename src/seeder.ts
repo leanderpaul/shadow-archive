@@ -1,91 +1,69 @@
 /**
  * Importing npm packages
  */
-import { faker } from '@faker-js/faker';
 import { NestFactory } from '@nestjs/core';
 import inquirer from 'inquirer';
-import moment from 'moment';
 
 /**
  * Importing user defined packages
  */
-import { DatabaseModule, DatabaseService, type User } from './modules/database';
-import { Logger } from './providers/logger';
-import { Currency, ExpenseCategory, ExpenseVisibiltyLevel } from './shared/constants';
+import { DatabaseService, UserVariant } from './modules/database';
+import { SeederModule, SeederService } from './modules/seeder';
 
 /**
  * Defining types
  */
+interface SeedOptions {
+  model: string;
+  count: number;
+  email?: string;
+}
 
 /**
  * Declaring the constants
  */
-const logger = Logger.getLogger('Seeder');
-const optional = (getter: () => any) => (faker.datatype.boolean() ? getter() : undefined);
-const minDate = parseInt(moment().subtract(1, 'year').format('YYMMDD'));
-const maxDate = parseInt(moment().format('YYMMDD'));
+const log = console.log; // eslint-disable-line no-console
+const error = console.error; // eslint-disable-line no-console
 
-function generateDocument(model: string, user?: User | null): Record<string, any> {
-  switch (model) {
-    case 'User':
+async function seedModel(options: SeedOptions, seederService: SeederService): Promise<void> {
+  switch (options.model) {
     case 'NativeUser':
-    case 'OAuthUser': {
-      const firstName = faker.person.firstName();
-      const lastName = faker.person.lastName();
-      return {
-        name: `${firstName} ${lastName}`,
-        email: faker.internet.email({ firstName, lastName, provider: 'seeder.shadow-apps.com' }),
-        verified: faker.datatype.boolean(),
-        password: 'Password@123',
-        spuid: faker.string.uuid(),
-        refreshToken: faker.string.uuid(),
-      };
-    }
+      return seederService
+        .seedUsers(UserVariant.NATIVE, options.count)
+        .then(users => log(`${users.length} native users seeded successfully`))
+        .catch(err => error(err));
+    case 'OAuthUser':
+      return seederService
+        .seedUsers(UserVariant.OAUTH, options.count)
+        .then(users => log(`${users.length} oauth users seeded successfully`))
+        .catch(err => error(err));
     case 'Expense': {
-      if (!user) throw new Error('User is required to generate Expense');
-      return {
-        uid: user?.uid,
-        bid: optional(faker.string.uuid),
-        level: faker.helpers.enumValue(ExpenseVisibiltyLevel),
-        category: faker.helpers.enumValue(ExpenseCategory),
-        store: faker.helpers.arrayElement(['LIDL', 'Tesco', 'Walmart', 'Sainsburg', 'ALDI', 'Tariq Meats', 'Asda', 'Morrisons', 'Waitrose', 'Iceland']),
-        storeLoc: optional(faker.location.city),
-        date: faker.number.int({ min: minDate, max: maxDate }),
-        time: optional(() => faker.number.int({ min: 0, max: 2359 })),
-        currency: faker.helpers.enumValue(Currency),
-        paymentMethod: faker.helpers.arrayElement(['Cash', 'Card', 'UPI', 'Net Banking', undefined]),
-        desc: optional(faker.lorem.sentence),
-        items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, () => ({
-          name: faker.commerce.productName(),
-          qty: optional(() => faker.number.int({ min: 1, max: 10 })),
-          price: faker.number.int({ min: 10, max: 2000 }),
-        })),
-      };
+      const email = options.email ?? 'admin@shadow-apps.com';
+      return seederService
+        .seedExpenses(email, options.count)
+        .then(expenses => log(`${expenses.length} expenses seeded successfully`))
+        .catch(err => error(err));
     }
-    default: {
-      throw new Error(`Model '${model}' not found`);
-    }
+    default:
+      return Promise.reject(new Error(`Seeding for model '${options.model}' not yet implemented`));
   }
 }
 
 async function seedDatabase(): Promise<void> {
-  const app = await NestFactory.create(DatabaseModule, { logger: ['error', 'warn'] });
+  const app = await NestFactory.create(SeederModule, { logger: ['error', 'warn'] });
   await app.init();
 
+  const seederService = app.get(SeederService);
   const databaseService = app.get(DatabaseService);
   const connection = databaseService.getConnection();
-  const { model, count, email } = await inquirer.prompt([
+  const options: SeedOptions = await inquirer.prompt([
     { name: 'model', message: 'Models to seed', type: 'list', choices: connection.modelNames().filter(name => name !== 'User') },
     { name: 'count', message: 'Number of documents to seed', type: 'number', default: 100 },
     { name: 'email', message: 'User email address', type: 'string', when: answers => !answers.model.includes('User'), default: 'admin@shadow-apps.com' },
   ]);
 
-  const user = email ? await databaseService.getUserModel().findOne({ email }).lean() : null;
-  const documents = Array.from({ length: count }, () => generateDocument(model, user));
-  const result = await connection.model(model).insertMany(documents, { ordered: false, throwOnValidationError: true });
-
+  await seedModel(options, seederService);
   app.close();
-  logger.info(`Seeded ${result.length} documents in model '${model}'`);
 }
 
 seedDatabase();

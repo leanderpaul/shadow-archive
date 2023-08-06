@@ -2,6 +2,7 @@
  * Importing npm packages
  */
 import { MongooseModule, Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import moment from 'moment';
 import { type Document, type Model, type Query, type Types } from 'mongoose';
 
 /**
@@ -81,8 +82,9 @@ export class Expense {
   @Prop({
     type: 'number',
     required: [true, 'Date is required'],
-    min: [220101, `should be greater than 220101 (2022-01-01)`],
+    min: [200101, `should be greater than 200101 (2020-01-01)`],
     max: [991231, `should be less than 991231 (2099-12-31)`],
+    validate: [(date: number) => moment(date, 'YYMMDD').isValid(), "should be a valid date of format 'YYMMDD'"],
   })
   date: number;
 
@@ -91,6 +93,7 @@ export class Expense {
     type: 'number',
     min: [0, 'should be grater than 0 (00:00)'],
     max: [2359, 'should be less than 2359 (23:59)'],
+    validate: [(time: number) => time % 100 < 60, "should be a valid time of format 'HHmm'"],
   })
   time?: number;
 

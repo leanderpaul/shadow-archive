@@ -27,16 +27,16 @@ export class ActivityResolver {
 
   @Mutation(() => Activity)
   async addActivityRecord(@Args() args: AddActivityArgs): Promise<Activity> {
-    return await this.memoirService.addMemoirField(args.date, 'activities', args.input);
+    return await this.memoirService.addMemoirField(null, args.date, 'activities', args.input);
   }
 
   @Mutation(() => Activity)
   async updateActivityRecord(@Args() args: UpdateActivityArgs): Promise<Activity> {
-    return await this.memoirService.updateMemoirField(args.date, 'activities', args.index, args.update);
+    return await this.memoirService.updateMemoirField(null, args.date, 'activities', args.index, args.update);
   }
 
   @Mutation(() => Activity)
   async deleteActivityRecord(@Args() args: DeleteArgs): Promise<Activity> {
-    return await this.memoirService.deleteMemoirField(args.date, 'activities', args.index);
+    return await this.memoirService.deleteMemoirField(null, args.date, 'activities', args.index);
   }
 }

@@ -27,16 +27,16 @@ export class ExerciseResolver {
 
   @Mutation(() => Exercise)
   async addExerciseRecord(@Args() args: AddExerciseArgs): Promise<Exercise> {
-    return await this.memoirService.addMemoirField(args.date, 'exercises', args.input);
+    return await this.memoirService.addMemoirField(null, args.date, 'exercises', args.input);
   }
 
   @Mutation(() => Exercise)
   async updateExerciseRecord(@Args() args: UpdateExerciseArgs): Promise<Exercise> {
-    return await this.memoirService.updateMemoirField(args.date, 'exercises', args.index, args.update);
+    return await this.memoirService.updateMemoirField(null, args.date, 'exercises', args.index, args.update);
   }
 
   @Mutation(() => Exercise)
   async deleteExerciseRecord(@Args() args: DeleteArgs): Promise<Exercise> {
-    return await this.memoirService.deleteMemoirField(args.date, 'exercises', args.index);
+    return await this.memoirService.deleteMemoirField(null, args.date, 'exercises', args.index);
   }
 }

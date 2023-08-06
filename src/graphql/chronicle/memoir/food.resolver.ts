@@ -27,16 +27,16 @@ export class FoodResolver {
 
   @Mutation(() => Food)
   async addFoodRecord(@Args() args: AddFoodArgs): Promise<Food> {
-    return await this.memoirService.addMemoirField(args.date, 'foods', args.input);
+    return await this.memoirService.addMemoirField(null, args.date, 'foods', args.input);
   }
 
   @Mutation(() => Food)
   async updateFoodRecord(@Args() args: UpdateFoodArgs): Promise<Food> {
-    return await this.memoirService.updateMemoirField(args.date, 'foods', args.index, args.update);
+    return await this.memoirService.updateMemoirField(null, args.date, 'foods', args.index, args.update);
   }
 
   @Mutation(() => Food)
   async deleteFoodRecord(@Args() args: DeleteArgs): Promise<Food> {
-    return await this.memoirService.deleteMemoirField(args.date, 'foods', args.index);
+    return await this.memoirService.deleteMemoirField(null, args.date, 'foods', args.index);
   }
 }

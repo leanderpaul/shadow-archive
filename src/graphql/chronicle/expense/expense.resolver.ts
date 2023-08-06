@@ -30,29 +30,29 @@ export class ExpenseResolver {
   @Query(() => Expense, { name: 'expense', nullable: true })
   getExpense(@Info() info: GraphQLResolveInfo, @Args() args: GetExpenseArgs): Promise<Expense | null> {
     const projection = this.graphqlService.getProjection<Expense>(info);
-    return this.expenseService.getExpense(args.eid, projection);
+    return this.expenseService.getExpense(null, args.eid, projection);
   }
 
   @Query(() => ExpenseConnection, { name: 'expenses' })
   getExpenseConnection(@Info() info: GraphQLResolveInfo, @Args() args: SearchExpensesArgs): Promise<ExpenseConnection> {
     return this.graphqlService.getPaginationResult<Expense, ExpenseConnection>(info, args.page, {
-      getCount: () => this.expenseService.getExpensesCount(args.filter),
-      getItems: projection => this.expenseService.getExpenseList(args, projection),
+      getCount: () => this.expenseService.getExpensesCount(null, args.filter),
+      getItems: projection => this.expenseService.getExpenseList(null, args, projection),
     });
   }
 
   @Mutation(() => Expense)
   addExpense(@Args('input') input: AddExpenseInput): Promise<Expense> {
-    return this.expenseService.addExpense(input);
+    return this.expenseService.addExpense(null, input);
   }
 
   @Mutation(() => Expense)
   updateExpense(@Args() args: UpdateExpenseArgs): Promise<Expense> {
-    return this.expenseService.updateExpense(args.eid, args.update);
+    return this.expenseService.updateExpense(null, args.eid, args.update);
   }
 
   @Mutation(() => Expense)
   removeExpense(@Args() args: GetExpenseArgs): Promise<Expense> {
-    return this.expenseService.removeExpense(args.eid);
+    return this.expenseService.removeExpense(null, args.eid);
   }
 }
