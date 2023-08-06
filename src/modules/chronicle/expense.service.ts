@@ -34,6 +34,8 @@ export interface ExpenseQuery {
   page: PageCursor;
 }
 
+type UID = ID | null;
+
 /**
  * Declaring the constants
  */
@@ -54,8 +56,8 @@ export class ExpenseService {
     return items.reduce((acc, item) => acc + Math.round(item.price * (item.qty ?? 1)), 0);
   }
 
-  private getExpensesQuery<T>(query?: ExpenseFilter, projection?: Projection<Expense> | T[]): QueryWithHelpers<Expense[], Expense> {
-    const { uid } = Context.getCurrentUser(true);
+  private getExpensesQuery<T>(uid: UID, query?: ExpenseFilter, projection?: Projection<Expense> | T[]): QueryWithHelpers<Expense[], Expense> {
+    if (!uid) uid = Context.getCurrentUser(true).uid;
     const expenseQuery = this.expenseModel.find({ uid }, projection);
     if (query?.currency) expenseQuery.where('currency', query.currency);
     if (query?.category) expenseQuery.where('category', query.category);
@@ -67,10 +69,10 @@ export class ExpenseService {
     return expenseQuery;
   }
 
-  async getExpense<T extends keyof Omit<Expense, 'uid' | 'eid'>>(eid: ID, projection?: T[]): Promise<Pick<Expense, 'uid' | 'eid' | T> | null>;
-  async getExpense(eid: ID, projection?: Projection<Expense>): Promise<Expense | null>;
-  async getExpense<T>(eid: ID, projection?: Projection<Expense> | T[]): Promise<Expense | null> {
-    const { uid } = Context.getCurrentUser(true);
+  async getExpense<T extends keyof Omit<Expense, 'uid' | 'eid'>>(uid: UID, eid: ID, projection?: T[]): Promise<Pick<Expense, 'uid' | 'eid' | T> | null>;
+  async getExpense(uid: UID, eid: ID, projection?: Projection<Expense>): Promise<Expense | null>;
+  async getExpense<T>(uid: UID, eid: ID, projection?: Projection<Expense> | T[]): Promise<Expense | null> {
+    if (!uid) uid = Context.getCurrentUser(true).uid;
     if (typeof eid === 'string') {
       const id = Parser.toObjectID(eid);
       if (!id) return null;
@@ -79,18 +81,18 @@ export class ExpenseService {
     return await this.expenseModel.findOne({ uid, eid }, projection).lean();
   }
 
-  async getExpenseList<T extends keyof Omit<Expense, 'uid' | 'eid'>>(query: ExpenseQuery, projection?: T[]): Promise<Pick<Expense, 'uid' | 'eid' | T>[]>;
-  async getExpenseList(query: ExpenseQuery, projection?: Projection<Expense>): Promise<Expense[]>;
-  async getExpenseList<T>(query: ExpenseQuery, projection?: Projection<Expense> | T[]): Promise<Expense[]> {
-    return await this.getExpensesQuery(query.filter, projection).sort({ date: query.sortOrder, time: query.sortOrder }).skip(query.page.offset).limit(query.page.limit).lean();
+  async getExpenseList<T extends keyof Omit<Expense, 'uid' | 'eid'>>(uid: UID, query: ExpenseQuery, projection?: T[]): Promise<Pick<Expense, 'uid' | 'eid' | T>[]>;
+  async getExpenseList(uid: UID, query: ExpenseQuery, projection?: Projection<Expense>): Promise<Expense[]>;
+  async getExpenseList<T>(uid: UID, query: ExpenseQuery, projection?: Projection<Expense> | T[]): Promise<Expense[]> {
+    return await this.getExpensesQuery(uid, query.filter, projection).sort({ date: query.sortOrder, time: query.sortOrder }).skip(query.page.offset).limit(query.page.limit).lean();
   }
 
-  async getExpensesCount(filter?: ExpenseFilter): Promise<number> {
-    return await this.getExpensesQuery(filter).countDocuments();
+  async getExpensesCount(uid: UID, filter?: ExpenseFilter): Promise<number> {
+    return await this.getExpensesQuery(uid, filter).countDocuments();
   }
 
-  async addExpense(input: Omit<Expense, 'eid' | 'uid' | 'total'>): Promise<Expense> {
-    const { uid } = Context.getCurrentUser(true);
+  async addExpense(uid: UID, input: Omit<Expense, 'eid' | 'uid' | 'total'>): Promise<Expense> {
+    if (!uid) uid = Context.getCurrentUser(true).uid;
     const total = this.calculateTotal(input.items);
     const expense = await this.expenseModel.create({ uid, ...input, total });
     await this.userModel
@@ -99,9 +101,9 @@ export class ExpenseService {
     return expense;
   }
 
-  async updateExpense(eid: ID, update: Partial<Omit<Expense, 'eid' | 'uid' | 'total'>>): Promise<Expense> {
+  async updateExpense(uid: UID, eid: ID, update: Partial<Omit<Expense, 'eid' | 'uid' | 'total'>>): Promise<Expense> {
+    if (!uid) uid = Context.getCurrentUser(true).uid;
     if (typeof eid === 'string') eid = Parser.toObjectID(eid, true);
-    const { uid } = Context.getCurrentUser(true);
     const expense = await this.expenseModel.findOne({ uid, eid }).lean();
     if (!expense) throw new AppError(ErrorCode.R001);
     const query = this.expenseModel.findOneAndUpdate({ uid, eid }, {});
@@ -127,9 +129,9 @@ export class ExpenseService {
     return updatedExpense;
   }
 
-  async removeExpense(eid: ID): Promise<Expense> {
+  async removeExpense(uid: UID, eid: ID): Promise<Expense> {
+    if (!uid) uid = Context.getCurrentUser(true).uid;
     if (typeof eid === 'string') eid = Parser.toObjectID(eid, true);
-    const { uid } = Context.getCurrentUser(true);
     const expense = await this.expenseModel.findOneAndDelete({ uid, eid }).lean();
     if (!expense) throw new AppError(ErrorCode.R001);
     await this.userModel
