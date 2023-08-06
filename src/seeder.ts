@@ -43,11 +43,6 @@ function generateDocument(model: string, user?: User | null): Record<string, any
     }
     case 'Expense': {
       if (!user) throw new Error('User is required to generate Expense');
-      const items = Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, () => ({
-        name: faker.commerce.productName(),
-        qty: optional(() => faker.number.int({ min: 1, max: 10 })),
-        price: faker.number.int({ min: 10, max: 2000 }),
-      }));
       return {
         uid: user?.uid,
         bid: optional(faker.string.uuid),
@@ -60,8 +55,11 @@ function generateDocument(model: string, user?: User | null): Record<string, any
         currency: faker.helpers.enumValue(Currency),
         paymentMethod: faker.helpers.arrayElement(['Cash', 'Card', 'UPI', 'Net Banking', undefined]),
         desc: optional(faker.lorem.sentence),
-        items,
-        total: items.reduce((total, item) => total + Math.round(item.price * (item.qty ?? 1)), 0),
+        items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, () => ({
+          name: faker.commerce.productName(),
+          qty: optional(() => faker.number.int({ min: 1, max: 10 })),
+          price: faker.number.int({ min: 10, max: 2000 }),
+        })),
       };
     }
     default: {
@@ -84,10 +82,10 @@ async function seedDatabase(): Promise<void> {
 
   const user = email ? await databaseService.getUserModel().findOne({ email }).lean() : null;
   const documents = Array.from({ length: count }, () => generateDocument(model, user));
-  await connection.model(model).insertMany(documents, { ordered: false, throwOnValidationError: true });
+  const result = await connection.model(model).insertMany(documents, { ordered: false, throwOnValidationError: true });
 
   app.close();
-  logger.info(`Seeded ${count} documents in model '${model}'`);
+  logger.info(`Seeded ${result.length} documents in model '${model}'`);
 }
 
 seedDatabase();
