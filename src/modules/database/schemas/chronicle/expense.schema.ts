@@ -2,7 +2,7 @@
  * Importing npm packages
  */
 import { MongooseModule, Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { type Model, type Types } from 'mongoose';
+import { type Document, type Model, type Query, type Types } from 'mongoose';
 
 /**
  * Importing user defined packages
@@ -21,6 +21,7 @@ export type ExpenseModel = Model<Expense>;
 /**
  * Declaring the constants
  */
+const calculateTotal = (items: ExpenseItem[]): number => items.reduce((total, item) => total + Math.round(item.price * (item.qty ?? 1)), 0);
 
 /**
  * Defining the schemas
@@ -126,7 +127,16 @@ export class Expense {
   @Prop({
     type: 'number',
     required: [true, 'required'],
-    validate: [(value: number) => value % 1 === 0 && value > 0, 'should be an integer greater than 0'],
+    default: (obj: Expense) => calculateTotal(obj.items),
+    validate: {
+      msg: 'should be an integer greater than 0 and be equal to the sum of the price of all the items',
+      validator: function (this: Document<Expense> | Query<unknown, Expense>, total: number) {
+        const items: ExpenseItem[] = this.get('items');
+        if (!items) return false;
+        const actualTotal = calculateTotal(items);
+        return total === actualTotal;
+      },
+    },
   })
   total: number;
 }
