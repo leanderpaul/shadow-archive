@@ -3,6 +3,7 @@
  */
 import { faker } from '@faker-js/faker';
 import { Injectable } from '@nestjs/common';
+import moment from 'moment';
 
 /**
  * Importing user defined packages
@@ -28,16 +29,17 @@ export class SeederService {
 
   constructor(private readonly userService: UserService, private readonly expenseService: ExpenseService) {}
 
-  private generateDate() {
+  private generateDate(): number {
     const date = new Date();
     const currentYear = date.getFullYear() - 2000;
     const year = faker.number.int({ min: currentYear - 1, max: currentYear });
-    const month = faker.number.int({ min: 1, max: 12 });
+    const month = faker.number.int({ min: 1, max: date.getMonth() });
     const day = faker.number.int({ min: 1, max: 28 });
-    return year * 10000 + month * 100 + day;
+    const generatedDate = year * 10000 + month * 100 + day;
+    return moment(generatedDate, 'YYMMDD').isAfter(date) ? this.generateDate() : generatedDate;
   }
 
-  private generateTime() {
+  private generateTime(): number {
     const hour = faker.number.int({ min: 0, max: 23 });
     const minute = faker.number.int({ min: 0, max: 59 });
     return hour * 100 + minute;
