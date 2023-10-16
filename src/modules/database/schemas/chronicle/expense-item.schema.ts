@@ -32,7 +32,7 @@ export class ExpenseItem {
   @Prop({
     type: 'number',
     required: [true, 'Price is required'],
-    validate: [(value: number) => value % 1 === 0 && value > 0, 'should be an integer greater than 0'],
+    validate: [(value: number) => value % 1 === 0 && value !== 0, 'should be an integer greater than or less 0'],
   })
   price: number;
 
